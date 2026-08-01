@@ -320,7 +320,10 @@ export default function AdminDashboardPage() {
     setActivities((prev) => [{ id: createId("a"), message, at: new Date().toISOString() }, ...prev.slice(0, 19)])
   }
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/admin/logout", { method: "POST" })
+    } catch {}
     localStorage.removeItem(ADMIN_KEYS.session)
     router.replace("/admin/login")
   }
