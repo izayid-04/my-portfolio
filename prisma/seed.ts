@@ -133,6 +133,75 @@ async function main() {
   })
 
   console.log("✅ Établissement UDB & Diplômes créés avec succès !")
+
+  console.log("🚀 Seeding projects...")
+  const projectsSeed = [
+    {
+      id: "project-udb",
+      title: "Université Dakar-Bourguiba (UDB)",
+      description:
+        "Projet réalisé lors d'un stage de 4 mois avec une équipe de 4 étudiants : site et applications pour l'université. Back-end Laravel, front-end Angular, base MySQL, hébergement OVH.",
+      date: "Juillet 2025",
+      slug: "udb",
+      tags: ["Laravel", "Angular", "MySQL", "OVH"],
+      image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&q=80",
+      href: "https://udb.sn/",
+      embedSite: true,
+      published: true,
+      order: 1,
+    },
+    {
+      id: "project-biacode",
+      title: "BIACode",
+      description:
+        "Notre plateforme et agence tech, lancée à trois. BIACode est notre structure dédiée au développement et à l'accompagnement des projets numériques.",
+      date: "Septembre 2025",
+      slug: "biacode",
+      tags: ["Agence", "Plateforme", "Laravel", "Angular", "LWS"],
+      image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80",
+      href: "https://www.biacode.tech/",
+      embedSite: true,
+      published: true,
+      order: 2,
+    },
+    {
+      id: "project-easytecs",
+      title: "EASYTECS — EasyGEC",
+      description:
+        "Premier client de l'agence : plateforme pour EASYTECS, structure sénégalaise spécialisée dans les logiciels métiers. EasyGEC est un système d'enregistrement sécurisé et simple pour gérer les faits d'état civil (naissance au décès), garantissant les droits fondamentaux : carte d'identité, droit de vote, héritage, accès à l'école, permis de conduire, etc.",
+      date: "Mars 2026",
+      slug: "easytecs",
+      tags: ["État civil", "e-Gouvernance", "Sénégal", "Laravel", "Angular"],
+      image: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=800&q=80",
+      href: "https://www.easytecs.tech/",
+      embedSite: true,
+      published: true,
+      order: 3,
+    },
+    {
+      id: "project-nora",
+      title: "Nora — Assistant IA",
+      description:
+        "Assistant IA conversationnel : interface web minimaliste pour poser des questions et recevoir des réponses naturelles. Front HTML/CSS/JavaScript, backend Python Flask, déployé sur Render.",
+      date: "Janvier 2024",
+      slug: "nora",
+      tags: ["IA", "Chatbot", "Flask", "Python"],
+      image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80",
+      href: "https://noraia.onrender.com/",
+      embedSite: true,
+      published: true,
+      order: 4,
+    },
+  ]
+
+  for (const proj of projectsSeed) {
+    await prisma.project.upsert({
+      where: { id: proj.id },
+      update: proj,
+      create: proj,
+    })
+  }
+  console.log("✅ Static projects successfully seeded to database!")
 }
 
 

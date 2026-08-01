@@ -85,3 +85,23 @@ model Diploma {
   @@map("diplomas")
 }
 
+model Project {
+  id          String   @id @default(cuid())
+  title       String
+  description String   @db.Text
+  date        String?
+  slug        String?
+  tags        String[] @default([])
+  image       String?
+  video       String?
+  href        String?
+  embedSite   Boolean  @default(true) @map("embed_site")
+  published   Boolean  @default(true)
+  order       Int      @default(0)
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("projects")
+}
+

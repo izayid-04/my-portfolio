@@ -14,7 +14,9 @@ function createPrismaClient(): PrismaClient {
 // En développement, réinitialiser si les nouveaux modèles diploma / institution n'existent pas sur le singleton mis en cache
 if (
   globalForPrisma.prisma &&
-  (!("diploma" in globalForPrisma.prisma) || !("institution" in globalForPrisma.prisma))
+  (!("diploma" in globalForPrisma.prisma) ||
+    !("institution" in globalForPrisma.prisma) ||
+    !("project" in globalForPrisma.prisma))
 ) {
   globalForPrisma.prisma = undefined
 }

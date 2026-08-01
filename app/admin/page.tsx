@@ -22,6 +22,7 @@ import { StatusSelect } from "@/components/admin/status-select"
 import { DatePicker } from "@/components/ui/date-picker"
 import { ProfileTab } from "@/components/admin/profile-tab"
 import { DiplomasTab } from "@/components/admin/diplomas-tab"
+import { ProjectsTab } from "@/components/admin/projects-tab"
 import {
   ADMIN_KEYS,
   type AdminActivity,
@@ -735,129 +736,7 @@ export default function AdminDashboardPage() {
               </div>
             )}
 
-            {activeSection === "projects" && (
-              <div className="grid items-start gap-6 lg:grid-cols-[1.2fr_1fr]">
-                <div className="space-y-4">
-                  <form onSubmit={handleAddProject} className="grid gap-3 rounded-2xl border border-border bg-background p-4">
-                    <p className="flex items-center gap-2 text-sm font-medium">
-                      <FilePlus2 className="size-4" />
-                      Ajouter un projet
-                    </p>
-                    <input value={projectTitle} onChange={(e) => setProjectTitle(e.target.value)} placeholder="Titre" className="rounded-lg border border-input bg-background px-3 py-2 text-sm" />
-                    <textarea value={projectSummary} onChange={(e) => setProjectSummary(e.target.value)} placeholder="Resume" rows={3} className="rounded-lg border border-input bg-background px-3 py-2 text-sm" />
-                    <input value={projectStack} onChange={(e) => setProjectStack(e.target.value)} placeholder="Stack (virgules)" className="rounded-lg border border-input bg-background px-3 py-2 text-sm" />
-                    <input value={projectTags} onChange={(e) => setProjectTags(e.target.value)} placeholder="Tags (virgules)" className="rounded-lg border border-input bg-background px-3 py-2 text-sm" />
-                    <div className="space-y-2">
-                      <label className="text-xs font-medium text-muted-foreground">Image couverture (upload)</label>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={onProjectFileChange}
-                        className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-muted file:px-2 file:py-1 file:text-xs"
-                      />
-                      {uploadingProjectImage && (
-                        <p className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-                          <Loader2 className="size-3.5 animate-spin" />
-                          Upload en cours...
-                        </p>
-                      )}
-                      {projectCoverImage && (
-                        <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 p-2">
-                          <img src={projectCoverImage} alt="" className="size-10 rounded-md object-cover" />
-                          <p className="truncate text-xs text-muted-foreground">{projectCoverImage}</p>
-                        </div>
-                      )}
-                    </div>
-                    <input value={projectLiveUrl} onChange={(e) => setProjectLiveUrl(e.target.value)} placeholder="Lien live" className="rounded-lg border border-input bg-background px-3 py-2 text-sm" />
-                    <input value={projectRepoUrl} onChange={(e) => setProjectRepoUrl(e.target.value)} placeholder="Lien repository" className="rounded-lg border border-input bg-background px-3 py-2 text-sm" />
-                    <button type="submit" className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">
-                      Enregistrer en brouillon
-                    </button>
-                    {formError && <p className="text-sm text-destructive">{formError}</p>}
-                  </form>
-
-                  <ul className="space-y-3">
-                    {projects.map((project) => (
-                      <li key={project.id} className="rounded-2xl border border-border bg-background p-4">
-                        <div className="flex flex-wrap items-start justify-between gap-3">
-                          <button type="button" onClick={() => setSelectedProjectId(project.id)} className="flex min-w-0 items-start gap-3 text-left">
-                            {project.coverImage ? (
-                              <img src={project.coverImage} alt="" className="size-12 rounded-lg object-cover" />
-                            ) : (
-                              <span className="flex size-12 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-                                <ImageIcon className="size-4" />
-                              </span>
-                            )}
-                            <span className="min-w-0">
-                              <p className="font-medium">{project.title}</p>
-                              <p className="text-sm text-muted-foreground">{project.summary}</p>
-                            </span>
-                          </button>
-                          <div className="flex items-center gap-2">
-                            <span className={`rounded-md px-2 py-1 text-xs font-medium ${statusBadge[project.status]}`}>
-                              {project.status}
-                            </span>
-                            <StatusSelect
-                              value={project.status}
-                              onChange={(next) => {
-                                setProjects((prev) =>
-                                  prev.map((entry) =>
-                                    entry.id === project.id
-                                      ? {
-                                          ...entry,
-                                          status: next,
-                                          publishedAt: next === "published" ? new Date().toISOString() : entry.publishedAt,
-                                        }
-                                      : entry
-                                  )
-                                )
-                                addActivity(`Projet ${project.title} passe en ${next}`)
-                              }}
-                            />
-                          </div>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <aside className="lg:sticky lg:top-2 self-start rounded-2xl border border-border bg-background p-4 h-[calc(100vh-1rem)] max-h-[calc(100vh-1rem)] min-h-[420px] overflow-hidden">
-                  <h2 className="text-sm font-semibold">Detail projet</h2>
-                  <div className="mt-3 h-[calc(100%-1.5rem)] overflow-y-auto pr-1">
-                    {selectedProject ? (
-                      <div className="space-y-2 text-sm">
-                        <p className="font-medium text-foreground">{selectedProject.title}</p>
-                        <p className="text-muted-foreground">{selectedProject.summary}</p>
-                        <p className="text-xs text-muted-foreground">Slug: {selectedProject.slug}</p>
-                        <p className="text-xs text-muted-foreground">
-                          Stack: {selectedProject.stack.length ? selectedProject.stack.join(", ") : "Non renseignee"}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          Tags: {selectedProject.tags.length ? selectedProject.tags.join(", ") : "Non renseignes"}
-                        </p>
-                        <p className="text-xs text-muted-foreground">Publie le: {formatDate(selectedProject.publishedAt)}</p>
-                        {selectedProject.coverImage && (
-                          <p className="inline-flex items-center gap-1 text-xs text-muted-foreground break-all">
-                            <ImageIcon className="size-3.5 shrink-0" />
-                            {selectedProject.coverImage}
-                          </p>
-                        )}
-                        <div className="space-y-1 pt-2">
-                          {selectedProject.links.map((link) => (
-                            <p key={link.id} className="inline-flex items-center gap-1 text-xs text-primary break-all">
-                              <LinkIcon className="size-3.5 shrink-0" />
-                              {link.label}: {link.url}
-                            </p>
-                          ))}
-                        </div>
-                      </div>
-                    ) : (
-                      <p className="text-sm text-muted-foreground">Aucun projet disponible.</p>
-                    )}
-                  </div>
-                </aside>
-              </div>
-            )}
+            {activeSection === "projects" && <ProjectsTab />}
 
             {activeSection === "blogs" && (
               <div className="grid items-start gap-6 lg:grid-cols-[1.3fr_1fr] min-w-0">
