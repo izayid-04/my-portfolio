@@ -17,7 +17,6 @@ import {
 import type { LucideIcon } from "lucide-react"
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler"
 import { StatusSelect } from "@/components/admin/status-select"
-import { blogPosts } from "@/data/blog"
 import {
   ADMIN_KEYS,
   type AdminActivity,
@@ -30,7 +29,6 @@ import {
   parseCsv,
   toSlug,
 } from "@/data/admin-demo"
-import type { BlogPost } from "@/types"
 
 type DashboardSection = "overview" | "projects" | "blogs" | "contacts"
 type ContentStatus = "draft" | "published" | "archived"
@@ -49,6 +47,21 @@ interface ContactMessage {
 
 interface BlogStatusMap {
   [slug: string]: ContentStatus
+}
+
+interface DbBlogPost {
+  id: string
+  slug: string
+  title: string
+  excerpt: string
+  content: string
+  date: string
+  readingTime: number
+  tags: string[]
+  image?: string | null
+  published: boolean
+  createdAt: string
+  updatedAt: string
 }
 
 const BLOG_STATUS_KEY = "portfolio_admin_blog_statuses_v1"
@@ -149,31 +162,6 @@ function normalizeProject(raw: unknown): AdminProject | null {
   }
 }
 
-function normalizeBlog(raw: unknown): BlogPost | null {
-  if (!raw || typeof raw !== "object") return null
-  const item = raw as Record<string, unknown>
-  const title = typeof item.title === "string" ? item.title.trim() : ""
-  const excerpt = typeof item.excerpt === "string" ? item.excerpt.trim() : ""
-  const content = typeof item.content === "string" ? item.content.trim() : ""
-  if (!title || !excerpt || !content) return null
-
-  const slugRaw = typeof item.slug === "string" ? item.slug : toSlug(title)
-  const slug = toSlug(slugRaw)
-  const image = typeof item.image === "string" ? normalizeUrl(item.image) : null
-  const parsedReadingTime = Number(item.readingTime)
-
-  return {
-    slug,
-    title,
-    excerpt,
-    content,
-    date: typeof item.date === "string" && item.date ? item.date : new Date().toISOString().slice(0, 10),
-    readingTime: Number.isFinite(parsedReadingTime) && parsedReadingTime > 0 ? parsedReadingTime : 4,
-    tags: asStringList(item.tags),
-    image: image ?? undefined,
-  }
-}
-
 export default function AdminDashboardPage() {
   const router = useRouter()
 
@@ -185,10 +173,17 @@ export default function AdminDashboardPage() {
   const [projects, setProjects] = useState<AdminProject[]>([])
   const [activities, setActivities] = useState<AdminActivity[]>([])
   const [blogStatuses, setBlogStatuses] = useState<BlogStatusMap>({})
-  const [customBlogs, setCustomBlogs] = useState<BlogPost[]>([])
+
+  // Blogs now managed from DB
+  const [dbBlogs, setDbBlogs] = useState<DbBlogPost[]>([])
+  const [blogsLoading, setBlogsLoading] = useState(false)
+  const [blogsReloadToken, setBlogsReloadToken] = useState(0)
+  const [blogSaving, setBlogSaving] = useState(false)
+  const [blogSaveStatus, setBlogSaveStatus] = useState<{ type: "success" | "error"; text: string } | null>(null)
+  const [editingBlogId, setEditingBlogId] = useState<string | null>(null)
 
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null)
-  const [selectedBlogSlug, setSelectedBlogSlug] = useState<string | null>(null)
+  const [selectedBlogId, setSelectedBlogId] = useState<string | null>(null)
   const [selectedContactId, setSelectedContactId] = useState<string | null>(null)
 
   const [contacts, setContacts] = useState<ContactMessage[]>([])
@@ -205,13 +200,13 @@ export default function AdminDashboardPage() {
   const [projectRepoUrl, setProjectRepoUrl] = useState("")
 
   const [blogTitle, setBlogTitle] = useState("")
-  const [blogSlug, setBlogSlug] = useState("")
   const [blogExcerpt, setBlogExcerpt] = useState("")
   const [blogContent, setBlogContent] = useState("")
   const [blogImage, setBlogImage] = useState("")
   const [blogTags, setBlogTags] = useState("")
   const [blogReadingTime, setBlogReadingTime] = useState("5")
   const [blogDate, setBlogDate] = useState(new Date().toISOString().slice(0, 10))
+  const [blogPublished, setBlogPublished] = useState(false)
   const [uploadingProjectImage, setUploadingProjectImage] = useState(false)
   const [uploadingBlogImage, setUploadingBlogImage] = useState(false)
 
@@ -297,12 +292,8 @@ export default function AdminDashboardPage() {
       const normalizedProjects = readStorage<unknown[]>(ADMIN_KEYS.projects, defaultProjects)
         .map(normalizeProject)
         .filter((item): item is AdminProject => item !== null)
-      const normalizedBlogs = readStorage<unknown[]>(CUSTOM_BLOGS_KEY, [])
-        .map(normalizeBlog)
-        .filter((item): item is BlogPost => item !== null)
 
       setProjects(normalizedProjects.length ? normalizedProjects : defaultProjects)
-      setCustomBlogs(normalizedBlogs)
       setActivities(readStorage(ADMIN_KEYS.activities, defaultActivities))
       setBlogStatuses(readStorage<BlogStatusMap>(BLOG_STATUS_KEY, {}))
       setReady(true)
@@ -327,10 +318,23 @@ export default function AdminDashboardPage() {
     localStorage.setItem(BLOG_STATUS_KEY, JSON.stringify(blogStatuses))
   }, [blogStatuses, ready])
 
+  // Load blogs from DB
   useEffect(() => {
     if (!ready) return
-    localStorage.setItem(CUSTOM_BLOGS_KEY, JSON.stringify(customBlogs))
-  }, [customBlogs, ready])
+    const loadBlogs = async () => {
+      setBlogsLoading(true)
+      try {
+        const res = await fetch("/api/admin/blogs")
+        const data = (await res.json()) as { posts?: DbBlogPost[] }
+        setDbBlogs(data.posts ?? [])
+      } catch {
+        setDbBlogs([])
+      } finally {
+        setBlogsLoading(false)
+      }
+    }
+    void loadBlogs()
+  }, [ready, blogsReloadToken])
 
   useEffect(() => {
     if (!ready || activeSection !== "contacts") return
@@ -356,20 +360,14 @@ export default function AdminDashboardPage() {
     void loadContacts()
   }, [activeSection, contactsReloadToken, ready])
 
-  const allBlogs = useMemo(() => {
-    const map = new Map<string, BlogPost>()
-    for (const post of blogPosts) map.set(post.slug, post)
-    for (const post of customBlogs) map.set(post.slug, post)
-    return Array.from(map.values()).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-  }, [customBlogs])
-
   const selectedProject = useMemo(
     () => projects.find((project) => project.id === selectedProjectId) ?? projects[0] ?? null,
     [projects, selectedProjectId]
   )
+
   const selectedBlog = useMemo(
-    () => allBlogs.find((post) => post.slug === selectedBlogSlug) ?? allBlogs[0] ?? null,
-    [allBlogs, selectedBlogSlug]
+    () => dbBlogs.find((post) => post.id === selectedBlogId) ?? dbBlogs[0] ?? null,
+    [dbBlogs, selectedBlogId]
   )
   const selectedContact = useMemo(
     () => contacts.find((contact) => contact.id === selectedContactId) ?? contacts[0] ?? null,
@@ -395,15 +393,15 @@ export default function AdminDashboardPage() {
 
   const stats = useMemo(() => {
     const publishedProjects = projects.filter((project) => project.status === "published").length
-    const publishedBlogs = allBlogs.filter((post) => (blogStatuses[post.slug] ?? "draft") === "published").length
+    const publishedBlogs = dbBlogs.filter((p) => p.published).length
     return {
       projectsTotal: projects.length,
-      blogsTotal: allBlogs.length,
+      blogsTotal: dbBlogs.length,
       contactsTotal: contacts.length,
       publishedProjects,
       publishedBlogs,
     }
-  }, [projects, allBlogs, blogStatuses, contacts.length])
+  }, [projects, dbBlogs, contacts.length])
 
   const addActivity = (message: string) => {
     setActivities((prev) => [{ id: createId("a"), message, at: new Date().toISOString() }, ...prev.slice(0, 19)])
@@ -461,49 +459,109 @@ export default function AdminDashboardPage() {
     setProjectRepoUrl("")
   }
 
-  const handleAddBlog = (event: FormEvent<HTMLFormElement>) => {
+  const handleAddBlog = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setFormError("")
+    setBlogSaveStatus(null)
 
     if (!blogTitle.trim() || !blogExcerpt.trim() || !blogContent.trim()) {
-      setFormError("Titre, extrait et contenu sont obligatoires pour un blog.")
+      setFormError("Titre, extrait et contenu sont obligatoires.")
       return
     }
 
     const image = normalizeUrl(blogImage)
     if (blogImage.trim() && !image) return setFormError("Image du blog invalide.")
 
-    const generatedSlug = toSlug(blogSlug || blogTitle)
-    if (allBlogs.some((post) => post.slug === generatedSlug)) {
-      setFormError("Ce slug existe deja. Choisis-en un autre.")
-      return
-    }
-
     const readingTimeNumber = Number(blogReadingTime)
-    const newBlog: BlogPost = {
-      slug: generatedSlug,
-      title: blogTitle.trim(),
-      excerpt: blogExcerpt.trim(),
-      content: blogContent.trim(),
-      date: blogDate || new Date().toISOString().slice(0, 10),
-      readingTime: Number.isFinite(readingTimeNumber) && readingTimeNumber > 0 ? readingTimeNumber : 5,
-      tags: parseCsv(blogTags),
-      image: image ?? undefined,
+    setBlogSaving(true)
+    try {
+      const url = editingBlogId ? `/api/admin/blogs/${editingBlogId}` : "/api/admin/blogs"
+      const method = editingBlogId ? "PATCH" : "POST"
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: blogTitle.trim(),
+          excerpt: blogExcerpt.trim(),
+          content: blogContent.trim(),
+          date: blogDate || new Date().toISOString().slice(0, 10),
+          readingTime: Number.isFinite(readingTimeNumber) && readingTimeNumber > 0 ? readingTimeNumber : 5,
+          tags: parseCsv(blogTags),
+          image: image || null,
+          published: blogPublished,
+        }),
+      })
+      const data = (await res.json()) as { post?: DbBlogPost; error?: string }
+      if (!res.ok) {
+        setFormError(data.error || "Erreur lors de la sauvegarde.")
+      } else {
+        setBlogSaveStatus({
+          type: "success",
+          text: editingBlogId ? "Article mis à jour avec succès !" : "Article créé et enregistré en base de données !",
+        })
+        addActivity(editingBlogId ? `Blog modifié : ${blogTitle}` : `Blog créé : ${blogTitle}`)
+        setBlogsReloadToken((p) => p + 1)
+        if (!editingBlogId) {
+          setBlogTitle("")
+          setBlogExcerpt("")
+          setBlogContent("")
+          setBlogImage("")
+          setBlogTags("")
+          setBlogReadingTime("5")
+          setBlogDate(new Date().toISOString().slice(0, 10))
+          setBlogPublished(false)
+        } else {
+          setEditingBlogId(null)
+        }
+        if (data.post) setSelectedBlogId(data.post.id)
+      }
+    } catch {
+      setFormError("Erreur réseau lors de la sauvegarde.")
+    } finally {
+      setBlogSaving(false)
     }
+  }
 
-    setCustomBlogs((prev) => [newBlog, ...prev])
-    setBlogStatuses((prev) => ({ ...prev, [newBlog.slug]: "draft" }))
-    setSelectedBlogSlug(newBlog.slug)
-    addActivity(`Blog ajoute en brouillon: ${newBlog.title}`)
+  const handleDeleteBlog = async (id: string) => {
+    if (!confirm("Supprimer définitivement cet article de la base de données ?")) return
+    try {
+      await fetch(`/api/admin/blogs/${id}`, { method: "DELETE" })
+      addActivity("Article supprimé de la base de données.")
+      setBlogsReloadToken((p) => p + 1)
+      setSelectedBlogId(null)
+    } catch {
+      alert("Erreur lors de la suppression.")
+    }
+  }
 
-    setBlogTitle("")
-    setBlogSlug("")
-    setBlogExcerpt("")
-    setBlogContent("")
-    setBlogImage("")
-    setBlogTags("")
-    setBlogReadingTime("5")
-    setBlogDate(new Date().toISOString().slice(0, 10))
+  const handleEditBlog = (blog: DbBlogPost) => {
+    setEditingBlogId(blog.id)
+    setBlogTitle(blog.title)
+    setBlogExcerpt(blog.excerpt)
+    setBlogContent(blog.content)
+    setBlogImage(blog.image ?? "")
+    setBlogTags(blog.tags.join(", "))
+    setBlogReadingTime(String(blog.readingTime))
+    setBlogDate(blog.date.slice(0, 10))
+    setBlogPublished(blog.published)
+    setBlogSaveStatus(null)
+    setFormError("")
+  }
+
+  const handleToggleBlogPublished = async (blog: DbBlogPost) => {
+    try {
+      const res = await fetch(`/api/admin/blogs/${blog.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ published: !blog.published }),
+      })
+      if (res.ok) {
+        setDbBlogs((prev) => prev.map((b) => (b.id === blog.id ? { ...b, published: !blog.published } : b)))
+        addActivity(`Article ${!blog.published ? "publié" : "dépublié"} : ${blog.title}`)
+      }
+    } catch {
+      alert("Erreur lors de la mise à jour du statut.")
+    }
   }
 
   const handleUpload = async (file: File, folder: "projects" | "blogs"): Promise<string | null> => {
@@ -795,19 +853,40 @@ export default function AdminDashboardPage() {
             )}
 
             {activeSection === "blogs" && (
-              <div className="grid items-start gap-6 lg:grid-cols-[1.2fr_1fr]">
+              <div className="grid items-start gap-6 lg:grid-cols-[1.3fr_1fr]">
+                {/* LEFT: FORM + LIST */}
                 <div className="space-y-4">
+
+                  {/* FORM CREATE / EDIT */}
                   <form onSubmit={handleAddBlog} className="grid gap-3 rounded-2xl border border-border bg-background p-4">
-                    <p className="flex items-center gap-2 text-sm font-medium">
-                      <FilePlus2 className="size-4" />
-                      Ajouter un blog
-                    </p>
-                    <input value={blogTitle} onChange={(e) => setBlogTitle(e.target.value)} placeholder="Titre article" className="rounded-lg border border-input bg-background px-3 py-2 text-sm" />
-                    <input value={blogSlug} onChange={(e) => setBlogSlug(e.target.value)} placeholder="Slug (optionnel)" className="rounded-lg border border-input bg-background px-3 py-2 text-sm" />
-                    <textarea value={blogExcerpt} onChange={(e) => setBlogExcerpt(e.target.value)} placeholder="Extrait" rows={2} className="rounded-lg border border-input bg-background px-3 py-2 text-sm" />
-                    <textarea value={blogContent} onChange={(e) => setBlogContent(e.target.value)} placeholder="Contenu (Markdown)" rows={6} className="rounded-lg border border-input bg-background px-3 py-2 text-sm" />
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                        <FilePlus2 className="size-4" />
+                        {editingBlogId ? "Modifier l'article" : "Créer un nouvel article"}
+                      </p>
+                      {editingBlogId && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingBlogId(null)
+                            setBlogTitle(""); setBlogExcerpt(""); setBlogContent("")
+                            setBlogImage(""); setBlogTags(""); setBlogReadingTime("5")
+                            setBlogDate(new Date().toISOString().slice(0, 10))
+                            setBlogPublished(false); setBlogSaveStatus(null); setFormError("")
+                          }}
+                          className="cursor-pointer text-xs text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          ← Annuler la modification
+                        </button>
+                      )}
+                    </div>
+
+                    <input value={blogTitle} onChange={(e) => setBlogTitle(e.target.value)} placeholder="Titre de l'article *" className="rounded-lg border border-input bg-background px-3 py-2 text-sm" />
+                    <textarea value={blogExcerpt} onChange={(e) => setBlogExcerpt(e.target.value)} placeholder="Extrait / résumé *" rows={2} className="rounded-lg border border-input bg-background px-3 py-2 text-sm" />
+                    <textarea value={blogContent} onChange={(e) => setBlogContent(e.target.value)} placeholder="Contenu en Markdown *" rows={8} className="rounded-lg border border-input bg-background px-3 py-2 text-sm font-mono" />
+
                     <div className="space-y-2">
-                      <label className="text-xs font-medium text-muted-foreground">Image couverture (upload)</label>
+                      <label className="text-xs font-medium text-muted-foreground">Image de couverture (upload)</label>
                       <input
                         type="file"
                         accept="image/*"
@@ -824,88 +903,188 @@ export default function AdminDashboardPage() {
                         <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 p-2">
                           <img src={blogImage} alt="" className="size-10 rounded-md object-cover" />
                           <p className="truncate text-xs text-muted-foreground">{blogImage}</p>
+                          <button type="button" onClick={() => setBlogImage("")} className="cursor-pointer ml-auto text-xs text-destructive hover:underline">Retirer</button>
                         </div>
                       )}
                     </div>
-                    <input value={blogTags} onChange={(e) => setBlogTags(e.target.value)} placeholder="Tags (virgules)" className="rounded-lg border border-input bg-background px-3 py-2 text-sm" />
+
+                    <input value={blogTags} onChange={(e) => setBlogTags(e.target.value)} placeholder="Tags séparés par des virgules" className="rounded-lg border border-input bg-background px-3 py-2 text-sm" />
+
                     <div className="grid gap-3 sm:grid-cols-2">
-                      <input value={blogReadingTime} onChange={(e) => setBlogReadingTime(e.target.value)} placeholder="Temps de lecture (min)" className="rounded-lg border border-input bg-background px-3 py-2 text-sm" />
+                      <input value={blogReadingTime} onChange={(e) => setBlogReadingTime(e.target.value)} placeholder="Temps de lecture (min)" type="number" min="1" className="rounded-lg border border-input bg-background px-3 py-2 text-sm" />
                       <input type="date" value={blogDate} onChange={(e) => setBlogDate(e.target.value)} className="rounded-lg border border-input bg-background px-3 py-2 text-sm" />
                     </div>
-                    <button type="submit" className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">
-                      Enregistrer en brouillon
+
+                    <label className="flex cursor-pointer items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={blogPublished}
+                        onChange={(e) => setBlogPublished(e.target.checked)}
+                        className="size-4 rounded border border-input accent-primary"
+                      />
+                      <span className="text-foreground">Publier immédiatement (visible sur le site)</span>
+                    </label>
+
+                    {formError && <p className="rounded-lg bg-destructive/10 border border-destructive/30 px-3 py-2 text-sm text-destructive">{formError}</p>}
+
+                    {blogSaveStatus && (
+                      <p className={`rounded-lg px-3 py-2 text-sm border ${
+                        blogSaveStatus.type === "success"
+                          ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
+                          : "bg-destructive/10 border-destructive/30 text-destructive"
+                      }`}>
+                        {blogSaveStatus.text}
+                      </p>
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={blogSaving}
+                      className="cursor-pointer inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60 transition-colors"
+                    >
+                      {blogSaving ? <><Loader2 className="size-3.5 animate-spin" /> Sauvegarde...</> : editingBlogId ? "Mettre à jour l'article" : "Créer l'article en DB"}
                     </button>
-                    {formError && <p className="text-sm text-destructive">{formError}</p>}
                   </form>
 
-                  {allBlogs.map((post) => {
-                    const status = blogStatuses[post.slug] ?? "draft"
-                    return (
-                      <article key={post.slug} className="rounded-2xl border border-border bg-background p-4">
-                        <div className="flex flex-wrap items-start justify-between gap-3">
-                          <button type="button" onClick={() => setSelectedBlogSlug(post.slug)} className="flex min-w-0 items-start gap-3 text-left">
-                            {post.image ? (
-                              <img src={post.image} alt="" className="size-12 rounded-lg object-cover" />
-                            ) : (
-                              <span className="flex size-12 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-                                <ImageIcon className="size-4" />
-                              </span>
-                            )}
-                            <span className="min-w-0">
-                              <p className="font-medium text-foreground">{post.title}</p>
-                              <p className="text-sm text-muted-foreground">{post.excerpt}</p>
-                              <p className="text-xs text-muted-foreground">{post.date}</p>
-                            </span>
-                          </button>
-                          <div className="flex items-center gap-2">
-                            <span className={`rounded-md px-2 py-1 text-xs font-medium ${statusBadge[status]}`}>{status}</span>
-                            <StatusSelect
-                              value={status}
-                              onChange={(next) => {
-                                setBlogStatuses((prev) => ({ ...prev, [post.slug]: next }))
-                                addActivity(`Blog ${post.slug} passe en ${next}`)
-                              }}
-                            />
-                          </div>
-                        </div>
-                      </article>
-                    )
-                  })}
-                </div>
+                  {/* LIST OF DB BLOGS */}
+                  <div className="rounded-2xl border border-border bg-background p-4">
+                    <div className="mb-4 flex items-center justify-between">
+                      <h2 className="text-sm font-semibold text-foreground">
+                        Articles en base de données
+                        <span className="ml-2 rounded-full bg-primary/20 px-2 py-0.5 text-xs font-medium text-primary">{dbBlogs.length}</span>
+                      </h2>
+                      <button
+                        type="button"
+                        onClick={() => setBlogsReloadToken((p) => p + 1)}
+                        className="cursor-pointer rounded-lg border border-border px-2.5 py-1 text-xs hover:bg-muted font-medium transition-colors"
+                      >
+                        Rafraîchir
+                      </button>
+                    </div>
 
-                <aside className="lg:sticky lg:top-2 self-start rounded-2xl border border-border bg-background p-4 h-[calc(100vh-1rem)] max-h-[calc(100vh-1rem)] min-h-[420px] overflow-hidden">
-                  <h2 className="text-sm font-semibold">Detail blog</h2>
-                  <div className="mt-3 h-[calc(100%-1.5rem)] overflow-y-auto pr-1">
-                    {selectedBlog ? (
-                      <div className="space-y-2">
-                        {selectedBlog.image && (
-                          <img
-                            src={selectedBlog.image}
-                            alt=""
-                            className="h-40 w-full rounded-lg object-cover"
-                          />
-                        )}
-                        <p className="font-medium">{selectedBlog.title}</p>
-                        <p className="text-xs text-muted-foreground">Slug: {selectedBlog.slug}</p>
-                        <p className="text-sm text-muted-foreground">{selectedBlog.excerpt}</p>
-                        <p className="text-xs text-muted-foreground">
-                          Tags: {selectedBlog.tags.length ? selectedBlog.tags.join(", ") : "Aucun"}
-                        </p>
-                        <p className="text-xs text-muted-foreground">Lecture: {selectedBlog.readingTime} min</p>
-                        <p className="text-xs text-muted-foreground break-all">
-                          Image: {selectedBlog.image || "Pas d'image"}
-                        </p>
-                        <pre className="rounded-lg bg-muted/40 p-3 text-xs whitespace-pre-wrap">
-                          {selectedBlog.content.slice(0, 1600)}
-                        </pre>
-                      </div>
+                    {blogsLoading ? (
+                      <p className="py-6 text-center text-sm text-muted-foreground">Chargement des articles...</p>
+                    ) : dbBlogs.length === 0 ? (
+                      <p className="py-6 text-center text-xs text-muted-foreground">Aucun article en base de données. Créez-en un ci-dessus.</p>
                     ) : (
-                      <p className="text-sm text-muted-foreground">Aucun article disponible.</p>
+                      <div className="space-y-3">
+                        {dbBlogs.map((post) => (
+                          <article
+                            key={post.id}
+                            onClick={() => setSelectedBlogId(post.id)}
+                            className={`cursor-pointer rounded-xl border p-3 transition-all ${
+                              selectedBlog?.id === post.id
+                                ? "border-primary bg-primary/5"
+                                : "border-border bg-background hover:bg-muted/40"
+                            }`}
+                          >
+                            <div className="flex flex-wrap items-start justify-between gap-2">
+                              <div className="flex min-w-0 items-start gap-3">
+                                {post.image ? (
+                                  <img src={post.image} alt="" className="size-10 rounded-lg object-cover shrink-0" />
+                                ) : (
+                                  <span className="flex size-10 items-center justify-center rounded-lg bg-muted text-muted-foreground shrink-0">
+                                    <ImageIcon className="size-4" />
+                                  </span>
+                                )}
+                                <div className="min-w-0">
+                                  <p className="font-medium text-sm text-foreground truncate">{post.title}</p>
+                                  <p className="text-xs text-muted-foreground truncate">{post.excerpt}</p>
+                                  <div className="mt-1 flex items-center gap-2 flex-wrap">
+                                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                                      post.published
+                                        ? "bg-emerald-500/20 text-emerald-400"
+                                        : "bg-amber-500/20 text-amber-400"
+                                    }`}>
+                                      {post.published ? "Publié" : "Brouillon"}
+                                    </span>
+                                    <span className="text-[11px] text-muted-foreground">{formatDate(post.date)}</span>
+                                    <span className="text-[11px] text-muted-foreground">{post.readingTime} min</span>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
+                                <button
+                                  type="button"
+                                  onClick={() => handleToggleBlogPublished(post)}
+                                  className={`cursor-pointer rounded-md px-2 py-1 text-[11px] font-semibold transition-colors ${
+                                    post.published
+                                      ? "border border-border bg-background text-foreground hover:bg-muted"
+                                      : "bg-emerald-600 text-white hover:bg-emerald-700"
+                                  }`}
+                                >
+                                  {post.published ? "Dépublier" : "Publier"}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleEditBlog(post)}
+                                  className="cursor-pointer rounded-md border border-border bg-background px-2 py-1 text-[11px] font-medium hover:bg-muted"
+                                >
+                                  Modifier
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteBlog(post.id)}
+                                  className="cursor-pointer rounded-md bg-destructive/10 border border-destructive/30 px-2 py-1 text-[11px] font-medium text-destructive hover:bg-destructive/20"
+                                >
+                                  Supprimer
+                                </button>
+                              </div>
+                            </div>
+                          </article>
+                        ))}
+                      </div>
                     )}
                   </div>
+                </div>
+
+                {/* RIGHT: DETAIL PANEL */}
+                <aside className="lg:sticky lg:top-2 self-start rounded-2xl border border-border bg-background p-4 max-h-[calc(100vh-2rem)] overflow-y-auto">
+                  <h2 className="text-sm font-semibold mb-3">Aperçu de l'article</h2>
+                  {selectedBlog ? (
+                    <div className="space-y-3 text-sm">
+                      {selectedBlog.image && (
+                        <img src={selectedBlog.image} alt="" className="h-40 w-full rounded-xl object-cover" />
+                      )}
+                      <div>
+                        <p className="font-bold text-base text-foreground">{selectedBlog.title}</p>
+                        <p className="text-xs text-muted-foreground mt-1 font-mono">/{selectedBlog.slug}</p>
+                      </div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+                          selectedBlog.published
+                            ? "bg-emerald-500/20 text-emerald-400"
+                            : "bg-amber-500/20 text-amber-400"
+                        }`}>
+                          {selectedBlog.published ? "Publié" : "Brouillon"}
+                        </span>
+                        <span className="text-xs text-muted-foreground">{formatDate(selectedBlog.date)}</span>
+                        <span className="text-xs text-muted-foreground">{selectedBlog.readingTime} min de lecture</span>
+                      </div>
+                      <p className="text-muted-foreground italic">{selectedBlog.excerpt}</p>
+                      <div className="flex flex-wrap gap-1">
+                        {selectedBlog.tags.map((tag) => (
+                          <span key={tag} className="rounded-md bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                      <div className="rounded-xl border border-border bg-muted/30 p-3">
+                        <p className="text-[11px] font-semibold text-muted-foreground uppercase mb-2">Contenu (Markdown preview) :</p>
+                        <pre className="text-xs whitespace-pre-wrap text-foreground leading-relaxed max-h-64 overflow-y-auto">
+                          {selectedBlog.content.slice(0, 2000)}{selectedBlog.content.length > 2000 ? "..." : ""}
+                        </pre>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground">Modifié le : {formatDate(selectedBlog.updatedAt)}</p>
+                    </div>
+                  ) : (
+                    <p className="py-8 text-center text-xs text-muted-foreground">Sélectionnez un article dans la liste pour voir les détails.</p>
+                  )}
                 </aside>
               </div>
             )}
+
+
 
             {activeSection === "contacts" && (
               <div className="grid gap-6 xl:grid-cols-[1.1fr_1.3fr]">

@@ -31,3 +31,20 @@ model Contact {
 
   @@map("contact_messages")
 }
+
+model BlogPost {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  excerpt     String
+  content     String   @db.Text
+  date        DateTime @default(now())
+  readingTime Int      @default(5) @map("reading_time")
+  tags        String[] @default([])
+  image       String?
+  published   Boolean  @default(false)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("blog_posts")
+}
