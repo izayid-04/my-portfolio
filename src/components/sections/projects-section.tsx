@@ -254,7 +254,7 @@ export function ProjectsSection({
         >
           {title}
         </h2>
-        <p className="mt-2 text-sm text-muted-foreground sm:text-base">{subtitle}</p>
+        <p className="mt-2 text-sm font-medium bg-gradient-to-r from-primary via-violet-500 to-cyan-500 bg-clip-text text-transparent sm:text-base">{subtitle}</p>
       </div>
       {/* Grille : 1 col mobile pour cadres plus larges, 2–3 cols desktop */}
       <ul className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
