@@ -502,7 +502,7 @@ export default function AdminDashboardPage() {
                   setActiveSection(id)
                   setFormError("")
                 }}
-                className={`flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors ${
+                className={`flex w-full cursor-pointer items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors ${
                   activeSection === id
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -528,12 +528,12 @@ export default function AdminDashboardPage() {
             <div className="flex items-center gap-2">
               <AnimatedThemeToggler
                 aria-label="Changer le theme"
-                className="inline-flex size-9 items-center justify-center rounded-lg border border-border bg-background text-foreground hover:bg-muted [&_svg]:size-4"
+                className="inline-flex size-9 cursor-pointer items-center justify-center rounded-lg border border-border bg-background text-foreground hover:bg-muted [&_svg]:size-4"
               />
               <button
                 type="button"
                 onClick={handleLogout}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground hover:bg-muted"
+                className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground hover:bg-muted"
               >
                 <LogOut className="size-4" />
                 Deconnexion
