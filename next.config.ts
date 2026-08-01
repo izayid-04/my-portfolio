@@ -36,6 +36,11 @@ const nextConfig: NextConfig = {
         hostname: "www.udb.sn",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "*.supabase.co",
+        pathname: "/**",
+      },
     ],
   },
 };

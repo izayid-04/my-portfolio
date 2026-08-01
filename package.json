@@ -20,6 +20,7 @@
     "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "date-fns": "^4.4.0",
     "framer-motion": "^12.34.5",
     "html2canvas": "^1.4.1",
     "jose": "^6.2.6",
@@ -31,6 +32,7 @@
     "qss": "^3.0.0",
     "radix-ui": "^1.4.3",
     "react": "19.2.3",
+    "react-day-picker": "^10.0.1",
     "react-dom": "19.2.3",
     "resend": "^6.18.1",
     "tailwind-merge": "^3.5.0"

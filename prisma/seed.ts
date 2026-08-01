@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client"
 import bcrypt from "bcryptjs"
+import { blogPosts } from "../src/data/blog"
 
 const prisma = new PrismaClient()
 
@@ -23,6 +24,35 @@ async function main() {
   })
 
   console.log(`✅ Admin user ready: ${admin.email}`)
+
+  console.log("🌱 Seeding blog posts into database...")
+  for (const post of blogPosts) {
+    await prisma.blogPost.upsert({
+      where: { slug: post.slug },
+      update: {
+        title: post.title,
+        excerpt: post.excerpt,
+        content: post.content,
+        date: new Date(post.date),
+        readingTime: post.readingTime,
+        tags: post.tags,
+        image: post.image || null,
+        published: true,
+      },
+      create: {
+        slug: post.slug,
+        title: post.title,
+        excerpt: post.excerpt,
+        content: post.content,
+        date: new Date(post.date),
+        readingTime: post.readingTime,
+        tags: post.tags,
+        image: post.image || null,
+        published: true,
+      },
+    })
+  }
+  console.log("✅ Static blog posts successfully seeded to database!")
 }
 
 main()
@@ -33,3 +63,4 @@ main()
   .finally(async () => {
     await prisma.$disconnect()
   })
+

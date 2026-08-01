@@ -17,6 +17,7 @@ import {
 import type { LucideIcon } from "lucide-react"
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler"
 import { StatusSelect } from "@/components/admin/status-select"
+import { DatePicker } from "@/components/ui/date-picker"
 import {
   ADMIN_KEYS,
   type AdminActivity,
@@ -853,15 +854,15 @@ export default function AdminDashboardPage() {
             )}
 
             {activeSection === "blogs" && (
-              <div className="grid items-start gap-6 lg:grid-cols-[1.3fr_1fr]">
+              <div className="grid items-start gap-6 lg:grid-cols-[1.3fr_1fr] min-w-0">
                 {/* LEFT: FORM + LIST */}
-                <div className="space-y-4">
+                <div className="space-y-4 min-w-0">
 
                   {/* FORM CREATE / EDIT */}
-                  <form onSubmit={handleAddBlog} className="grid gap-3 rounded-2xl border border-border bg-background p-4">
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                        <FilePlus2 className="size-4" />
+                  <form onSubmit={handleAddBlog} className="grid gap-3 rounded-2xl border border-border bg-background p-4 min-w-0">
+                    <div className="flex items-center justify-between gap-2 min-w-0">
+                      <p className="flex items-center gap-2 text-sm font-semibold text-foreground truncate">
+                        <FilePlus2 className="size-4 shrink-0" />
                         {editingBlogId ? "Modifier l'article" : "Créer un nouvel article"}
                       </p>
                       {editingBlogId && (
@@ -874,18 +875,18 @@ export default function AdminDashboardPage() {
                             setBlogDate(new Date().toISOString().slice(0, 10))
                             setBlogPublished(false); setBlogSaveStatus(null); setFormError("")
                           }}
-                          className="cursor-pointer text-xs text-muted-foreground hover:text-foreground transition-colors"
+                          className="cursor-pointer text-xs text-muted-foreground hover:text-foreground transition-colors shrink-0"
                         >
-                          ← Annuler la modification
+                          ← Annuler
                         </button>
                       )}
                     </div>
 
-                    <input value={blogTitle} onChange={(e) => setBlogTitle(e.target.value)} placeholder="Titre de l'article *" className="rounded-lg border border-input bg-background px-3 py-2 text-sm" />
-                    <textarea value={blogExcerpt} onChange={(e) => setBlogExcerpt(e.target.value)} placeholder="Extrait / résumé *" rows={2} className="rounded-lg border border-input bg-background px-3 py-2 text-sm" />
-                    <textarea value={blogContent} onChange={(e) => setBlogContent(e.target.value)} placeholder="Contenu en Markdown *" rows={8} className="rounded-lg border border-input bg-background px-3 py-2 text-sm font-mono" />
+                    <input value={blogTitle} onChange={(e) => setBlogTitle(e.target.value)} placeholder="Titre de l'article *" className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm" />
+                    <textarea value={blogExcerpt} onChange={(e) => setBlogExcerpt(e.target.value)} placeholder="Extrait / résumé *" rows={2} className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm" />
+                    <textarea value={blogContent} onChange={(e) => setBlogContent(e.target.value)} placeholder="Contenu en Markdown *" rows={6} className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm font-mono" />
 
-                    <div className="space-y-2">
+                    <div className="space-y-2 min-w-0">
                       <label className="text-xs font-medium text-muted-foreground">Image de couverture (upload)</label>
                       <input
                         type="file"
@@ -900,19 +901,19 @@ export default function AdminDashboardPage() {
                         </p>
                       )}
                       {blogImage && (
-                        <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 p-2">
-                          <img src={blogImage} alt="" className="size-10 rounded-md object-cover" />
-                          <p className="truncate text-xs text-muted-foreground">{blogImage}</p>
-                          <button type="button" onClick={() => setBlogImage("")} className="cursor-pointer ml-auto text-xs text-destructive hover:underline">Retirer</button>
+                        <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 p-2 min-w-0 overflow-hidden">
+                          <img src={blogImage} alt="" className="size-10 rounded-md object-cover shrink-0" />
+                          <p className="truncate text-xs text-muted-foreground min-w-0 flex-1 font-mono">{blogImage}</p>
+                          <button type="button" onClick={() => setBlogImage("")} className="cursor-pointer shrink-0 text-xs text-destructive hover:underline ml-1">Retirer</button>
                         </div>
                       )}
                     </div>
 
-                    <input value={blogTags} onChange={(e) => setBlogTags(e.target.value)} placeholder="Tags séparés par des virgules" className="rounded-lg border border-input bg-background px-3 py-2 text-sm" />
+                    <input value={blogTags} onChange={(e) => setBlogTags(e.target.value)} placeholder="Tags séparés par des virgules" className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm" />
 
                     <div className="grid gap-3 sm:grid-cols-2">
-                      <input value={blogReadingTime} onChange={(e) => setBlogReadingTime(e.target.value)} placeholder="Temps de lecture (min)" type="number" min="1" className="rounded-lg border border-input bg-background px-3 py-2 text-sm" />
-                      <input type="date" value={blogDate} onChange={(e) => setBlogDate(e.target.value)} className="rounded-lg border border-input bg-background px-3 py-2 text-sm" />
+                      <input value={blogReadingTime} onChange={(e) => setBlogReadingTime(e.target.value)} placeholder="Temps de lecture (min)" type="number" min="1" className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm" />
+                      <DatePicker value={blogDate} onChange={setBlogDate} placeholder="Date de publication" />
                     </div>
 
                     <label className="flex cursor-pointer items-center gap-2 text-sm">
@@ -946,17 +947,17 @@ export default function AdminDashboardPage() {
                     </button>
                   </form>
 
-                  {/* LIST OF DB BLOGS */}
-                  <div className="rounded-2xl border border-border bg-background p-4">
-                    <div className="mb-4 flex items-center justify-between">
-                      <h2 className="text-sm font-semibold text-foreground">
+                  {/* LIST OF DB BLOGS - COMPACT 2-COLUMN GRID */}
+                  <div className="rounded-2xl border border-border bg-background p-4 min-w-0">
+                    <div className="mb-3 flex items-center justify-between min-w-0">
+                      <h2 className="text-sm font-semibold text-foreground truncate">
                         Articles en base de données
                         <span className="ml-2 rounded-full bg-primary/20 px-2 py-0.5 text-xs font-medium text-primary">{dbBlogs.length}</span>
                       </h2>
                       <button
                         type="button"
                         onClick={() => setBlogsReloadToken((p) => p + 1)}
-                        className="cursor-pointer rounded-lg border border-border px-2.5 py-1 text-xs hover:bg-muted font-medium transition-colors"
+                        className="cursor-pointer rounded-lg border border-border px-2.5 py-1 text-xs hover:bg-muted font-medium transition-colors shrink-0"
                       >
                         Rafraîchir
                       </button>
@@ -967,19 +968,30 @@ export default function AdminDashboardPage() {
                     ) : dbBlogs.length === 0 ? (
                       <p className="py-6 text-center text-xs text-muted-foreground">Aucun article en base de données. Créez-en un ci-dessus.</p>
                     ) : (
-                      <div className="space-y-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[420px] overflow-y-auto pr-1">
                         {dbBlogs.map((post) => (
                           <article
                             key={post.id}
                             onClick={() => setSelectedBlogId(post.id)}
-                            className={`cursor-pointer rounded-xl border p-3 transition-all ${
+                            className={`cursor-pointer rounded-xl border p-3 flex flex-col justify-between transition-all min-w-0 ${
                               selectedBlog?.id === post.id
-                                ? "border-primary bg-primary/5"
+                                ? "border-primary bg-primary/5 ring-1 ring-primary/30"
                                 : "border-border bg-background hover:bg-muted/40"
                             }`}
                           >
-                            <div className="flex flex-wrap items-start justify-between gap-2">
-                              <div className="flex min-w-0 items-start gap-3">
+                            <div className="space-y-2 min-w-0">
+                              <div className="flex items-center justify-between gap-2 min-w-0">
+                                <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold shrink-0 ${
+                                  post.published
+                                    ? "bg-emerald-500/20 text-emerald-400"
+                                    : "bg-amber-500/20 text-amber-400"
+                                }`}>
+                                  {post.published ? "Publié" : "Brouillon"}
+                                </span>
+                                <span className="text-[10px] text-muted-foreground shrink-0">{formatDate(post.date)}</span>
+                              </div>
+
+                              <div className="flex items-start gap-2.5 min-w-0">
                                 {post.image ? (
                                   <img src={post.image} alt="" className="size-10 rounded-lg object-cover shrink-0" />
                                 ) : (
@@ -987,27 +999,20 @@ export default function AdminDashboardPage() {
                                     <ImageIcon className="size-4" />
                                   </span>
                                 )}
-                                <div className="min-w-0">
-                                  <p className="font-medium text-sm text-foreground truncate">{post.title}</p>
-                                  <p className="text-xs text-muted-foreground truncate">{post.excerpt}</p>
-                                  <div className="mt-1 flex items-center gap-2 flex-wrap">
-                                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                                      post.published
-                                        ? "bg-emerald-500/20 text-emerald-400"
-                                        : "bg-amber-500/20 text-amber-400"
-                                    }`}>
-                                      {post.published ? "Publié" : "Brouillon"}
-                                    </span>
-                                    <span className="text-[11px] text-muted-foreground">{formatDate(post.date)}</span>
-                                    <span className="text-[11px] text-muted-foreground">{post.readingTime} min</span>
-                                  </div>
+                                <div className="min-w-0 flex-1">
+                                  <p className="font-semibold text-xs text-foreground truncate">{post.title}</p>
+                                  <p className="text-[11px] text-muted-foreground line-clamp-2 mt-0.5">{post.excerpt}</p>
                                 </div>
                               </div>
-                              <div className="flex items-center gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
+                            </div>
+
+                            <div className="mt-3 pt-2 border-t border-border/60 flex items-center justify-between gap-1 text-[11px] shrink-0" onClick={(e) => e.stopPropagation()}>
+                              <span className="text-[10px] text-muted-foreground">{post.readingTime} min</span>
+                              <div className="flex items-center gap-1">
                                 <button
                                   type="button"
                                   onClick={() => handleToggleBlogPublished(post)}
-                                  className={`cursor-pointer rounded-md px-2 py-1 text-[11px] font-semibold transition-colors ${
+                                  className={`cursor-pointer rounded px-1.5 py-0.5 text-[10px] font-semibold transition-colors ${
                                     post.published
                                       ? "border border-border bg-background text-foreground hover:bg-muted"
                                       : "bg-emerald-600 text-white hover:bg-emerald-700"
@@ -1018,16 +1023,16 @@ export default function AdminDashboardPage() {
                                 <button
                                   type="button"
                                   onClick={() => handleEditBlog(post)}
-                                  className="cursor-pointer rounded-md border border-border bg-background px-2 py-1 text-[11px] font-medium hover:bg-muted"
+                                  className="cursor-pointer rounded border border-border bg-background px-1.5 py-0.5 text-[10px] font-medium hover:bg-muted"
                                 >
-                                  Modifier
+                                  Éditer
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => handleDeleteBlog(post.id)}
-                                  className="cursor-pointer rounded-md bg-destructive/10 border border-destructive/30 px-2 py-1 text-[11px] font-medium text-destructive hover:bg-destructive/20"
+                                  className="cursor-pointer rounded bg-destructive/10 border border-destructive/30 px-1.5 py-0.5 text-[10px] font-medium text-destructive hover:bg-destructive/20"
                                 >
-                                  Supprimer
+                                  Suppr.
                                 </button>
                               </div>
                             </div>
