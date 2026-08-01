@@ -96,8 +96,8 @@ export function HeroSection({
               const angleOffset = (ringIndex * Math.PI) / (ring.iconCount * 2)
               const angle = (iconIndex / ring.iconCount) * Math.PI * 2 + angleOffset
               const radius = ring.size * ring.radiusRatio
-              const x = Math.cos(angle) * radius
-              const y = Math.sin(angle) * radius
+              const x = (Math.cos(angle) * radius).toFixed(2)
+              const y = (Math.sin(angle) * radius).toFixed(2)
               const isGithubIcon = icon === githubHeroIcon
 
               return (
