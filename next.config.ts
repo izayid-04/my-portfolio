@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 
+// Reload server cache
 const nextConfig: NextConfig = {
   turbopack: {
     root: __dirname,

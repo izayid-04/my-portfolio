@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import { motion, AnimatePresence } from "motion/react"
 import { Award, ExternalLink } from "lucide-react"
@@ -146,14 +146,44 @@ export function CertificationsSection({
   className,
   title = "Certifications",
   subtitle = "Formations et diplômes",
-  certifications = defaultCertifications,
+  certifications: initialCertifications = defaultCertifications,
 }: CertificationsSectionProps) {
-  const [selectedId, setSelectedId] = useState<string | null>(
-    certifications[0] ? `${certifications[0].name}-${certifications[0].issuer}` : null
-  )
+  const [items, setItems] = useState<Certification[]>(initialCertifications)
 
-  const selected = certifications.find(
-    (c) => `${c.name}-${c.issuer}` === selectedId
+  useEffect(() => {
+    async function loadDiplomas() {
+      try {
+        const res = await fetch("/api/diplomas")
+        if (res.ok) {
+          const data = await res.json()
+          if (Array.isArray(data.diplomas) && data.diplomas.length > 0) {
+            const mapped: Certification[] = data.diplomas.map((d: any) => ({
+              name: d.title,
+              issuer: d.institution?.name || "Formation / Indépendant",
+              date: d.date || undefined,
+              url: d.url || d.institution?.website || undefined,
+              logo: d.institution?.logo || undefined,
+              description: d.description || undefined,
+              image: d.image || undefined,
+            }))
+            setItems(mapped)
+          }
+        }
+      } catch (err) {
+        console.error("Erreur de chargement des diplômes", err)
+      }
+    }
+    loadDiplomas()
+  }, [])
+
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+
+  const activeCertifications = items.length > 0 ? items : initialCertifications
+
+  const activeSelectedId = selectedId || (activeCertifications[0] ? `${activeCertifications[0].name}-${activeCertifications[0].issuer}` : null)
+
+  const selected = activeCertifications.find(
+    (c) => `${c.name}-${c.issuer}` === activeSelectedId
   )
 
   return (
@@ -176,9 +206,9 @@ export function CertificationsSection({
       {/* Mobile : chaque certificat avec son bloc détail directement en dessous */}
       {/* Desktop : ligne de cartes + un seul bloc détail en bas */}
       <ul className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4 mb-8 sm:mb-8">
-        {certifications.map((cert, i) => {
+        {activeCertifications.map((cert, i) => {
           const id = `${cert.name}-${cert.issuer}`
-          const isSelected = selectedId === id
+          const isSelected = activeSelectedId === id
           return (
             <motion.li
               key={id}

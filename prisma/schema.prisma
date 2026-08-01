@@ -48,3 +48,40 @@ model BlogPost {
 
   @@map("blog_posts")
 }
+
+model Institution {
+  id        String    @id @default(cuid())
+  name      String
+  logo      String?
+  website   String?
+  city      String?
+  country   String?
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  diplomas  Diploma[]
+
+  @@map("institutions")
+}
+
+model Diploma {
+  id            String       @id @default(cuid())
+  title         String
+  degreeType    String       @default("CERTIFICAT") @map("degree_type")
+  fieldOfStudy  String?      @map("field_of_study")
+  description   String?      @db.Text
+  date          String?
+  image         String?
+  url           String?
+  published     Boolean      @default(true)
+  order         Int          @default(0)
+
+  institutionId String?      @map("institution_id")
+  institution   Institution? @relation(fields: [institutionId], references: [id], onDelete: SetNull)
+
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+
+  @@map("diplomas")
+}
+

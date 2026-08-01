@@ -14,12 +14,14 @@ import {
   PanelLeft,
   Rocket,
   User,
+  GraduationCap,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler"
 import { StatusSelect } from "@/components/admin/status-select"
 import { DatePicker } from "@/components/ui/date-picker"
 import { ProfileTab } from "@/components/admin/profile-tab"
+import { DiplomasTab } from "@/components/admin/diplomas-tab"
 import {
   ADMIN_KEYS,
   type AdminActivity,
@@ -33,7 +35,7 @@ import {
   toSlug,
 } from "@/data/admin-demo"
 
-type DashboardSection = "overview" | "projects" | "blogs" | "contacts" | "profile"
+type DashboardSection = "overview" | "projects" | "blogs" | "diplomas" | "contacts" | "profile"
 type ContentStatus = "draft" | "published" | "archived"
 
 interface ContactMessage {
@@ -80,6 +82,7 @@ const dashboardSections: Array<{ id: DashboardSection; label: string; icon: Luci
   { id: "overview", label: "Vue globale", icon: Activity },
   { id: "projects", label: "Projets", icon: Rocket },
   { id: "blogs", label: "Blogs", icon: BookText },
+  { id: "diplomas", label: "Diplômes & Établissements", icon: GraduationCap },
   { id: "contacts", label: "Contacts", icon: MessageSquareText },
   { id: "profile", label: "Profil", icon: User },
 ]
@@ -1342,6 +1345,8 @@ export default function AdminDashboardPage() {
                 </aside>
               </div>
             )}
+
+            {activeSection === "diplomas" && <DiplomasTab />}
 
             {activeSection === "profile" && (
               <ProfileTab
