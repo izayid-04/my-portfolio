@@ -42,6 +42,8 @@ interface ContactMessage {
   phone: string | null
   message: string | null
   country_code: string | null
+  isRead?: boolean
+  repliedAt?: string | null
   created_at: string
 }
 
@@ -213,6 +215,76 @@ export default function AdminDashboardPage() {
   const [uploadingProjectImage, setUploadingProjectImage] = useState(false)
   const [uploadingBlogImage, setUploadingBlogImage] = useState(false)
 
+  const [replyText, setReplyText] = useState("")
+  const [replySubject, setReplySubject] = useState("")
+  const [replySending, setReplySending] = useState(false)
+  const [replyStatus, setReplyStatus] = useState<{ type: "success" | "error"; text: string } | null>(null)
+  const [contactFilter, setContactFilter] = useState<"all" | "unread" | "replied">("all")
+  const [contactSearch, setContactSearch] = useState("")
+
+  const toggleReadStatus = async (contactId: string, currentReadStatus: boolean) => {
+    const nextReadState = !currentReadStatus
+    setContacts((prev) =>
+      prev.map((c) => (c.id === contactId ? { ...c, isRead: nextReadState } : c))
+    )
+    try {
+      const response = await fetch(`/api/admin/contacts/${contactId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isRead: nextReadState }),
+      })
+      if (!response.ok) {
+        setContacts((prev) =>
+          prev.map((c) => (c.id === contactId ? { ...c, isRead: currentReadStatus } : c))
+        )
+      }
+    } catch (e) {
+      console.error("Erreur toggle status read:", e)
+      setContacts((prev) =>
+        prev.map((c) => (c.id === contactId ? { ...c, isRead: currentReadStatus } : c))
+      )
+    }
+  }
+
+  const handleSendReply = async (e: React.FormEvent, contactId: string) => {
+    e.preventDefault()
+    if (!replyText.trim()) return
+
+    setReplySending(true)
+    setReplyStatus(null)
+
+    try {
+      const response = await fetch(`/api/admin/contacts/${contactId}/reply`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          replyMessage: replyText,
+          subject: replySubject || `Re: Votre message sur le Portfolio — Ali Izayid`,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        setReplyStatus({ type: "error", text: data.error || "Erreur lors de l'envoi de la réponse." })
+      } else {
+        setReplyStatus({ type: "success", text: "Réponse envoyée avec succès par email !" })
+        setReplyText("")
+        setContacts((prev) =>
+          prev.map((c) =>
+            c.id === contactId
+              ? { ...c, isRead: true, repliedAt: new Date().toISOString() }
+              : c
+          )
+        )
+      }
+    } catch {
+      setReplyStatus({ type: "error", text: "Erreur réseau lors de l'envoi." })
+    } finally {
+      setReplySending(false)
+    }
+  }
+
   useEffect(() => {
     const rawSession = localStorage.getItem(ADMIN_KEYS.session)
     if (!rawSession) {
@@ -303,6 +375,23 @@ export default function AdminDashboardPage() {
     () => contacts.find((contact) => contact.id === selectedContactId) ?? contacts[0] ?? null,
     [contacts, selectedContactId]
   )
+
+  const filteredContacts = useMemo(() => {
+    return contacts.filter((c) => {
+      const query = contactSearch.toLowerCase()
+      const matchesSearch =
+        c.name.toLowerCase().includes(query) ||
+        c.email.toLowerCase().includes(query) ||
+        (c.message && c.message.toLowerCase().includes(query))
+      if (!matchesSearch) return false
+
+      if (contactFilter === "unread") return !c.isRead
+      if (contactFilter === "replied") return Boolean(c.repliedAt)
+      return true
+    })
+  }, [contacts, contactSearch, contactFilter])
+
+  const unreadContactsCount = useMemo(() => contacts.filter((c) => !c.isRead).length, [contacts])
 
   const stats = useMemo(() => {
     const publishedProjects = projects.filter((project) => project.status === "published").length
@@ -819,57 +908,249 @@ export default function AdminDashboardPage() {
             )}
 
             {activeSection === "contacts" && (
-              <div className="grid gap-6 xl:grid-cols-[1.2fr_1fr]">
-                <div className="rounded-2xl border border-border bg-background p-4">
-                  <div className="mb-3 flex items-center justify-between">
-                    <h2 className="text-sm font-semibold">Messages de contact</h2>
+              <div className="grid gap-6 xl:grid-cols-[1.1fr_1.3fr]">
+                {/* LISTE DES MESSAGES ET FILTRES */}
+                <div className="flex flex-col rounded-2xl border border-border bg-background p-4">
+                  <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                      <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                        Messages de contact
+                        {unreadContactsCount > 0 && (
+                          <span className="rounded-full bg-primary/20 px-2 py-0.5 text-xs font-medium text-primary">
+                            {unreadContactsCount} non lu{unreadContactsCount > 1 ? "s" : ""}
+                          </span>
+                        )}
+                      </h2>
+                      <p className="text-xs text-muted-foreground">{contactsInfo}</p>
+                    </div>
                     <button
                       type="button"
                       onClick={() => setContactsReloadToken((prev) => prev + 1)}
-                      className="rounded-md border border-border px-2 py-1 text-xs hover:bg-muted"
+                      className="cursor-pointer rounded-lg border border-border px-2.5 py-1 text-xs hover:bg-muted font-medium text-foreground transition-colors"
                     >
-                      Rafraichir
+                      Rafraîchir
                     </button>
                   </div>
-                  <p className="mb-3 text-xs text-muted-foreground">{contactsInfo}</p>
+
+                  {/* RECHERCHE ET FILTRES */}
+                  <div className="mb-4 space-y-2">
+                    <input
+                      type="text"
+                      placeholder="Rechercher par nom, email ou mot clé..."
+                      value={contactSearch}
+                      onChange={(e) => setContactSearch(e.target.value)}
+                      className="w-full rounded-xl border border-border bg-background px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                    />
+
+                    <div className="flex gap-1.5 text-xs">
+                      <button
+                        type="button"
+                        onClick={() => setContactFilter("all")}
+                        className={`cursor-pointer rounded-lg px-2.5 py-1 transition-colors ${
+                          contactFilter === "all"
+                            ? "bg-primary text-primary-foreground font-medium"
+                            : "bg-muted/50 text-muted-foreground hover:bg-muted"
+                        }`}
+                      >
+                        Tous ({contacts.length})
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setContactFilter("unread")}
+                        className={`cursor-pointer rounded-lg px-2.5 py-1 transition-colors ${
+                          contactFilter === "unread"
+                            ? "bg-primary text-primary-foreground font-medium"
+                            : "bg-muted/50 text-muted-foreground hover:bg-muted"
+                        }`}
+                      >
+                        Non lus ({unreadContactsCount})
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setContactFilter("replied")}
+                        className={`cursor-pointer rounded-lg px-2.5 py-1 transition-colors ${
+                          contactFilter === "replied"
+                            ? "bg-primary text-primary-foreground font-medium"
+                            : "bg-muted/50 text-muted-foreground hover:bg-muted"
+                        }`}
+                      >
+                        Répondus ({contacts.filter((c) => c.repliedAt).length})
+                      </button>
+                    </div>
+                  </div>
+
                   {contactsLoading ? (
-                    <p className="text-sm text-muted-foreground">Chargement...</p>
-                  ) : contacts.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">
-                      Aucun contact recupere. Si Supabase n'est pas configure, cette vue reste en mode UI.
-                    </p>
+                    <p className="py-8 text-center text-sm text-muted-foreground">Chargement des messages...</p>
+                  ) : filteredContacts.length === 0 ? (
+                    <div className="py-8 text-center text-xs text-muted-foreground">
+                      Aucun message ne correspond à vos critères.
+                    </div>
                   ) : (
-                    <ul className="space-y-2">
-                      {contacts.map((contact) => (
-                        <li key={contact.id} className="rounded-lg border border-border p-3">
-                          <button type="button" onClick={() => setSelectedContactId(contact.id)} className="w-full text-left">
-                            <p className="text-sm font-medium text-foreground">{contact.name}</p>
-                            <p className="text-xs text-muted-foreground">{contact.email}</p>
-                            <p className="text-xs text-muted-foreground">{formatDate(contact.created_at)}</p>
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
+                    <div className="space-y-2 overflow-y-auto max-h-[600px] pr-1">
+                      {filteredContacts.map((contact) => {
+                        const isSelected = selectedContact?.id === contact.id
+                        const isUnread = !contact.isRead
+                        return (
+                          <div
+                            key={contact.id}
+                            onClick={() => setSelectedContactId(contact.id)}
+                            className={`group relative cursor-pointer rounded-xl border p-3 transition-all ${
+                              isSelected
+                                ? "border-primary bg-primary/5 shadow-sm"
+                                : isUnread
+                                ? "border-violet-500/40 bg-violet-500/5 hover:border-violet-500/60"
+                                : "border-border bg-background hover:bg-muted/50"
+                            }`}
+                          >
+                            <div className="flex items-start justify-between gap-2">
+                              <span className="font-semibold text-sm text-foreground group-hover:text-primary transition-colors">
+                                {contact.name}
+                              </span>
+                              <div className="flex items-center gap-1.5 shrink-0">
+                                <button
+                                  type="button"
+                                  title={contact.isRead ? "Marquer comme non lu" : "Marquer comme lu"}
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    void toggleReadStatus(contact.id, Boolean(contact.isRead))
+                                  }}
+                                  className={`cursor-pointer rounded-full px-2 py-0.5 text-[10px] font-semibold transition-colors ${
+                                    contact.isRead
+                                      ? "bg-muted/80 text-muted-foreground hover:bg-muted"
+                                      : "bg-violet-500/20 text-violet-400 hover:bg-violet-500/30"
+                                  }`}
+                                >
+                                  {contact.isRead ? "Lu" : "Non lu"}
+                                </button>
+                                {contact.repliedAt && (
+                                  <span className="inline-flex items-center rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-semibold text-emerald-400">
+                                    Répondu
+                                  </span>
+                                )}
+                                <span className="text-[11px] text-muted-foreground">{formatDate(contact.created_at)}</span>
+                              </div>
+                            </div>
+                            <p className="text-xs text-muted-foreground font-mono">{contact.email}</p>
+                            <p className="mt-1 line-clamp-2 text-xs text-foreground/80">
+                              {contact.message || "Aucun texte..."}
+                            </p>
+                          </div>
+                        )
+                      })}
+                    </div>
                   )}
                 </div>
 
-                <aside className="rounded-2xl border border-border bg-background p-4">
-                  <h2 className="text-sm font-semibold">Detail contact</h2>
+                {/* DETAIL DU MESSAGE ET REPONSE EN DIRECT */}
+                <aside className="flex flex-col rounded-2xl border border-border bg-background p-4">
+                  <h2 className="text-sm font-semibold text-foreground mb-3">Détail & Réponse directe</h2>
+
                   {selectedContact ? (
-                    <div className="mt-3 space-y-2 text-sm">
-                      <p className="font-medium">{selectedContact.name}</p>
-                      <p className="text-muted-foreground">{selectedContact.email}</p>
-                      <p className="text-muted-foreground">{selectedContact.phone || "Telephone non fourni"}</p>
-                      <p className="text-xs text-muted-foreground">
-                        Pays: {selectedContact.country_code || "N/A"}
-                      </p>
-                      <p className="text-xs text-muted-foreground">{formatDate(selectedContact.created_at)}</p>
-                      <p className="rounded-lg bg-muted/40 p-3 text-sm text-foreground">
-                        {selectedContact.message || "Aucun message."}
-                      </p>
+                    <div className="flex flex-col gap-4">
+                      {/* INFORMATIONS SENDER */}
+                      <div className="rounded-xl border border-border/80 bg-muted/20 p-4 space-y-2 text-xs">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <h3 className="text-base font-bold text-foreground">{selectedContact.name}</h3>
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => toggleReadStatus(selectedContact.id, Boolean(selectedContact.isRead))}
+                              className={`cursor-pointer rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+                                selectedContact.isRead
+                                  ? "border border-border bg-background text-foreground hover:bg-muted"
+                                  : "bg-violet-600 text-white hover:bg-violet-700 shadow-sm"
+                              }`}
+                            >
+                              {selectedContact.isRead ? "✉️ Marquer comme non lu" : "✓ Marquer comme lu"}
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 text-muted-foreground">
+                          <p>Email: <a href={`mailto:${selectedContact.email}`} className="text-primary hover:underline font-mono">{selectedContact.email}</a></p>
+                          <p>Téléphone: <span className="text-foreground">{selectedContact.phone || "Non fourni"}</span></p>
+                          <p>Pays: <span className="text-foreground">{selectedContact.country_code || "N/A"}</span></p>
+                          <p>Reçu le: <span className="text-foreground">{formatDate(selectedContact.created_at)}</span></p>
+                        </div>
+                      </div>
+
+                      {/* CONTENU DU MESSAGE */}
+                      <div className="space-y-1">
+                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Message reçu :</p>
+                        <div className="rounded-xl border border-border bg-muted/40 p-4 text-sm text-foreground leading-relaxed whitespace-pre-wrap">
+                          {selectedContact.message || "Aucun contenu de message."}
+                        </div>
+                      </div>
+
+                      {/* STATUT DE REPONSE */}
+                      {selectedContact.repliedAt && (
+                        <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs text-emerald-400">
+                          ✓ Réponse envoyée le {formatDate(selectedContact.repliedAt)}
+                        </div>
+                      )}
+
+                      {/* FORMULAIRE DE REPONSE DIRECTE PAR EMAIL */}
+                      <form
+                        onSubmit={(e) => handleSendReply(e, selectedContact.id)}
+                        className="rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-3"
+                      >
+                        <h4 className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                          ✉️ Répondre directement à {selectedContact.name} via Resend
+                        </h4>
+
+                        <div>
+                          <label className="block text-[11px] font-medium text-muted-foreground mb-1">
+                            Sujet de l'email :
+                          </label>
+                          <input
+                            type="text"
+                            value={replySubject || `Re: Votre message sur le Portfolio — Ali Izayid`}
+                            onChange={(e) => setReplySubject(e.target.value)}
+                            className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-medium text-muted-foreground mb-1">
+                            Votre message de réponse :
+                          </label>
+                          <textarea
+                            rows={4}
+                            placeholder="Rédigez votre réponse ici..."
+                            value={replyText}
+                            onChange={(e) => setReplyText(e.target.value)}
+                            required
+                            className="w-full rounded-lg border border-border bg-background p-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                          />
+                        </div>
+
+                        {replyStatus && (
+                          <div
+                            className={`rounded-lg p-2.5 text-xs ${
+                              replyStatus.type === "success"
+                                ? "bg-emerald-500/10 border border-emerald-500/30 text-emerald-400"
+                                : "bg-destructive/10 border border-destructive/30 text-destructive"
+                            }`}
+                          >
+                            {replyStatus.text}
+                          </div>
+                        )}
+
+                        <div className="flex justify-end">
+                          <button
+                            type="submit"
+                            disabled={replySending || !replyText.trim()}
+                            className="cursor-pointer inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-xs font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
+                          >
+                            {replySending ? "Envoi en cours..." : "Envoyer la réponse par email"}
+                          </button>
+                        </div>
+                      </form>
                     </div>
                   ) : (
-                    <p className="mt-2 text-sm text-muted-foreground">Selectionnez un message.</p>
+                    <div className="py-12 text-center text-xs text-muted-foreground">
+                      Sélectionnez un message dans la liste à gauche pour lire et répondre.
+                    </div>
                   )}
                 </aside>
               </div>

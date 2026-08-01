@@ -1,47 +1,36 @@
 import { NextResponse } from "next/server"
-import { createServerSupabaseClient } from "@/lib/supabase/server"
-
-interface ContactMessageRow {
-  id: string
-  name: string
-  email: string
-  phone: string | null
-  message: string | null
-  country_code: string | null
-  created_at: string
-}
+import { prisma } from "@/lib/prisma"
 
 export async function GET() {
   try {
-    const supabase = createServerSupabaseClient()
+    const contacts = await prisma.contact.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 100,
+    })
 
-    const { data, error } = await supabase
-      .from("contact_messages")
-      .select("id,name,email,phone,message,country_code,created_at")
-      .order("created_at", { ascending: false })
-      .limit(100)
-
-    if (error) {
-      return NextResponse.json(
-        {
-          items: [],
-          source: "ui-fallback",
-          warning: "Impossible de lire Supabase pour le moment.",
-        },
-        { status: 200 }
-      )
-    }
+    const formattedContacts = contacts.map((item) => ({
+      id: item.id,
+      name: item.name,
+      email: item.email,
+      phone: item.phone,
+      message: item.message,
+      country_code: item.countryCode,
+      isRead: item.isRead,
+      repliedAt: item.repliedAt ? item.repliedAt.toISOString() : null,
+      created_at: item.createdAt.toISOString(),
+    }))
 
     return NextResponse.json({
-      items: (data ?? []) as ContactMessageRow[],
-      source: "supabase",
+      items: formattedContacts,
+      source: "prisma",
     })
-  } catch {
+  } catch (error) {
+    console.error("[api/admin/contacts] Erreur lecture Prisma:", error)
     return NextResponse.json(
       {
         items: [],
         source: "ui-fallback",
-        warning: "Variables Supabase manquantes ou serveur indisponible.",
+        warning: "Impossible de charger les messages depuis la base de données.",
       },
       { status: 200 }
     )
