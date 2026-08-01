@@ -13,11 +13,13 @@ import {
   MessageSquareText,
   PanelLeft,
   Rocket,
+  User,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler"
 import { StatusSelect } from "@/components/admin/status-select"
 import { DatePicker } from "@/components/ui/date-picker"
+import { ProfileTab } from "@/components/admin/profile-tab"
 import {
   ADMIN_KEYS,
   type AdminActivity,
@@ -31,7 +33,7 @@ import {
   toSlug,
 } from "@/data/admin-demo"
 
-type DashboardSection = "overview" | "projects" | "blogs" | "contacts"
+type DashboardSection = "overview" | "projects" | "blogs" | "contacts" | "profile"
 type ContentStatus = "draft" | "published" | "archived"
 
 interface ContactMessage {
@@ -79,6 +81,7 @@ const dashboardSections: Array<{ id: DashboardSection; label: string; icon: Luci
   { id: "projects", label: "Projets", icon: Rocket },
   { id: "blogs", label: "Blogs", icon: BookText },
   { id: "contacts", label: "Contacts", icon: MessageSquareText },
+  { id: "profile", label: "Profil", icon: User },
 ]
 
 function formatDate(value: string | null): string {
@@ -1338,6 +1341,14 @@ export default function AdminDashboardPage() {
                   )}
                 </aside>
               </div>
+            )}
+
+            {activeSection === "profile" && (
+              <ProfileTab
+                onProfileUpdated={(updatedUser) => {
+                  setSession((prev) => (prev ? { ...prev, email: updatedUser.email } : null))
+                }}
+              />
             )}
           </div>
         </section>
