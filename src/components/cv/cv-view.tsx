@@ -22,9 +22,17 @@ export function CvView() {
   const [rendering, setRendering] = useState(false)
   const [numPages, setNumPages] = useState<number>(0)
   const [pdfDoc, setPdfDoc] = useState<any>(null)
-  const [zoomScale, setZoomScale] = useState<number>(100) // 70% à 150%
+  const [zoomScale, setZoomScale] = useState<number>(100) // 60% à 170%
+  const [isDragging, setIsDragging] = useState(false)
 
   const containerRef = useRef<HTMLDivElement>(null)
+  const viewportRef = useRef<HTMLDivElement>(null)
+  const dragStartRef = useRef<{ x: number; y: number; scrollLeft: number; scrollTop: number }>({
+    x: 0,
+    y: 0,
+    scrollLeft: 0,
+    scrollTop: 0,
+  })
 
   // 1. Récupération des données du CV
   useEffect(() => {
@@ -120,7 +128,7 @@ export function CvView() {
           const viewport = page.getViewport({ scale: scale * 1.5 }) // Rendu HD
 
           const canvas = document.createElement("canvas")
-          canvas.className = "w-full h-auto bg-white block shadow-xs border-b border-border/40"
+          canvas.className = "w-full h-auto bg-white block shadow-xs border-b border-border/40 select-none pointer-events-none"
           canvas.height = viewport.height
           canvas.width = viewport.width
 
@@ -148,12 +156,56 @@ export function CvView() {
     }
   }, [pdfDoc, numPages])
 
-  const handleZoomIn = () => setZoomScale((prev) => Math.min(prev + 15, 150))
-  const handleZoomOut = () => setZoomScale((prev) => Math.max(prev - 15, 70))
+  // 4. Gestion du Zoom au Ctrl + Molette de la souris / Touchpad
+  useEffect(() => {
+    const viewport = viewportRef.current
+    if (!viewport) return
+
+    const handleWheel = (e: WheelEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault()
+        const zoomDelta = e.deltaY < 0 ? 10 : -10
+        setZoomScale((prev) => Math.min(Math.max(prev + zoomDelta, 60), 170))
+      }
+    }
+
+    viewport.addEventListener("wheel", handleWheel, { passive: false })
+    return () => {
+      viewport.removeEventListener("wheel", handleWheel)
+    }
+  }, [])
+
+  // 5. Gestion du glisser / déplacer à la main (Drag to Pan avec curseur Grab / Grabbing)
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!viewportRef.current) return
+    setIsDragging(true)
+    dragStartRef.current = {
+      x: e.clientX,
+      y: e.clientY,
+      scrollLeft: viewportRef.current.scrollLeft,
+      scrollTop: viewportRef.current.scrollTop,
+    }
+  }
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isDragging || !viewportRef.current) return
+    e.preventDefault()
+    const dx = e.clientX - dragStartRef.current.x
+    const dy = e.clientY - dragStartRef.current.y
+    viewportRef.current.scrollLeft = dragStartRef.current.scrollLeft - dx
+    viewportRef.current.scrollTop = dragStartRef.current.scrollTop - dy
+  }
+
+  const handleMouseUpOrLeave = () => {
+    setIsDragging(false)
+  }
+
+  const handleZoomIn = () => setZoomScale((prev) => Math.min(prev + 15, 170))
+  const handleZoomOut = () => setZoomScale((prev) => Math.max(prev - 15, 60))
   const handleResetZoom = () => setZoomScale(100)
 
   return (
-    <div className="h-screen w-full bg-background flex flex-col overflow-hidden p-2 sm:p-4 pb-20 sm:pb-24 relative">
+    <div className="h-screen w-full bg-background flex flex-col overflow-hidden p-2 sm:p-4 pb-20 sm:pb-24 relative select-none">
       {/* Masquage strict des barres de scroll tout en conservant le défilement fluide */}
       <style jsx global>{`
         .hide-scrollbar::-webkit-scrollbar {
@@ -175,7 +227,7 @@ export function CvView() {
             <button
               type="button"
               onClick={handleZoomIn}
-              disabled={zoomScale >= 150}
+              disabled={zoomScale >= 170}
               className="cursor-pointer inline-flex size-8 sm:size-9 items-center justify-center rounded-xl bg-background text-foreground border border-border hover:bg-primary hover:text-primary-foreground disabled:opacity-40 transition-all shadow-xs"
               title="Zoomer (+)"
             >
@@ -189,7 +241,7 @@ export function CvView() {
             <button
               type="button"
               onClick={handleZoomOut}
-              disabled={zoomScale <= 70}
+              disabled={zoomScale <= 60}
               className="cursor-pointer inline-flex size-8 sm:size-9 items-center justify-center rounded-xl bg-background text-foreground border border-border hover:bg-primary hover:text-primary-foreground disabled:opacity-40 transition-all shadow-xs"
               title="Dézoomer (-)"
             >
@@ -284,16 +336,33 @@ export function CvView() {
               </div>
             </div>
           ) : pdfUrl ? (
-            /* ZONE CANVAS : Défilement fluide avec mise à l'échelle instantanée en direct au clic sur + et - */
-            <div className="flex-1 min-h-0 w-full relative bg-white overflow-y-auto hide-scrollbar flex flex-col items-center justify-start p-1">
+            /* ZONE CANVAS INTERACTIVE AVEC GESTION CORRIGÉE DU PANNING ET DE L'ORIGINE DU ZOOM */
+            <div
+              ref={viewportRef}
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUpOrLeave}
+              onMouseLeave={handleMouseUpOrLeave}
+              className={`flex-1 min-h-0 w-full relative bg-white overflow-auto hide-scrollbar flex flex-col p-1 transition-colors ${
+                isDragging ? "cursor-grabbing" : "cursor-grab"
+              } ${zoomScale > 100 ? "items-start" : "items-center"}`}
+            >
               <div
-                ref={containerRef}
-                className="w-full flex flex-col items-center justify-start transition-transform duration-200 origin-top"
+                className="flex flex-col items-center justify-start transition-all duration-200"
                 style={{
-                  transform: `scale(${zoomScale / 100})`,
-                  transformOrigin: "top center",
+                  width: zoomScale > 100 ? `${zoomScale}%` : "100%",
+                  minWidth: "100%",
                 }}
-              />
+              >
+                <div
+                  ref={containerRef}
+                  className="w-full flex flex-col items-center justify-start pointer-events-none transition-transform duration-200"
+                  style={{
+                    transform: `scale(${zoomScale / 100})`,
+                    transformOrigin: zoomScale > 100 ? "top left" : "top center",
+                  }}
+                />
+              </div>
             </div>
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-3 bg-card">
