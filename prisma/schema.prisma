@@ -1,0 +1,116 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  role      String   @default("ADMIN")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Contact {
+  id          String    @id @default(cuid())
+  name        String
+  email       String
+  phone       String?
+  countryCode String?   @map("country_code")
+  message     String?
+  isRead      Boolean   @default(false) @map("is_read")
+  repliedAt   DateTime? @map("replied_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  @@map("contact_messages")
+}
+
+model BlogPost {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  excerpt     String
+  content     String   @db.Text
+  date        DateTime @default(now())
+  readingTime Int      @default(5) @map("reading_time")
+  tags        String[] @default([])
+  image       String?
+  published   Boolean  @default(false)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("blog_posts")
+}
+
+model Institution {
+  id        String    @id @default(cuid())
+  name      String
+  logo      String?
+  website   String?
+  city      String?
+  country   String?
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  diplomas  Diploma[]
+
+  @@map("institutions")
+}
+
+model Diploma {
+  id            String       @id @default(cuid())
+  title         String
+  degreeType    String       @default("CERTIFICAT") @map("degree_type")
+  fieldOfStudy  String?      @map("field_of_study")
+  description   String?      @db.Text
+  date          String?
+  image         String?
+  url           String?
+  published     Boolean      @default(true)
+  order         Int          @default(0)
+
+  institutionId String?      @map("institution_id")
+  institution   Institution? @relation(fields: [institutionId], references: [id], onDelete: SetNull)
+
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+
+  @@map("diplomas")
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  title       String
+  description String   @db.Text
+  date        String?
+  slug        String?
+  tags        String[] @default([])
+  image       String?
+  video       String?
+  href        String?
+  embedSite   Boolean  @default(true) @map("embed_site")
+  published   Boolean  @default(true)
+  order       Int      @default(0)
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("projects")
+}
+
+model Resume {
+  id        String   @id @default("active")
+  pdfUrl    String   @map("pdf_url")
+  fileName  String?  @map("file_name")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("resumes")
+}
+

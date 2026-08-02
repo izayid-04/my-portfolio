@@ -1,12 +1,12 @@
 "use client"
 
 import Image from "next/image"
-import { motion } from "motion/react"
+import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { siteConfig } from "@/config/site"
 import { SectionWrapper } from "@/components/layout"
-import { IconCloud } from "@/components/ui/icon-cloud"
-import { techIconUrls, techCategories } from "@/data/tech-icons"
+import { techCategories } from "@/data/tech-icons"
+import { InteractiveTerminal } from "@/components/ui/interactive-terminal"
 
 interface AboutSectionProps {
   className?: string
@@ -29,20 +29,23 @@ export function AboutSection({
       id={siteConfig.sections.about}
       className={cn("bg-muted/30", className)}
     >
-      {/* Haut : nuage + texte */}
-      <div className="grid gap-6 sm:gap-12 lg:grid-cols-12 lg:gap-16 lg:items-center min-w-0">
+      {/* Haut : Terminal CLI large (à gauche lg:col-span-7) + Texte À propos (à droite lg:col-span-5) */}
+      <div className="grid gap-8 sm:gap-12 lg:grid-cols-12 lg:gap-10 lg:items-center min-w-0">
+        
+        {/* Terminal CLI très large */}
         <motion.div
-          className="lg:col-span-5 flex justify-center lg:justify-end min-w-0 order-2 sm:order-2 lg:order-1"
-          initial={{ opacity: 0, scale: 0.98 }}
-          whileInView={{ opacity: 1, scale: 1 }}
+          className="lg:col-span-7 w-full min-w-0 order-2 sm:order-2 lg:order-1"
+          initial={{ opacity: 0, x: -20 }}
+          whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true, margin: "-50px" }}
           transition={{ duration: 0.5 }}
         >
-          <IconCloud images={techIconUrls} />
+          <InteractiveTerminal />
         </motion.div>
 
+        {/* Texte À propos */}
         <motion.div
-          className="lg:col-span-7 min-w-0 order-1 sm:order-1 lg:order-2"
+          className="lg:col-span-5 min-w-0 order-1 sm:order-1 lg:order-2"
           initial={{ opacity: 0, x: 20 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true, margin: "-50px" }}
@@ -54,10 +57,10 @@ export function AboutSection({
           >
             {title}
           </h2>
-          <p className="mt-2 text-sm font-medium uppercase tracking-widest text-muted-foreground">
+          <p className="mt-2 text-sm font-semibold uppercase tracking-widest bg-gradient-to-r from-primary via-violet-500 to-cyan-500 bg-clip-text text-transparent">
             Parcours & valeurs
           </p>
-          <div className="mt-8 space-y-6">
+          <div className="mt-6 space-y-5">
             {paragraphs.map((text, i) => (
               <motion.p
                 key={i}

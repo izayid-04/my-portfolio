@@ -1,432 +1,384 @@
 "use client"
 
-import { useState, useCallback } from "react"
-import Image from "next/image"
+import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import {
   ArrowLeft,
   Download,
-  Loader2,
-  Mail,
-  Phone,
-  MapPin,
-  Github,
-  Linkedin,
-  Globe,
   ExternalLink,
+  FileText,
+  Loader2,
+  CheckCircle2,
+  Plus,
+  Minus,
+  RotateCcw,
 } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { downloadCvAsPdf } from "@/lib/cv-pdf"
-
-const CONTACT = {
-  email: "izayidali@biacode.tech",
-  phoneDisplay: "+221 78 372 35 07",
-  phoneHref: "https://wa.me/221783723507",
-  location: "Sénégal",
-  portfolio: "Portfolio en ligne",
-  portfolioHref: "/",
-} as const
-
-const SOCIAL = [
-  { label: "GitHub", href: "https://github.com/ClayJense", icon: Github },
-  { label: "LinkedIn", href: "https://www.linkedin.com/in/ali-izayid/", icon: Linkedin },
-  { label: "X", href: "https://x.com/Izayid04", icon: null as null },
-] as const
-
-function XIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-    </svg>
-  )
-}
-
-const SKILL_TAGS = [
-  "Laravel",
-  "Angular",
-  "Next.js",
-  "React",
-  "Nest.js",
-  "Spring Boot",
-  "MySQL",
-  "PostgreSQL",
-  "Docker",
-  "Linux",
-  "Git / GitHub",
-  "OVH / LWS",
-  "API REST",
-  "DevOps",
-] as const
-
-const EXPERIENCES = [
-  {
-    period: "2025 — présent",
-    title: "Co-fondateur & développeur full-stack",
-    org: "BIACode",
-    detail:
-      "Agence tech lancée à trois : développement web, plateformes métiers, accompagnement clients. Stack Laravel, Angular, MySQL, déploiement LWS.",
-    href: "https://www.biacode.tech/",
-  },
-  {
-    period: "Mars 2026",
-    title: "Développeur — plateforme vitrine",
-    org: "EASYTECS (EasyGEC)",
-    detail:
-      "Premier client de l’agence : site présentant EasyGEC (état civil, sécurité, e-gouvernance). Laravel, Angular, MySQL, hébergement LWS.",
-    href: "https://www.easytecs.tech/",
-  },
-  {
-    period: "Juillet 2025",
-    title: "Stage — équipe de 4",
-    org: "Université Dakar-Bourguiba (UDB)",
-    detail:
-      "Plateforme web institutionnelle : back-end Laravel, front Angular, MySQL, Git/GitHub, hébergement OVH.",
-    href: "https://udb.sn/",
-  },
-] as const
-
-const PROJECTS = [
-  {
-    name: "Plateforme UDB",
-    stack: "Laravel · Angular · MySQL · OVH",
-    href: "https://udb.sn/",
-  },
-  {
-    name: "BIACode",
-    stack: "Laravel · Angular · MySQL · LWS",
-    href: "https://www.biacode.tech/",
-  },
-  {
-    name: "EASYTECS / EasyGEC",
-    stack: "Laravel · Angular · MySQL · LWS",
-    href: "https://www.easytecs.tech/",
-  },
-  {
-    name: "Nora — Assistant IA",
-    stack: "HTML · CSS · JS · Python Flask · Render",
-    href: "https://noraia.onrender.com/",
-  },
-] as const
 
 export function CvView() {
-  const [pdfLoading, setPdfLoading] = useState(false)
-  const [pdfError, setPdfError] = useState<string | null>(null)
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null)
+  const [fileName, setFileName] = useState<string | null>(null)
+  const [updatedAt, setUpdatedAt] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [rendering, setRendering] = useState(false)
+  const [numPages, setNumPages] = useState<number>(0)
+  const [pdfDoc, setPdfDoc] = useState<any>(null)
+  const [zoomScale, setZoomScale] = useState<number>(100) // 60% à 170%
+  const [isDragging, setIsDragging] = useState(false)
 
-  const handleDownloadPdf = useCallback(async () => {
-    const el = document.getElementById("cv-root")
-    if (!el || !(el instanceof HTMLElement)) {
-      setPdfError("Impossible de trouver le CV sur la page.")
-      return
+  const containerRef = useRef<HTMLDivElement>(null)
+  const viewportRef = useRef<HTMLDivElement>(null)
+  const dragStartRef = useRef<{ x: number; y: number; scrollLeft: number; scrollTop: number }>({
+    x: 0,
+    y: 0,
+    scrollLeft: 0,
+    scrollTop: 0,
+  })
+
+  // 1. Récupération des données du CV
+  useEffect(() => {
+    async function loadResume() {
+      try {
+        setLoading(true)
+        const res = await fetch("/api/resume")
+        if (res.ok) {
+          const data = await res.json()
+          if (data.pdfUrl) {
+            setPdfUrl(data.pdfUrl)
+            setFileName(data.fileName || "CV_Izayid_Ali.pdf")
+            setUpdatedAt(data.updatedAt)
+          }
+        }
+      } catch (err) {
+        console.error("Erreur chargement CV PDF:", err)
+      } finally {
+        setLoading(false)
+      }
     }
-    setPdfError(null)
-    setPdfLoading(true)
-    try {
-      await downloadCvAsPdf(el)
-    } catch (err) {
-      console.error("[cv-pdf]", err)
-      const hint =
-        err instanceof Error && err.message
-          ? err.message
-          : typeof err === "string"
-            ? err
-            : "Erreur inconnue"
-      setPdfError(
-        `PDF : ${hint.slice(0, 200)}${hint.length > 200 ? "…" : ""} — Vérifie la console (F12) pour le détail.`
-      )
-    } finally {
-      setPdfLoading(false)
+    loadResume()
+  }, [])
+
+  // 2. Chargement du document PDF via PDF.js
+  useEffect(() => {
+    if (!pdfUrl) return
+
+    let active = true
+
+    async function initPdfJs() {
+      try {
+        setRendering(true)
+        if (!(window as any).pdfjsLib) {
+          await new Promise<void>((resolve, reject) => {
+            const script = document.createElement("script")
+            script.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"
+            script.onload = () => resolve()
+            script.onerror = () => reject(new Error("Impossible de charger PDF.js"))
+            document.head.appendChild(script)
+          })
+        }
+
+        const pdfjsLib = (window as any).pdfjsLib
+        pdfjsLib.GlobalWorkerOptions.workerSrc =
+          "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"
+
+        const task = pdfjsLib.getDocument(pdfUrl)
+        const doc = await task.promise
+
+        if (active) {
+          setPdfDoc(doc)
+          setNumPages(doc.numPages)
+        }
+      } catch (err) {
+        console.error("Erreur d'initialisation PDF.js:", err)
+      } finally {
+        if (active) setRendering(false)
+      }
+    }
+
+    initPdfJs()
+
+    return () => {
+      active = false
+    }
+  }, [pdfUrl])
+
+  // 3. Dessin haute définition des pages sur les <canvas>
+  useEffect(() => {
+    if (!pdfDoc || numPages === 0 || !containerRef.current) return
+
+    let cancelled = false
+
+    async function renderPages() {
+      const container = containerRef.current
+      if (!container) return
+
+      // Vider le conteneur avant rendu
+      container.innerHTML = ""
+
+      const containerWidth = container.clientWidth || 560
+
+      for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+        if (cancelled) break
+
+        try {
+          const page = await pdfDoc.getPage(pageNum)
+          if (cancelled) break
+
+          const unscaledViewport = page.getViewport({ scale: 1.0 })
+          const scale = containerWidth / unscaledViewport.width
+          const viewport = page.getViewport({ scale: scale * 1.5 }) // Rendu HD
+
+          const canvas = document.createElement("canvas")
+          canvas.className = "w-full h-auto bg-white block shadow-xs border-b border-border/40 select-none pointer-events-none"
+          canvas.height = viewport.height
+          canvas.width = viewport.width
+
+          const context = canvas.getContext("2d")
+          if (context) {
+            await page.render({
+              canvasContext: context,
+              viewport: viewport,
+            }).promise
+          }
+
+          if (!cancelled) {
+            container.appendChild(canvas)
+          }
+        } catch (e) {
+          console.error(`Erreur rendu page ${pageNum}:`, e)
+        }
+      }
+    }
+
+    renderPages()
+
+    return () => {
+      cancelled = true
+    }
+  }, [pdfDoc, numPages])
+
+  // 4. Gestion du Zoom au Ctrl + Molette de la souris / Touchpad
+  useEffect(() => {
+    const viewport = viewportRef.current
+    if (!viewport) return
+
+    const handleWheel = (e: WheelEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault()
+        const zoomDelta = e.deltaY < 0 ? 10 : -10
+        setZoomScale((prev) => Math.min(Math.max(prev + zoomDelta, 60), 170))
+      }
+    }
+
+    viewport.addEventListener("wheel", handleWheel, { passive: false })
+    return () => {
+      viewport.removeEventListener("wheel", handleWheel)
     }
   }, [])
 
+  // 5. Gestion du glisser / déplacer à la main (Drag to Pan avec curseur Grab / Grabbing)
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!viewportRef.current) return
+    setIsDragging(true)
+    dragStartRef.current = {
+      x: e.clientX,
+      y: e.clientY,
+      scrollLeft: viewportRef.current.scrollLeft,
+      scrollTop: viewportRef.current.scrollTop,
+    }
+  }
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isDragging || !viewportRef.current) return
+    e.preventDefault()
+    const dx = e.clientX - dragStartRef.current.x
+    const dy = e.clientY - dragStartRef.current.y
+    viewportRef.current.scrollLeft = dragStartRef.current.scrollLeft - dx
+    viewportRef.current.scrollTop = dragStartRef.current.scrollTop - dy
+  }
+
+  const handleMouseUpOrLeave = () => {
+    setIsDragging(false)
+  }
+
+  const handleZoomIn = () => setZoomScale((prev) => Math.min(prev + 15, 170))
+  const handleZoomOut = () => setZoomScale((prev) => Math.max(prev - 15, 60))
+  const handleResetZoom = () => setZoomScale(100)
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-muted/60 via-background to-background pb-32 pt-6 sm:pt-10">
-      {/* Barre d’actions (masquée à l’impression) */}
-      <div
-        className={cn(
-          "cv-no-print mx-auto mb-6 flex max-w-[210mm] flex-col gap-3 px-4 sm:flex-row sm:items-center sm:justify-between sm:px-0"
-        )}
-      >
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <ArrowLeft className="size-4" />
-          Retour au portfolio
-        </Link>
-        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-          <button
-            type="button"
-            onClick={handleDownloadPdf}
-            disabled={pdfLoading}
-            className={cn(
-              "inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-md",
-              "hover:opacity-90 transition-opacity cursor-pointer",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-              "disabled:pointer-events-none disabled:opacity-60"
-            )}
-          >
-            {pdfLoading ? (
-              <>
-                <Loader2 className="size-4 animate-spin" aria-hidden />
-                Génération du PDF…
-              </>
-            ) : (
-              <>
-                <Download className="size-4" aria-hidden />
-                Télécharger le CV (PDF)
-              </>
-            )}
-          </button>
-          <p className="text-xs text-muted-foreground sm:max-w-xs">
-            Uniquement la feuille de CV est exportée (pas la navbar ni cette barre).
-          </p>
-          {pdfError && (
-            <p className="w-full text-sm text-destructive" role="alert">
-              {pdfError}
-            </p>
-          )}
-        </div>
-      </div>
+    <div className="h-screen w-full bg-background flex flex-col overflow-hidden p-2 sm:p-4 pb-20 sm:pb-24 relative select-none">
+      {/* Masquage strict des barres de scroll tout en conservant le défilement fluide */}
+      <style jsx global>{`
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none !important;
+          width: 0 !important;
+          height: 0 !important;
+        }
+        .hide-scrollbar {
+          -ms-overflow-style: none !important;
+          scrollbar-width: none !important;
+        }
+      `}</style>
 
-      {/* Feuille CV */}
-      <article
-        id="cv-root"
-        className={cn(
-          "cv-sheet mx-auto w-full max-w-[210mm] overflow-hidden rounded-2xl border border-border bg-card shadow-2xl",
-          "print:shadow-none print:rounded-none print:border-0"
-        )}
-      >
-        <div className="grid print:grid-cols-[minmax(0,260px)_1fr] md:grid-cols-[minmax(0,280px)_1fr] lg:grid-cols-[minmax(0,300px)_1fr]">
-            <aside
-              className={cn(
-                "cv-sidebar relative flex flex-col gap-8 bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-950 p-8 text-zinc-50",
-                "md:border-r md:border-zinc-700/50"
-              )}
+      {/* CONTENEUR PRINCIPAL DU CADRE PDF ET DES BOUTONS DE ZOOM ACCOLÉS */}
+      <div className="mx-auto w-full max-w-[560px] flex flex-col h-full space-y-2 relative">
+        {/* BOUTONS DE ZOOM ACCOLÉS STRICTEMENT AU BORD DROIT DU CADRE PDF */}
+        {pdfUrl && (
+          <div className="absolute -right-11 sm:-right-13 top-1/2 -translate-y-1/2 z-40 flex flex-col items-center gap-1 rounded-2xl border border-border bg-card/95 backdrop-blur-md p-1 sm:p-1.5 shadow-xl">
+            <button
+              type="button"
+              onClick={handleZoomIn}
+              disabled={zoomScale >= 170}
+              className="cursor-pointer inline-flex size-8 sm:size-9 items-center justify-center rounded-xl bg-background text-foreground border border-border hover:bg-primary hover:text-primary-foreground disabled:opacity-40 transition-all shadow-xs"
+              title="Zoomer (+)"
             >
-              <div className="relative mx-auto w-full max-w-[200px]">
-                {/* Couleurs fixes : ne pas utiliser text-primary / primary ici (en mode clair primary = noir → invisible sur fond sombre) */}
-                <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-white/25 to-zinc-600/40 blur-sm" />
-                <div className="relative overflow-hidden rounded-2xl border-2 border-white/20 shadow-xl">
-                  <Image
-                    src="/me.png"
-                    alt="Izayid Ali"
-                    width={400}
-                    height={500}
-                    className="h-auto w-full object-cover object-top"
-                    priority
-                  />
-                </div>
-              </div>
+              <Plus className="size-4" />
+            </button>
 
-              <div className="text-center md:text-left">
-                <h1 className="text-2xl font-bold tracking-tight text-white lg:text-3xl">
-                  Izayid Ali
-                </h1>
-                <p className="mt-2 text-sm font-medium uppercase tracking-[0.2em] text-zinc-400">
-                  Iza
-                </p>
-                <p className="mt-3 text-sm leading-relaxed text-zinc-300">
-                  Développeur full-stack orienté backend &amp; DevOps — co-fondateur BIACode.
-                </p>
-              </div>
+            <span className="text-[10px] font-mono font-bold text-muted-foreground py-0.5 text-center select-none">
+              {zoomScale}%
+            </span>
 
-              <div className="space-y-4 text-sm">
-                <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">
-                  Contact
-                </h2>
-                <ul className="space-y-3">
-                  <li className="flex items-start gap-3">
-                    <Mail className="mt-0.5 size-4 shrink-0 text-zinc-100" strokeWidth={2.25} />
-                    <a
-                      href={`mailto:${CONTACT.email}`}
-                      className="break-all text-zinc-200 underline-offset-2 hover:underline"
-                    >
-                      {CONTACT.email}
-                    </a>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <Phone className="mt-0.5 size-4 shrink-0 text-zinc-100" strokeWidth={2.25} />
-                    <a
-                      href={CONTACT.phoneHref}
-                      className="text-zinc-200 underline-offset-2 hover:underline"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {CONTACT.phoneDisplay} (WhatsApp)
-                    </a>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <MapPin className="mt-0.5 size-4 shrink-0 text-zinc-100" strokeWidth={2.25} />
-                    <span className="text-zinc-200">{CONTACT.location}</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <Globe className="mt-0.5 size-4 shrink-0 text-zinc-100" strokeWidth={2.25} />
-                    <Link
-                      href={CONTACT.portfolioHref}
-                      className="text-zinc-200 underline-offset-2 hover:underline"
-                    >
-                      {CONTACT.portfolio}
-                    </Link>
-                  </li>
-                </ul>
-              </div>
+            <button
+              type="button"
+              onClick={handleZoomOut}
+              disabled={zoomScale <= 60}
+              className="cursor-pointer inline-flex size-8 sm:size-9 items-center justify-center rounded-xl bg-background text-foreground border border-border hover:bg-primary hover:text-primary-foreground disabled:opacity-40 transition-all shadow-xs"
+              title="Dézoomer (-)"
+            >
+              <Minus className="size-4" />
+            </button>
 
-              <div className="space-y-3 text-sm">
-                <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">
-                  Réseaux
-                </h2>
-                <ul className="space-y-2">
-                  {SOCIAL.map((s) => (
-                    <li key={s.label}>
-                      <a
-                        href={s.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 text-zinc-200 transition-colors hover:text-white"
-                      >
-                        {s.icon ? (
-                          <s.icon className="size-4 shrink-0 text-zinc-100" strokeWidth={2.25} />
-                        ) : (
-                          <XIcon className="size-4 shrink-0 text-zinc-100" />
-                        )}
-                        {s.label}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+            {zoomScale !== 100 && (
+              <button
+                type="button"
+                onClick={handleResetZoom}
+                className="cursor-pointer mt-0.5 inline-flex size-7 items-center justify-center rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-accent transition-all"
+                title="Réinitialiser à 100%"
+              >
+                <RotateCcw className="size-3" />
+              </button>
+            )}
+          </div>
+        )}
 
-              <div className="space-y-3">
-                <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">
-                  Langues
-                </h2>
-                <ul className="space-y-2 text-sm text-zinc-200">
-                  <li className="flex justify-between gap-4 border-b border-zinc-700/50 pb-2">
-                    <span>Français</span>
-                    <span className="text-zinc-400">Courant</span>
-                  </li>
-                  <li className="flex justify-between gap-4">
-                    <span>Anglais</span>
-                    <span className="text-zinc-400">Professionnel</span>
-                  </li>
-                </ul>
-              </div>
-            </aside>
+        {/* EN-TÊTE COMPACTE ALIGNÉE AU CADRE */}
+        <header className="flex items-center justify-between gap-2 bg-card px-3 py-1.5 rounded-xl border border-border/80 shadow-xs shrink-0">
+          <div className="flex items-center gap-2">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground rounded-lg border border-border bg-background px-2.5 py-1 hover:bg-accent"
+            >
+              <ArrowLeft className="size-3.5" />
+              <span className="hidden sm:inline">Retour</span>
+            </Link>
 
-            <div className="cv-main space-y-8 bg-card p-8 lg:p-10">
-              <section className="cv-avoid-break">
-                <h2 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary">
-                  <span className="h-px w-8 shrink-0 bg-primary/40" aria-hidden />
-                  Profil
-                  <span className="h-px flex-1 bg-border" aria-hidden />
-                </h2>
-                <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                  Développeur full-stack avec une forte orientation <strong className="text-foreground">backend</strong> et{" "}
-                  <strong className="text-foreground">DevOps</strong>. J&apos;ai déjà travaillé en entreprise et je poursuis ma
-                  formation tout en construisant des produits web concrets. Co-fondateur de{" "}
-                  <strong className="text-foreground">BIACode</strong>, j&apos;interviens sur des plateformes Laravel / Angular,
-                  des APIs, des bases MySQL/PostgreSQL, et le déploiement (Docker, Linux, OVH, LWS). Niveau{" "}
-                  <strong className="text-foreground">intermédiaire</strong> : solide sur les fondamentaux, en progression
-                  continue sur l&apos;architecture et la scalabilité.
-                </p>
-              </section>
+            <div className="h-3.5 w-px bg-border hidden sm:block" />
 
-              <section className="cv-avoid-break">
-                <h2 className="text-xs font-bold uppercase tracking-widest text-foreground">
-                  Compétences clés
-                </h2>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {SKILL_TAGS.map((tag) => (
-                    <span
-                      key={tag}
-                      className="rounded-lg border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-foreground"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </section>
-
-              <section>
-                <h2 className="text-xs font-bold uppercase tracking-widest text-foreground">
-                  Expérience
-                </h2>
-                <ul className="mt-5 space-y-6 border-l-2 border-primary/30 pl-6">
-                  {EXPERIENCES.map((exp) => (
-                    <li key={exp.title + exp.period} className="cv-avoid-break relative">
-                      <span className="absolute -left-[calc(0.5rem+2px)] top-1.5 size-2.5 rounded-full bg-primary ring-4 ring-primary/15" />
-                      <div className="flex flex-wrap items-baseline justify-between gap-2">
-                        <div>
-                          <p className="font-semibold text-foreground">{exp.title}</p>
-                          <p className="text-sm text-primary">{exp.org}</p>
-                        </div>
-                        <span className="text-xs font-medium text-muted-foreground">{exp.period}</span>
-                      </div>
-                      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{exp.detail}</p>
-                      <a
-                        href={exp.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="cv-no-print mt-2 inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
-                      >
-                        Lien <ExternalLink className="size-3" />
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-
-              <section className="grid gap-8 lg:grid-cols-2">
-                <div className="cv-avoid-break">
-                  <h2 className="text-xs font-bold uppercase tracking-widest text-foreground">
-                    Formation
-                  </h2>
-                  <div className="mt-4 rounded-xl border border-border bg-muted/30 p-4">
-                    <p className="font-semibold text-foreground">Licence 3 — Génie logiciel</p>
-                    <p className="text-sm text-primary">Université Dakar-Bourguiba</p>
-                    <p className="mt-1 text-xs text-muted-foreground">2025</p>
-                  </div>
-                </div>
-                <div className="cv-avoid-break">
-                  <h2 className="text-xs font-bold uppercase tracking-widest text-foreground">
-                    Certifications
-                  </h2>
-                  <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
-                    <li className="rounded-xl border border-border bg-muted/30 p-4">
-                      <span className="font-medium text-foreground">Certificat de stage</span> — Projet plateforme UDB (Laravel,
-                      Angular, MySQL, OVH).
-                    </li>
-                  </ul>
-                </div>
-              </section>
-
-              <section className="cv-avoid-break">
-                <h2 className="text-xs font-bold uppercase tracking-widest text-foreground">
-                  Projets phares
-                </h2>
-                <ul className="mt-4 grid gap-3 sm:grid-cols-2">
-                  {PROJECTS.map((p) => (
-                    <li
-                      key={p.name}
-                      className="rounded-xl border border-border bg-muted/20 p-4 transition-colors hover:border-primary/30"
-                    >
-                      <p className="font-semibold text-foreground">{p.name}</p>
-                      <p className="mt-1 text-xs text-muted-foreground">{p.stack}</p>
-                      <a
-                        href={p.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="cv-no-print mt-2 inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
-                      >
-                        Voir <ExternalLink className="size-3" />
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </section>
+            <div className="flex items-center gap-1.5">
+              <span className="flex size-6 items-center justify-center rounded-md bg-primary/10 text-primary">
+                <FileText className="size-3.5" />
+              </span>
+              <h1 className="text-xs font-bold text-foreground truncate max-w-[150px] sm:max-w-none">
+                CV Izayid Ali
+              </h1>
             </div>
-        </div>
-      </article>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            {pdfUrl && (
+              <>
+                <a
+                  href={pdfUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 rounded-lg border border-border bg-background px-2.5 py-1 text-xs font-semibold text-foreground hover:bg-accent transition-colors"
+                >
+                  <ExternalLink className="size-3.5" />
+                  <span className="hidden sm:inline">PDF brut</span>
+                </a>
+
+                <a
+                  href={pdfUrl}
+                  download={fileName || "CV_Izayid_Ali.pdf"}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground shadow-xs hover:bg-primary/90 transition-all cursor-pointer"
+                >
+                  <Download className="size-3.5" />
+                  <span>Télécharger</span>
+                </a>
+              </>
+            )}
+          </div>
+        </header>
+
+        {/* CADRE FENÊTRE PRINCIPALE */}
+        <main className="flex-1 min-h-0 relative w-full overflow-hidden rounded-xl border border-border/80 bg-white shadow-xs flex flex-col">
+          {/* BARRE FENÊTRE MAC-STYLE DE HAUT */}
+          <div className="flex items-center justify-between px-3 py-1.5 bg-muted/50 border-b border-border text-xs text-muted-foreground shrink-0 z-10">
+            <div className="flex items-center gap-1.5">
+              <span className="size-2 rounded-full bg-rose-500/80" />
+              <span className="size-2 rounded-full bg-amber-500/80" />
+              <span className="size-2 rounded-full bg-emerald-500/80" />
+              <span className="font-mono text-[10px] text-foreground/80 font-medium ml-1.5 truncate">
+                {fileName || "CV_Izayid_Ali.pdf"}
+              </span>
+            </div>
+
+            <span className="inline-flex items-center gap-1 text-[10px] text-emerald-500 font-semibold">
+              <CheckCircle2 className="size-3" /> CV Officiel
+            </span>
+          </div>
+
+          {loading || (rendering && !pdfDoc) ? (
+            <div className="flex-1 flex items-center justify-center p-6 bg-card">
+              <div className="flex flex-col items-center gap-2 text-xs text-muted-foreground">
+                <Loader2 className="size-5 animate-spin text-primary" />
+                <span>Chargement HD du CV...</span>
+              </div>
+            </div>
+          ) : pdfUrl ? (
+            /* ZONE CANVAS INTERACTIVE AVEC GESTION CORRIGÉE DU PANNING ET DE L'ORIGINE DU ZOOM */
+            <div
+              ref={viewportRef}
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUpOrLeave}
+              onMouseLeave={handleMouseUpOrLeave}
+              className={`flex-1 min-h-0 w-full relative bg-white overflow-auto hide-scrollbar flex flex-col p-1 transition-colors ${
+                isDragging ? "cursor-grabbing" : "cursor-grab"
+              } ${zoomScale > 100 ? "items-start" : "items-center"}`}
+            >
+              <div
+                className="flex flex-col items-center justify-start transition-all duration-200"
+                style={{
+                  width: zoomScale > 100 ? `${zoomScale}%` : "100%",
+                  minWidth: "100%",
+                }}
+              >
+                <div
+                  ref={containerRef}
+                  className="w-full flex flex-col items-center justify-start pointer-events-none transition-transform duration-200"
+                  style={{
+                    transform: `scale(${zoomScale / 100})`,
+                    transformOrigin: zoomScale > 100 ? "top left" : "top center",
+                  }}
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-3 bg-card">
+              <div className="flex size-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <FileText className="size-6" />
+              </div>
+              <div className="space-y-1 max-w-xs">
+                <h2 className="text-xs font-bold text-foreground">Aucun CV disponible</h2>
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  Ajoutez votre fichier PDF depuis le Dashboard Admin dans la section <strong className="text-foreground">"Mon CV (PDF)"</strong>.
+                </p>
+              </div>
+            </div>
+          )}
+        </main>
+      </div>
     </div>
   )
 }

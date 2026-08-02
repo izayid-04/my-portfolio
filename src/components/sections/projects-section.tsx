@@ -235,9 +235,50 @@ export function ProjectsSection({
   className,
   title = "Projets",
   subtitle = "Réalisations récentes et side projects",
-  projects = defaultProjects,
+  projects: initialProjects = defaultProjects,
 }: ProjectsSectionProps) {
+  const [items, setItems] = useState<Project[]>(initialProjects)
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
+
+  useEffect(() => {
+    async function loadProjects() {
+      try {
+        const res = await fetch("/api/projects")
+        if (res.ok) {
+          const data = await res.json()
+          if (Array.isArray(data.projects) && data.projects.length > 0) {
+            const mapped: Project[] = data.projects.map((p: any) => {
+              const techIcons: ProjectTechIcon[] = (p.tags || [])
+                .map((tag: string) => {
+                  const matchedEntry = Object.entries(projectStackIcons).find(
+                    ([key]) => key.toLowerCase() === tag.toLowerCase()
+                  )
+                  return matchedEntry ? { name: tag, url: matchedEntry[1] } : null
+                })
+                .filter(Boolean) as ProjectTechIcon[]
+
+              return {
+                title: p.title,
+                description: p.description,
+                date: p.date || undefined,
+                slug: p.slug || undefined,
+                tags: p.tags || [],
+                image: p.image || undefined,
+                video: p.video || undefined,
+                href: p.href || undefined,
+                embedSite: Boolean(p.embedSite),
+                techIcons: techIcons.length > 0 ? techIcons : undefined,
+              }
+            })
+            setItems(mapped)
+          }
+        }
+      } catch (err) {
+        console.error("Erreur de chargement des projets:", err)
+      }
+    }
+    loadProjects()
+  }, [])
 
   const selectedSlug = selectedProject ? getProjectBlogSlug(selectedProject) : null
   const selectedPost = selectedSlug ? getPostBySlug(selectedSlug) : undefined
@@ -254,11 +295,11 @@ export function ProjectsSection({
         >
           {title}
         </h2>
-        <p className="mt-2 text-sm text-muted-foreground sm:text-base">{subtitle}</p>
+        <p className="mt-2 text-sm font-medium bg-gradient-to-r from-primary via-violet-500 to-cyan-500 bg-clip-text text-transparent sm:text-base">{subtitle}</p>
       </div>
       {/* Grille : 1 col mobile pour cadres plus larges, 2–3 cols desktop */}
       <ul className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {projects.map((project) => (
+        {items.map((project) => (
           <motion.li
             key={project.title}
             initial={{ opacity: 0, y: 20 }}

@@ -1,4 +1,4 @@
-import { blogPosts } from "@/data/blog"
+import { getAllPublishedPosts } from "@/lib/blog"
 import { Timeline } from "@/components/ui/timeline"
 import { BlogTimelineContent } from "@/components/blog/blog-timeline-content"
 
@@ -16,11 +16,10 @@ function formatTimelineDate(dateStr: string): string {
   })
 }
 
-export default function BlogPage() {
-  const sortedPosts = [...blogPosts].sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-  )
-  const timelineData = sortedPosts.map((post) => ({
+export default async function BlogPage() {
+  const posts = await getAllPublishedPosts()
+
+  const timelineData = posts.map((post) => ({
     id: post.slug,
     title: formatTimelineDate(post.date),
     content: <BlogTimelineContent key={post.slug} post={post} />,

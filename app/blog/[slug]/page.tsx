@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import { ArrowLeft, Clock, Calendar } from "lucide-react"
-import { getPostBySlug, getAllSlugs } from "@/data/blog"
+import { getPostBySlugFromDB, getAllSlugsFromDB } from "@/lib/blog"
 import { BlogPostContent } from "@/components/blog/blog-post-content"
 
 interface PageProps {
@@ -9,12 +9,13 @@ interface PageProps {
 }
 
 export async function generateStaticParams() {
-  return getAllSlugs().map((slug) => ({ slug }))
+  const slugs = await getAllSlugsFromDB()
+  return slugs.map((slug) => ({ slug }))
 }
 
 export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params
-  const post = getPostBySlug(slug)
+  const post = await getPostBySlugFromDB(slug)
   if (!post) return { title: "Article | Blog" }
   return {
     title: `${post.title} | Blog`,
@@ -24,7 +25,7 @@ export async function generateMetadata({ params }: PageProps) {
 
 export default async function BlogPostPage({ params }: PageProps) {
   const { slug } = await params
-  const post = getPostBySlug(slug)
+  const post = await getPostBySlugFromDB(slug)
   if (!post) notFound()
 
   const dateFormatted = new Date(post.date).toLocaleDateString("fr-FR", {

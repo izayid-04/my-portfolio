@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 
+// Reload server cache
 const nextConfig: NextConfig = {
+  turbopack: {
+    root: __dirname,
+  },
   images: {
     remotePatterns: [
       {
@@ -31,6 +35,11 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "www.udb.sn",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "*.supabase.co",
         pathname: "/**",
       },
     ],
