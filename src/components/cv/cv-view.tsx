@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import {
   ArrowLeft,
@@ -8,18 +8,21 @@ import {
   ExternalLink,
   FileText,
   Loader2,
-  Sparkles,
   CheckCircle2,
-  Calendar,
 } from "lucide-react"
-import { cn } from "@/lib/utils"
 
 export function CvView() {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null)
   const [fileName, setFileName] = useState<string | null>(null)
   const [updatedAt, setUpdatedAt] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [rendering, setRendering] = useState(false)
+  const [numPages, setNumPages] = useState<number>(0)
+  const [pdfDoc, setPdfDoc] = useState<any>(null)
 
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  // 1. Récupération des données du CV
   useEffect(() => {
     async function loadResume() {
       try {
@@ -42,106 +45,217 @@ export function CvView() {
     loadResume()
   }, [])
 
+  // 2. Chargement du document PDF via PDF.js
+  useEffect(() => {
+    if (!pdfUrl) return
+
+    let active = true
+
+    async function initPdfJs() {
+      try {
+        setRendering(true)
+        if (!(window as any).pdfjsLib) {
+          await new Promise<void>((resolve, reject) => {
+            const script = document.createElement("script")
+            script.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"
+            script.onload = () => resolve()
+            script.onerror = () => reject(new Error("Impossible de charger PDF.js"))
+            document.head.appendChild(script)
+          })
+        }
+
+        const pdfjsLib = (window as any).pdfjsLib
+        pdfjsLib.GlobalWorkerOptions.workerSrc =
+          "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"
+
+        const task = pdfjsLib.getDocument(pdfUrl)
+        const doc = await task.promise
+
+        if (active) {
+          setPdfDoc(doc)
+          setNumPages(doc.numPages)
+        }
+      } catch (err) {
+        console.error("Erreur d'initialisation PDF.js:", err)
+      } finally {
+        if (active) setRendering(false)
+      }
+    }
+
+    initPdfJs()
+
+    return () => {
+      active = false
+    }
+  }, [pdfUrl])
+
+  // 3. Dessin des pages sur les éléments <canvas>
+  useEffect(() => {
+    if (!pdfDoc || numPages === 0 || !containerRef.current) return
+
+    let cancelled = false
+
+    async function renderPages() {
+      const container = containerRef.current
+      if (!container) return
+
+      // Vider le conteneur avant rendu
+      container.innerHTML = ""
+
+      const containerWidth = container.clientWidth || 600
+
+      for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+        if (cancelled) break
+
+        try {
+          const page = await pdfDoc.getPage(pageNum)
+          if (cancelled) break
+
+          const unscaledViewport = page.getViewport({ scale: 1.0 })
+          // Ajustement parfait à 100% de la largeur du conteneur sans marge
+          const scale = containerWidth / unscaledViewport.width
+          const viewport = page.getViewport({ scale: scale * 1.5 }) // Rendu HD 1.5x
+
+          const canvas = document.createElement("canvas")
+          canvas.className = "w-full h-auto bg-white block shadow-xs border-b border-border/40"
+          canvas.height = viewport.height
+          canvas.width = viewport.width
+
+          const context = canvas.getContext("2d")
+          if (context) {
+            await page.render({
+              canvasContext: context,
+              viewport: viewport,
+            }).promise
+          }
+
+          if (!cancelled) {
+            container.appendChild(canvas)
+          }
+        } catch (e) {
+          console.error(`Erreur rendu page ${pageNum}:`, e)
+        }
+      }
+    }
+
+    renderPages()
+
+    return () => {
+      cancelled = true
+    }
+  }, [pdfDoc, numPages])
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-muted/60 via-background to-background pb-20 pt-6 sm:pt-10">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 space-y-6">
-        {/* BARRE DE NAVIGATION & ACTIONS */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-card/80 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-border shadow-sm">
-          <div className="flex items-center gap-3">
+    <div className="h-screen w-full bg-background flex flex-col overflow-hidden p-2 sm:p-4">
+      {/* Masquage strict et total des barres de scroll tout en permettant le défilement fluide */}
+      <style jsx global>{`
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none !important;
+          width: 0 !important;
+          height: 0 !important;
+        }
+        .hide-scrollbar {
+          -ms-overflow-style: none !important;
+          scrollbar-width: none !important;
+        }
+      `}</style>
+
+      {/* CONTENEUR SUR MESURE (MAX-W-[640px]) */}
+      <div className="mx-auto w-full max-w-[640px] flex flex-col h-full space-y-2">
+        {/* EN-TÊTE COMPACTE */}
+        <header className="flex items-center justify-between gap-2 bg-card px-3 py-1.5 rounded-xl border border-border/80 shadow-xs shrink-0">
+          <div className="flex items-center gap-2">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground rounded-xl border border-border bg-background px-3 py-2"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground rounded-lg border border-border bg-background px-2.5 py-1 hover:bg-accent"
             >
-              <ArrowLeft className="size-4" />
-              Retour au portfolio
+              <ArrowLeft className="size-3.5" />
+              <span className="hidden sm:inline">Retour</span>
             </Link>
 
-            <div className="hidden md:block h-6 w-px bg-border" />
+            <div className="h-3.5 w-px bg-border hidden sm:block" />
 
-            <div className="hidden md:block">
-              <h1 className="text-sm font-bold text-foreground flex items-center gap-2">
-                <FileText className="size-4 text-primary" />
-                Curriculum Vitae — Izayid Ali
+            <div className="flex items-center gap-1.5">
+              <span className="flex size-6 items-center justify-center rounded-md bg-primary/10 text-primary">
+                <FileText className="size-3.5" />
+              </span>
+              <h1 className="text-xs font-bold text-foreground truncate max-w-[150px] sm:max-w-none">
+                CV Izayid Ali
               </h1>
-              {updatedAt && (
-                <p className="text-[10px] text-muted-foreground flex items-center gap-1">
-                  <Calendar className="size-3" /> Mis à jour le {new Date(updatedAt).toLocaleDateString("fr-FR")}
-                </p>
-              )}
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-1.5">
             {pdfUrl && (
               <>
                 <a
                   href={pdfUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-background px-3.5 py-2 text-xs font-semibold text-foreground hover:bg-accent transition-colors"
+                  className="inline-flex items-center gap-1 rounded-lg border border-border bg-background px-2.5 py-1 text-xs font-semibold text-foreground hover:bg-accent transition-colors"
                 >
-                  Plein écran <ExternalLink className="size-3.5" />
+                  <ExternalLink className="size-3.5" />
+                  <span className="hidden sm:inline">Ouvrir PDF brut</span>
                 </a>
 
                 <a
                   href={pdfUrl}
                   download={fileName || "CV_Izayid_Ali.pdf"}
-                  className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground shadow-md hover:bg-primary/90 transition-all cursor-pointer"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground shadow-xs hover:bg-primary/90 transition-all cursor-pointer"
                 >
                   <Download className="size-3.5" />
-                  Télécharger le CV (PDF)
+                  <span>Télécharger</span>
                 </a>
               </>
             )}
           </div>
-        </div>
+        </header>
 
-        {/* CADRE / CONTENEUR PDF DYNAMIQUE */}
-        {loading ? (
-          <div className="flex h-[75vh] items-center justify-center rounded-3xl border border-border bg-card shadow-sm p-8">
-            <div className="flex flex-col items-center gap-3 text-sm text-muted-foreground">
-              <Loader2 className="size-6 animate-spin text-primary" />
-              <span>Chargement du document PDF...</span>
-            </div>
-          </div>
-        ) : pdfUrl ? (
-          <div className="space-y-4">
-            <div className="relative w-full overflow-hidden rounded-3xl border border-border bg-card shadow-2xl">
-              <iframe
-                src={`${pdfUrl}#toolbar=1`}
-                className="w-full h-[82vh] border-0 rounded-3xl"
-                title="Curriculum Vitae Izayid Ali"
-              />
-            </div>
-
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground bg-muted/40 p-4 rounded-2xl border border-border">
-              <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="size-4 text-emerald-400" />
-                Document officiel synchronisé en direct depuis le Dashboard.
+        {/* ZONE PRINCIPALE DE VISIONNAGE RENDU CANVAS SANS AUCUNE BARRE DE SCROLL NAVIGATEUR */}
+        <main className="flex-1 min-h-0 relative w-full overflow-hidden rounded-xl border border-border/80 bg-white shadow-xs flex flex-col">
+          {/* BARRE FENÊTRE DE HAUT */}
+          <div className="flex items-center justify-between px-3 py-1.5 bg-muted/50 border-b border-border text-xs text-muted-foreground shrink-0 z-10">
+            <div className="flex items-center gap-1.5">
+              <span className="size-2 rounded-full bg-rose-500/80" />
+              <span className="size-2 rounded-full bg-amber-500/80" />
+              <span className="size-2 rounded-full bg-emerald-500/80" />
+              <span className="font-mono text-[10px] text-foreground/80 font-medium ml-1.5 truncate">
+                {fileName || "CV_Izayid_Ali.pdf"}
               </span>
-              <a
-                href={pdfUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary font-semibold hover:underline flex items-center gap-1"
-              >
-                Problème d'affichage ? Ouvrir directement le PDF <ExternalLink className="size-3" />
-              </a>
             </div>
+
+            <span className="inline-flex items-center gap-1 text-[10px] text-emerald-500 font-semibold">
+              <CheckCircle2 className="size-3" /> CV Officiel
+            </span>
           </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-border bg-card p-16 text-center space-y-4 shadow-sm">
-            <div className="flex size-16 items-center justify-center rounded-3xl bg-primary/10 text-primary">
-              <FileText className="size-8" />
+
+          {loading || (rendering && !pdfDoc) ? (
+            <div className="flex-1 flex items-center justify-center p-6 bg-card">
+              <div className="flex flex-col items-center gap-2 text-xs text-muted-foreground">
+                <Loader2 className="size-5 animate-spin text-primary" />
+                <span>Chargement HD du CV...</span>
+              </div>
             </div>
-            <div className="space-y-1.5 max-w-md">
-              <h2 className="text-lg font-bold text-foreground">Aucun CV PDF disponible</h2>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Le document CV n'a pas encore été uploadé dans l'espace d'administration. Vous pouvez l'ajouter depuis le Dashboard Admin dans la section <strong className="text-foreground">"Mon CV (PDF)"</strong>.
-              </p>
+          ) : pdfUrl ? (
+            /* RENDU HTML5 CANVAS PUR : Zéro iframe, Zéro barre de scroll navigateur visible, Zéro décalage */
+            <div
+              ref={containerRef}
+              className="flex-1 min-h-0 w-full relative bg-white overflow-y-auto hide-scrollbar flex flex-col items-center justify-start"
+            />
+          ) : (
+            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-3 bg-card">
+              <div className="flex size-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <FileText className="size-6" />
+              </div>
+              <div className="space-y-1 max-w-xs">
+                <h2 className="text-xs font-bold text-foreground">Aucun CV disponible</h2>
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  Ajoutez votre fichier PDF depuis le Dashboard Admin dans la section <strong className="text-foreground">"Mon CV (PDF)"</strong>.
+                </p>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </main>
       </div>
     </div>
   )
