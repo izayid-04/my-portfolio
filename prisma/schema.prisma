@@ -105,3 +105,12 @@ model Project {
   @@map("projects")
 }
 
+model Resume {
+  id        String   @id @default("active")
+  pdfUrl    String   @map("pdf_url")
+  fileName  String?  @map("file_name")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("resumes")
+}
+

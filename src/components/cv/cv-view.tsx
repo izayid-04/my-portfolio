@@ -1,432 +1,148 @@
 "use client"
 
-import { useState, useCallback } from "react"
-import Image from "next/image"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import {
   ArrowLeft,
   Download,
-  Loader2,
-  Mail,
-  Phone,
-  MapPin,
-  Github,
-  Linkedin,
-  Globe,
   ExternalLink,
+  FileText,
+  Loader2,
+  Sparkles,
+  CheckCircle2,
+  Calendar,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { downloadCvAsPdf } from "@/lib/cv-pdf"
-
-const CONTACT = {
-  email: "izayidali@biacode.tech",
-  phoneDisplay: "+221 78 372 35 07",
-  phoneHref: "https://wa.me/221783723507",
-  location: "Sénégal",
-  portfolio: "Portfolio en ligne",
-  portfolioHref: "/",
-} as const
-
-const SOCIAL = [
-  { label: "GitHub", href: "https://github.com/ClayJense", icon: Github },
-  { label: "LinkedIn", href: "https://www.linkedin.com/in/ali-izayid/", icon: Linkedin },
-  { label: "X", href: "https://x.com/Izayid04", icon: null as null },
-] as const
-
-function XIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-    </svg>
-  )
-}
-
-const SKILL_TAGS = [
-  "Laravel",
-  "Angular",
-  "Next.js",
-  "React",
-  "Nest.js",
-  "Spring Boot",
-  "MySQL",
-  "PostgreSQL",
-  "Docker",
-  "Linux",
-  "Git / GitHub",
-  "OVH / LWS",
-  "API REST",
-  "DevOps",
-] as const
-
-const EXPERIENCES = [
-  {
-    period: "2025 — présent",
-    title: "Co-fondateur & développeur full-stack",
-    org: "BIACode",
-    detail:
-      "Agence tech lancée à trois : développement web, plateformes métiers, accompagnement clients. Stack Laravel, Angular, MySQL, déploiement LWS.",
-    href: "https://www.biacode.tech/",
-  },
-  {
-    period: "Mars 2026",
-    title: "Développeur — plateforme vitrine",
-    org: "EASYTECS (EasyGEC)",
-    detail:
-      "Premier client de l’agence : site présentant EasyGEC (état civil, sécurité, e-gouvernance). Laravel, Angular, MySQL, hébergement LWS.",
-    href: "https://www.easytecs.tech/",
-  },
-  {
-    period: "Juillet 2025",
-    title: "Stage — équipe de 4",
-    org: "Université Dakar-Bourguiba (UDB)",
-    detail:
-      "Plateforme web institutionnelle : back-end Laravel, front Angular, MySQL, Git/GitHub, hébergement OVH.",
-    href: "https://udb.sn/",
-  },
-] as const
-
-const PROJECTS = [
-  {
-    name: "Plateforme UDB",
-    stack: "Laravel · Angular · MySQL · OVH",
-    href: "https://udb.sn/",
-  },
-  {
-    name: "BIACode",
-    stack: "Laravel · Angular · MySQL · LWS",
-    href: "https://www.biacode.tech/",
-  },
-  {
-    name: "EASYTECS / EasyGEC",
-    stack: "Laravel · Angular · MySQL · LWS",
-    href: "https://www.easytecs.tech/",
-  },
-  {
-    name: "Nora — Assistant IA",
-    stack: "HTML · CSS · JS · Python Flask · Render",
-    href: "https://noraia.onrender.com/",
-  },
-] as const
 
 export function CvView() {
-  const [pdfLoading, setPdfLoading] = useState(false)
-  const [pdfError, setPdfError] = useState<string | null>(null)
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null)
+  const [fileName, setFileName] = useState<string | null>(null)
+  const [updatedAt, setUpdatedAt] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
 
-  const handleDownloadPdf = useCallback(async () => {
-    const el = document.getElementById("cv-root")
-    if (!el || !(el instanceof HTMLElement)) {
-      setPdfError("Impossible de trouver le CV sur la page.")
-      return
+  useEffect(() => {
+    async function loadResume() {
+      try {
+        setLoading(true)
+        const res = await fetch("/api/resume")
+        if (res.ok) {
+          const data = await res.json()
+          if (data.pdfUrl) {
+            setPdfUrl(data.pdfUrl)
+            setFileName(data.fileName || "CV_Izayid_Ali.pdf")
+            setUpdatedAt(data.updatedAt)
+          }
+        }
+      } catch (err) {
+        console.error("Erreur chargement CV PDF:", err)
+      } finally {
+        setLoading(false)
+      }
     }
-    setPdfError(null)
-    setPdfLoading(true)
-    try {
-      await downloadCvAsPdf(el)
-    } catch (err) {
-      console.error("[cv-pdf]", err)
-      const hint =
-        err instanceof Error && err.message
-          ? err.message
-          : typeof err === "string"
-            ? err
-            : "Erreur inconnue"
-      setPdfError(
-        `PDF : ${hint.slice(0, 200)}${hint.length > 200 ? "…" : ""} — Vérifie la console (F12) pour le détail.`
-      )
-    } finally {
-      setPdfLoading(false)
-    }
+    loadResume()
   }, [])
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-muted/60 via-background to-background pb-32 pt-6 sm:pt-10">
-      {/* Barre d’actions (masquée à l’impression) */}
-      <div
-        className={cn(
-          "cv-no-print mx-auto mb-6 flex max-w-[210mm] flex-col gap-3 px-4 sm:flex-row sm:items-center sm:justify-between sm:px-0"
-        )}
-      >
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <ArrowLeft className="size-4" />
-          Retour au portfolio
-        </Link>
-        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-          <button
-            type="button"
-            onClick={handleDownloadPdf}
-            disabled={pdfLoading}
-            className={cn(
-              "inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-md",
-              "hover:opacity-90 transition-opacity cursor-pointer",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-              "disabled:pointer-events-none disabled:opacity-60"
-            )}
-          >
-            {pdfLoading ? (
-              <>
-                <Loader2 className="size-4 animate-spin" aria-hidden />
-                Génération du PDF…
-              </>
-            ) : (
-              <>
-                <Download className="size-4" aria-hidden />
-                Télécharger le CV (PDF)
-              </>
-            )}
-          </button>
-          <p className="text-xs text-muted-foreground sm:max-w-xs">
-            Uniquement la feuille de CV est exportée (pas la navbar ni cette barre).
-          </p>
-          {pdfError && (
-            <p className="w-full text-sm text-destructive" role="alert">
-              {pdfError}
-            </p>
-          )}
-        </div>
-      </div>
-
-      {/* Feuille CV */}
-      <article
-        id="cv-root"
-        className={cn(
-          "cv-sheet mx-auto w-full max-w-[210mm] overflow-hidden rounded-2xl border border-border bg-card shadow-2xl",
-          "print:shadow-none print:rounded-none print:border-0"
-        )}
-      >
-        <div className="grid print:grid-cols-[minmax(0,260px)_1fr] md:grid-cols-[minmax(0,280px)_1fr] lg:grid-cols-[minmax(0,300px)_1fr]">
-            <aside
-              className={cn(
-                "cv-sidebar relative flex flex-col gap-8 bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-950 p-8 text-zinc-50",
-                "md:border-r md:border-zinc-700/50"
-              )}
+    <div className="min-h-screen bg-gradient-to-b from-muted/60 via-background to-background pb-20 pt-6 sm:pt-10">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 space-y-6">
+        {/* BARRE DE NAVIGATION & ACTIONS */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-card/80 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-border shadow-sm">
+          <div className="flex items-center gap-3">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground rounded-xl border border-border bg-background px-3 py-2"
             >
-              <div className="relative mx-auto w-full max-w-[200px]">
-                {/* Couleurs fixes : ne pas utiliser text-primary / primary ici (en mode clair primary = noir → invisible sur fond sombre) */}
-                <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-white/25 to-zinc-600/40 blur-sm" />
-                <div className="relative overflow-hidden rounded-2xl border-2 border-white/20 shadow-xl">
-                  <Image
-                    src="/me.png"
-                    alt="Izayid Ali"
-                    width={400}
-                    height={500}
-                    className="h-auto w-full object-cover object-top"
-                    priority
-                  />
-                </div>
-              </div>
+              <ArrowLeft className="size-4" />
+              Retour au portfolio
+            </Link>
 
-              <div className="text-center md:text-left">
-                <h1 className="text-2xl font-bold tracking-tight text-white lg:text-3xl">
-                  Izayid Ali
-                </h1>
-                <p className="mt-2 text-sm font-medium uppercase tracking-[0.2em] text-zinc-400">
-                  Iza
+            <div className="hidden md:block h-6 w-px bg-border" />
+
+            <div className="hidden md:block">
+              <h1 className="text-sm font-bold text-foreground flex items-center gap-2">
+                <FileText className="size-4 text-primary" />
+                Curriculum Vitae — Izayid Ali
+              </h1>
+              {updatedAt && (
+                <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+                  <Calendar className="size-3" /> Mis à jour le {new Date(updatedAt).toLocaleDateString("fr-FR")}
                 </p>
-                <p className="mt-3 text-sm leading-relaxed text-zinc-300">
-                  Développeur full-stack orienté backend &amp; DevOps — co-fondateur BIACode.
-                </p>
-              </div>
-
-              <div className="space-y-4 text-sm">
-                <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">
-                  Contact
-                </h2>
-                <ul className="space-y-3">
-                  <li className="flex items-start gap-3">
-                    <Mail className="mt-0.5 size-4 shrink-0 text-zinc-100" strokeWidth={2.25} />
-                    <a
-                      href={`mailto:${CONTACT.email}`}
-                      className="break-all text-zinc-200 underline-offset-2 hover:underline"
-                    >
-                      {CONTACT.email}
-                    </a>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <Phone className="mt-0.5 size-4 shrink-0 text-zinc-100" strokeWidth={2.25} />
-                    <a
-                      href={CONTACT.phoneHref}
-                      className="text-zinc-200 underline-offset-2 hover:underline"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {CONTACT.phoneDisplay} (WhatsApp)
-                    </a>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <MapPin className="mt-0.5 size-4 shrink-0 text-zinc-100" strokeWidth={2.25} />
-                    <span className="text-zinc-200">{CONTACT.location}</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <Globe className="mt-0.5 size-4 shrink-0 text-zinc-100" strokeWidth={2.25} />
-                    <Link
-                      href={CONTACT.portfolioHref}
-                      className="text-zinc-200 underline-offset-2 hover:underline"
-                    >
-                      {CONTACT.portfolio}
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-
-              <div className="space-y-3 text-sm">
-                <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">
-                  Réseaux
-                </h2>
-                <ul className="space-y-2">
-                  {SOCIAL.map((s) => (
-                    <li key={s.label}>
-                      <a
-                        href={s.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 text-zinc-200 transition-colors hover:text-white"
-                      >
-                        {s.icon ? (
-                          <s.icon className="size-4 shrink-0 text-zinc-100" strokeWidth={2.25} />
-                        ) : (
-                          <XIcon className="size-4 shrink-0 text-zinc-100" />
-                        )}
-                        {s.label}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="space-y-3">
-                <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">
-                  Langues
-                </h2>
-                <ul className="space-y-2 text-sm text-zinc-200">
-                  <li className="flex justify-between gap-4 border-b border-zinc-700/50 pb-2">
-                    <span>Français</span>
-                    <span className="text-zinc-400">Courant</span>
-                  </li>
-                  <li className="flex justify-between gap-4">
-                    <span>Anglais</span>
-                    <span className="text-zinc-400">Professionnel</span>
-                  </li>
-                </ul>
-              </div>
-            </aside>
-
-            <div className="cv-main space-y-8 bg-card p-8 lg:p-10">
-              <section className="cv-avoid-break">
-                <h2 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary">
-                  <span className="h-px w-8 shrink-0 bg-primary/40" aria-hidden />
-                  Profil
-                  <span className="h-px flex-1 bg-border" aria-hidden />
-                </h2>
-                <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                  Développeur full-stack avec une forte orientation <strong className="text-foreground">backend</strong> et{" "}
-                  <strong className="text-foreground">DevOps</strong>. J&apos;ai déjà travaillé en entreprise et je poursuis ma
-                  formation tout en construisant des produits web concrets. Co-fondateur de{" "}
-                  <strong className="text-foreground">BIACode</strong>, j&apos;interviens sur des plateformes Laravel / Angular,
-                  des APIs, des bases MySQL/PostgreSQL, et le déploiement (Docker, Linux, OVH, LWS). Niveau{" "}
-                  <strong className="text-foreground">intermédiaire</strong> : solide sur les fondamentaux, en progression
-                  continue sur l&apos;architecture et la scalabilité.
-                </p>
-              </section>
-
-              <section className="cv-avoid-break">
-                <h2 className="text-xs font-bold uppercase tracking-widest text-foreground">
-                  Compétences clés
-                </h2>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {SKILL_TAGS.map((tag) => (
-                    <span
-                      key={tag}
-                      className="rounded-lg border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-foreground"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </section>
-
-              <section>
-                <h2 className="text-xs font-bold uppercase tracking-widest text-foreground">
-                  Expérience
-                </h2>
-                <ul className="mt-5 space-y-6 border-l-2 border-primary/30 pl-6">
-                  {EXPERIENCES.map((exp) => (
-                    <li key={exp.title + exp.period} className="cv-avoid-break relative">
-                      <span className="absolute -left-[calc(0.5rem+2px)] top-1.5 size-2.5 rounded-full bg-primary ring-4 ring-primary/15" />
-                      <div className="flex flex-wrap items-baseline justify-between gap-2">
-                        <div>
-                          <p className="font-semibold text-foreground">{exp.title}</p>
-                          <p className="text-sm text-primary">{exp.org}</p>
-                        </div>
-                        <span className="text-xs font-medium text-muted-foreground">{exp.period}</span>
-                      </div>
-                      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{exp.detail}</p>
-                      <a
-                        href={exp.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="cv-no-print mt-2 inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
-                      >
-                        Lien <ExternalLink className="size-3" />
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-
-              <section className="grid gap-8 lg:grid-cols-2">
-                <div className="cv-avoid-break">
-                  <h2 className="text-xs font-bold uppercase tracking-widest text-foreground">
-                    Formation
-                  </h2>
-                  <div className="mt-4 rounded-xl border border-border bg-muted/30 p-4">
-                    <p className="font-semibold text-foreground">Licence 3 — Génie logiciel</p>
-                    <p className="text-sm text-primary">Université Dakar-Bourguiba</p>
-                    <p className="mt-1 text-xs text-muted-foreground">2025</p>
-                  </div>
-                </div>
-                <div className="cv-avoid-break">
-                  <h2 className="text-xs font-bold uppercase tracking-widest text-foreground">
-                    Certifications
-                  </h2>
-                  <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
-                    <li className="rounded-xl border border-border bg-muted/30 p-4">
-                      <span className="font-medium text-foreground">Certificat de stage</span> — Projet plateforme UDB (Laravel,
-                      Angular, MySQL, OVH).
-                    </li>
-                  </ul>
-                </div>
-              </section>
-
-              <section className="cv-avoid-break">
-                <h2 className="text-xs font-bold uppercase tracking-widest text-foreground">
-                  Projets phares
-                </h2>
-                <ul className="mt-4 grid gap-3 sm:grid-cols-2">
-                  {PROJECTS.map((p) => (
-                    <li
-                      key={p.name}
-                      className="rounded-xl border border-border bg-muted/20 p-4 transition-colors hover:border-primary/30"
-                    >
-                      <p className="font-semibold text-foreground">{p.name}</p>
-                      <p className="mt-1 text-xs text-muted-foreground">{p.stack}</p>
-                      <a
-                        href={p.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="cv-no-print mt-2 inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
-                      >
-                        Voir <ExternalLink className="size-3" />
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </section>
+              )}
             </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            {pdfUrl && (
+              <>
+                <a
+                  href={pdfUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-background px-3.5 py-2 text-xs font-semibold text-foreground hover:bg-accent transition-colors"
+                >
+                  Plein écran <ExternalLink className="size-3.5" />
+                </a>
+
+                <a
+                  href={pdfUrl}
+                  download={fileName || "CV_Izayid_Ali.pdf"}
+                  className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground shadow-md hover:bg-primary/90 transition-all cursor-pointer"
+                >
+                  <Download className="size-3.5" />
+                  Télécharger le CV (PDF)
+                </a>
+              </>
+            )}
+          </div>
         </div>
-      </article>
+
+        {/* CADRE / CONTENEUR PDF DYNAMIQUE */}
+        {loading ? (
+          <div className="flex h-[75vh] items-center justify-center rounded-3xl border border-border bg-card shadow-sm p-8">
+            <div className="flex flex-col items-center gap-3 text-sm text-muted-foreground">
+              <Loader2 className="size-6 animate-spin text-primary" />
+              <span>Chargement du document PDF...</span>
+            </div>
+          </div>
+        ) : pdfUrl ? (
+          <div className="space-y-4">
+            <div className="relative w-full overflow-hidden rounded-3xl border border-border bg-card shadow-2xl">
+              <iframe
+                src={`${pdfUrl}#toolbar=1`}
+                className="w-full h-[82vh] border-0 rounded-3xl"
+                title="Curriculum Vitae Izayid Ali"
+              />
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground bg-muted/40 p-4 rounded-2xl border border-border">
+              <span className="flex items-center gap-1.5">
+                <CheckCircle2 className="size-4 text-emerald-400" />
+                Document officiel synchronisé en direct depuis le Dashboard.
+              </span>
+              <a
+                href={pdfUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary font-semibold hover:underline flex items-center gap-1"
+              >
+                Problème d'affichage ? Ouvrir directement le PDF <ExternalLink className="size-3" />
+              </a>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-border bg-card p-16 text-center space-y-4 shadow-sm">
+            <div className="flex size-16 items-center justify-center rounded-3xl bg-primary/10 text-primary">
+              <FileText className="size-8" />
+            </div>
+            <div className="space-y-1.5 max-w-md">
+              <h2 className="text-lg font-bold text-foreground">Aucun CV PDF disponible</h2>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Le document CV n'a pas encore été uploadé dans l'espace d'administration. Vous pouvez l'ajouter depuis le Dashboard Admin dans la section <strong className="text-foreground">"Mon CV (PDF)"</strong>.
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

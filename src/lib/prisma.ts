@@ -16,7 +16,8 @@ if (
   globalForPrisma.prisma &&
   (!("diploma" in globalForPrisma.prisma) ||
     !("institution" in globalForPrisma.prisma) ||
-    !("project" in globalForPrisma.prisma))
+    !("project" in globalForPrisma.prisma) ||
+    !("resume" in globalForPrisma.prisma))
 ) {
   globalForPrisma.prisma = undefined
 }

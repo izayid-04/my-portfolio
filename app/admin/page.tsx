@@ -15,6 +15,7 @@ import {
   Rocket,
   User,
   GraduationCap,
+  FileText,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler"
@@ -24,6 +25,7 @@ import { ProfileTab } from "@/components/admin/profile-tab"
 import { DiplomasTab } from "@/components/admin/diplomas-tab"
 import { ProjectsTab } from "@/components/admin/projects-tab"
 import { OverviewTab } from "@/components/admin/overview-tab"
+import { CvTab } from "@/components/admin/cv-tab"
 import {
   ADMIN_KEYS,
   type AdminActivity,
@@ -37,7 +39,7 @@ import {
   toSlug,
 } from "@/data/admin-demo"
 
-type DashboardSection = "overview" | "projects" | "blogs" | "diplomas" | "contacts" | "profile"
+type DashboardSection = "overview" | "projects" | "blogs" | "diplomas" | "contacts" | "cv" | "profile"
 type ContentStatus = "draft" | "published" | "archived"
 
 interface ContactMessage {
@@ -86,6 +88,7 @@ const dashboardSections: Array<{ id: DashboardSection; label: string; icon: Luci
   { id: "blogs", label: "Blogs", icon: BookText },
   { id: "diplomas", label: "Diplômes & Établissements", icon: GraduationCap },
   { id: "contacts", label: "Contacts", icon: MessageSquareText },
+  { id: "cv", label: "Mon CV (PDF)", icon: FileText },
   { id: "profile", label: "Profil", icon: User },
 ]
 
@@ -1192,6 +1195,8 @@ export default function AdminDashboardPage() {
             )}
 
             {activeSection === "diplomas" && <DiplomasTab />}
+
+            {activeSection === "cv" && <CvTab />}
 
             {activeSection === "profile" && (
               <ProfileTab
