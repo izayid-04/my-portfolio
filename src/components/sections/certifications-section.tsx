@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import { motion, AnimatePresence } from "motion/react"
-import { Award, ExternalLink } from "lucide-react"
+import { Award, ExternalLink, FileText } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { siteConfig } from "@/config/site"
 import { SectionWrapper } from "@/components/layout"
@@ -76,42 +76,41 @@ function CertDetail({ cert }: { cert: Certification }) {
       {media.length > 0 && (
         <div className="sm:ml-auto shrink-0">
           <div className="flex flex-col gap-3">
-            <a
-              href={media[0]}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block rounded-lg border border-border overflow-hidden hover:opacity-90 transition-opacity bg-muted"
-            >
-              <Image
-                src={media[0]}
-                alt={`Certificat ${cert.name}`}
-                width={220}
-                height={160}
-                className="object-cover"
-              />
-            </a>
-
-            {media.length > 1 && (
-              <div className="flex flex-wrap gap-2 justify-end">
-                {media.slice(1).map((src, idx) => (
-                  <a
-                    key={src + idx}
-                    href={src}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block rounded-lg border border-border overflow-hidden hover:opacity-90 transition-opacity bg-muted"
-                  >
-                    <Image
-                      src={src}
-                      alt={`Certificat ${cert.name} (image ${idx + 2})`}
-                      width={90}
-                      height={70}
-                      className="object-cover"
-                    />
-                  </a>
-                ))}
-              </div>
-            )}
+            {media.map((src, idx) => {
+              const isPdf = src.toLowerCase().includes(".pdf")
+              return isPdf ? (
+                <a
+                  key={src + idx}
+                  href={src}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2.5 rounded-xl border border-primary/30 bg-primary/10 px-4 py-3 text-xs font-semibold text-primary hover:bg-primary/20 transition-all shadow-xs"
+                >
+                  <FileText className="size-5 shrink-0 text-rose-400" />
+                  <div className="text-left">
+                    <p className="font-bold text-foreground">Document PDF</p>
+                    <p className="text-[10px] text-muted-foreground">Consulter l'attestation / diplôme</p>
+                  </div>
+                  <ExternalLink className="size-3.5 ml-2 text-primary" />
+                </a>
+              ) : (
+                <a
+                  key={src + idx}
+                  href={src}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block rounded-lg border border-border overflow-hidden hover:opacity-90 transition-opacity bg-muted"
+                >
+                  <Image
+                    src={src}
+                    alt={`Certificat ${cert.name}`}
+                    width={220}
+                    height={160}
+                    className="object-cover"
+                  />
+                </a>
+              )
+            })}
           </div>
         </div>
       )}

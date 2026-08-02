@@ -23,6 +23,7 @@ import { DatePicker } from "@/components/ui/date-picker"
 import { ProfileTab } from "@/components/admin/profile-tab"
 import { DiplomasTab } from "@/components/admin/diplomas-tab"
 import { ProjectsTab } from "@/components/admin/projects-tab"
+import { OverviewTab } from "@/components/admin/overview-tab"
 import {
   ADMIN_KEYS,
   type AdminActivity,
@@ -698,42 +699,7 @@ export default function AdminDashboardPage() {
 
           <div className="space-y-6">
             {activeSection === "overview" && (
-              <div className="space-y-6">
-                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                  <article className="rounded-2xl border border-border bg-background p-4">
-                    <p className="text-xs text-muted-foreground">Projets</p>
-                    <p className="mt-1 text-2xl font-semibold">{stats.projectsTotal}</p>
-                    <p className="text-xs text-muted-foreground">{stats.publishedProjects} publies</p>
-                  </article>
-                  <article className="rounded-2xl border border-border bg-background p-4">
-                    <p className="text-xs text-muted-foreground">Blogs</p>
-                    <p className="mt-1 text-2xl font-semibold">{stats.blogsTotal}</p>
-                    <p className="text-xs text-muted-foreground">{stats.publishedBlogs} publies</p>
-                  </article>
-                  <article className="rounded-2xl border border-border bg-background p-4">
-                    <p className="text-xs text-muted-foreground">Contacts</p>
-                    <p className="mt-1 text-2xl font-semibold">{stats.contactsTotal}</p>
-                    <p className="text-xs text-muted-foreground">messages recuperes</p>
-                  </article>
-                  <article className="rounded-2xl border border-border bg-background p-4">
-                    <p className="text-xs text-muted-foreground">Activite</p>
-                    <p className="mt-1 text-2xl font-semibold">{activities.length}</p>
-                    <p className="text-xs text-muted-foreground">actions recentes</p>
-                  </article>
-                </div>
-
-                <div className="rounded-2xl border border-border bg-background p-4">
-                  <h2 className="mb-3 text-sm font-semibold">Activite recente</h2>
-                  <ul className="space-y-2">
-                    {activities.map((item) => (
-                      <li key={item.id} className="rounded-lg border border-border px-3 py-2">
-                        <p className="text-sm text-foreground">{item.message}</p>
-                        <p className="text-xs text-muted-foreground">{formatDate(item.at)}</p>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
+              <OverviewTab onNavigateSection={(section) => setActiveSection(section)} />
             )}
 
             {activeSection === "projects" && <ProjectsTab />}

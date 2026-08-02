@@ -18,8 +18,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Fichier manquant." }, { status: 400 })
     }
 
-    if (!file.type.startsWith("image/")) {
-      return NextResponse.json({ error: "Seules les images sont acceptees." }, { status: 400 })
+    const isImage = file.type.startsWith("image/")
+    const isPdf = file.type === "application/pdf" || file.name.endsWith(".pdf")
+
+    if (!isImage && !isPdf) {
+      return NextResponse.json({ error: "Seuls les images et fichiers PDF sont acceptés." }, { status: 400 })
     }
 
     const folder = typeof folderRaw === "string" && folderRaw.trim() ? folderRaw.trim() : "general"

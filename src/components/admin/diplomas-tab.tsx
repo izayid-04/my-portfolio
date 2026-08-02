@@ -10,6 +10,7 @@ import {
   ExternalLink,
   GraduationCap,
   Image as ImageIcon,
+  FileText,
   Loader2,
   Plus,
   Trash2,
@@ -262,14 +263,19 @@ export function DiplomasTab() {
 
       const data = await res.json()
       if (res.ok && data.diploma) {
-        if (editingDiplomaId) {
-          setDiplomas((prev) => prev.map((d) => (d.id === editingDiplomaId ? data.diploma : d)))
-          setStatusMessage({ type: "success", text: "Diplôme mis à jour !" })
-        } else {
-          setDiplomas((prev) => [data.diploma, ...prev])
-          setStatusMessage({ type: "success", text: "Nouveau diplôme ajouté avec succès !" })
-        }
+        setStatusMessage({
+          type: "success",
+          text: editingDiplomaId ? "Diplôme mis à jour avec succès !" : "Nouveau diplôme ajouté avec succès !",
+        })
+
+        // Rafraîchir immédiatement les diplômes depuis la BDD
+        await fetchData()
         resetForm()
+
+        // Auto-effacer le message de succès après 3.5s
+        setTimeout(() => {
+          setStatusMessage(null)
+        }, 3500)
       } else {
         setStatusMessage({ type: "error", text: data.error || "Erreur lors de l'enregistrement." })
       }
@@ -282,6 +288,7 @@ export function DiplomasTab() {
   }
 
   const handleEditDiploma = (dip: Diploma) => {
+    setStatusMessage(null)
     setEditingDiplomaId(dip.id)
     setTitle(dip.title)
     setDegreeType(dip.degreeType || "CERTIFICAT")
@@ -301,6 +308,7 @@ export function DiplomasTab() {
       const res = await fetch(`/api/admin/diplomas?id=${id}`, { method: "DELETE" })
       if (res.ok) {
         setDiplomas((prev) => prev.filter((d) => d.id !== id))
+        setStatusMessage(null)
       }
     } catch (err) {
       console.error(err)
@@ -623,13 +631,13 @@ export function DiplomasTab() {
               />
             </div>
 
-            {/* IMAGE / ATTESTATION UPLOAD */}
+            {/* IMAGE / ATTESTATION / PDF UPLOAD */}
             <div className="space-y-1">
-              <label className="text-xs font-medium text-muted-foreground">Image de l'attestation / diplôme</label>
+              <label className="text-xs font-medium text-muted-foreground">Document / Attestation / Diplôme (Image ou PDF)</label>
               <div className="flex items-center gap-2">
                 <input
                   type="url"
-                  placeholder="URL de l'image"
+                  placeholder="URL de l'image ou du PDF"
                   value={image}
                   onChange={(e) => setImage(e.target.value)}
                   className="flex-1 rounded-lg border border-input bg-background px-3 py-1.5 text-xs text-foreground"
@@ -639,7 +647,7 @@ export function DiplomasTab() {
                   Upload
                   <input
                     type="file"
-                    accept="image/*"
+                    accept="image/*,application/pdf,.pdf"
                     className="hidden"
                     onChange={(e) => {
                       const file = e.target.files?.[0]
@@ -802,7 +810,15 @@ export function DiplomasTab() {
                         rel="noreferrer"
                         className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline font-medium"
                       >
-                        <ImageIcon className="size-3.5" /> Voir l'attestation / diplôme
+                        {dip.image.toLowerCase().includes(".pdf") ? (
+                          <>
+                            <FileText className="size-3.5 text-rose-400" /> Consulter le document PDF
+                          </>
+                        ) : (
+                          <>
+                            <ImageIcon className="size-3.5" /> Voir l'attestation / image
+                          </>
+                        )}
                       </a>
                     </div>
                   )}
