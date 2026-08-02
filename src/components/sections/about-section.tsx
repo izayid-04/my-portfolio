@@ -29,12 +29,12 @@ export function AboutSection({
       id={siteConfig.sections.about}
       className={cn("bg-muted/30", className)}
     >
-      {/* Haut : Terminal CLI interactif (à gauche) + Texte À propos (à droite) */}
-      <div className="grid gap-8 sm:gap-12 lg:grid-cols-12 lg:gap-14 lg:items-center min-w-0">
+      {/* Haut : Terminal CLI large (à gauche lg:col-span-7) + Texte À propos (à droite lg:col-span-5) */}
+      <div className="grid gap-8 sm:gap-12 lg:grid-cols-12 lg:gap-10 lg:items-center min-w-0">
         
-        {/* Terminal CLI interactif à la place du bloc tournant */}
+        {/* Terminal CLI très large */}
         <motion.div
-          className="lg:col-span-6 w-full min-w-0 order-2 sm:order-2 lg:order-1"
+          className="lg:col-span-7 w-full min-w-0 order-2 sm:order-2 lg:order-1"
           initial={{ opacity: 0, x: -20 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true, margin: "-50px" }}
@@ -45,7 +45,7 @@ export function AboutSection({
 
         {/* Texte À propos */}
         <motion.div
-          className="lg:col-span-6 min-w-0 order-1 sm:order-1 lg:order-2"
+          className="lg:col-span-5 min-w-0 order-1 sm:order-1 lg:order-2"
           initial={{ opacity: 0, x: 20 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true, margin: "-50px" }}
