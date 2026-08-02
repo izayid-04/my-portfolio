@@ -8,7 +8,7 @@ export async function GET() {
       take: 100,
     })
 
-    const formattedContacts = contacts.map((item) => ({
+    const formattedContacts = contacts.map((item: any) => ({
       id: item.id,
       name: item.name,
       email: item.email,

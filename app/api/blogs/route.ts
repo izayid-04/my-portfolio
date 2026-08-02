@@ -20,7 +20,7 @@ export async function GET() {
     })
 
     return NextResponse.json({
-      posts: posts.map((p) => ({
+      posts: posts.map((p: any) => ({
         ...p,
         date: p.date.toISOString(),
       })),
