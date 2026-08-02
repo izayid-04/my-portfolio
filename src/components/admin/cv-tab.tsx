@@ -12,6 +12,7 @@ import {
   Eye,
   RefreshCw,
   Sparkles,
+  Trash2,
 } from "lucide-react"
 
 export function CvTab() {
@@ -21,6 +22,7 @@ export function CvTab() {
   const [loading, setLoading] = React.useState(true)
   const [uploading, setUploading] = React.useState(false)
   const [saving, setSaving] = React.useState(false)
+  const [deleting, setDeleting] = React.useState(false)
   const [statusMessage, setStatusMessage] = React.useState<{ type: "success" | "error"; text: string } | null>(null)
 
   // Charger le CV actuellement enregistré en BDD
@@ -34,6 +36,10 @@ export function CvTab() {
           setPdfUrl(data.pdfUrl)
           setFileName(data.fileName || "CV_Izayid_Ali.pdf")
           setUpdatedAt(data.updatedAt)
+        } else {
+          setPdfUrl("")
+          setFileName("")
+          setUpdatedAt(null)
         }
       }
     } catch (err) {
@@ -119,6 +125,38 @@ export function CvTab() {
       setStatusMessage({ type: "error", text: "Erreur de connexion serveur." })
     } finally {
       setSaving(false)
+    }
+  }
+
+  // Suppression du CV actif
+  const handleDelete = async () => {
+    if (!window.confirm("Êtes-vous sûr de vouloir supprimer le CV PDF actuel ? Il ne sera plus visible sur le site public.")) {
+      return
+    }
+
+    try {
+      setDeleting(true)
+      setStatusMessage(null)
+
+      const res = await fetch("/api/resume", {
+        method: "DELETE",
+      })
+
+      const data = await res.json()
+      if (res.ok && data.success) {
+        setPdfUrl("")
+        setFileName("")
+        setUpdatedAt(null)
+        setStatusMessage({ type: "success", text: "Le CV PDF a été supprimé avec succès ! 🗑️" })
+        setTimeout(() => setStatusMessage(null), 4000)
+      } else {
+        setStatusMessage({ type: "error", text: data.error || "Erreur lors de la suppression." })
+      }
+    } catch (err) {
+      console.error(err)
+      setStatusMessage({ type: "error", text: "Erreur serveur lors de la suppression." })
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -239,7 +277,31 @@ export function CvTab() {
             </div>
           )}
 
-          <div className="flex justify-end pt-2">
+          <div className="flex items-center justify-between pt-2">
+            {/* BOUTON SUPPRIMER LE CV */}
+            {pdfUrl ? (
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={deleting || saving || uploading}
+                className="cursor-pointer inline-flex items-center gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-2.5 text-xs font-semibold text-rose-500 hover:bg-rose-500/20 disabled:opacity-50 transition-all"
+              >
+                {deleting ? (
+                  <>
+                    <Loader2 className="size-3.5 animate-spin" />
+                    Suppression...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="size-3.5" />
+                    Supprimer le CV
+                  </>
+                )}
+              </button>
+            ) : (
+              <div />
+            )}
+
             <button
               type="submit"
               disabled={saving || uploading || !pdfUrl.trim()}
@@ -261,7 +323,7 @@ export function CvTab() {
         </form>
       </div>
 
-      {/* 📄 PRÉVISUALISATION DU CV PDF (CADRE / IFRAME) */}
+      {/* 📄 PRÉVISUALISATION DU CV PDF (CADRE) */}
       <div className="rounded-3xl border border-border bg-card p-6 shadow-sm space-y-4">
         <div className="flex items-center justify-between border-b border-border pb-3">
           <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">

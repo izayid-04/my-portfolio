@@ -57,3 +57,17 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: error?.message || "Erreur lors de l'enregistrement du CV" }, { status: 500 })
   }
 }
+
+export async function DELETE() {
+  try {
+    const db = getPrisma()
+    await db.resume.deleteMany({
+      where: { id: "active" },
+    })
+
+    return NextResponse.json({ success: true, message: "CV supprimé avec succès" })
+  } catch (error: any) {
+    console.error("[RESUME DELETE ERROR]", error)
+    return NextResponse.json({ error: error?.message || "Erreur lors de la suppression du CV" }, { status: 500 })
+  }
+}
