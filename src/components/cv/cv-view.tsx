@@ -9,6 +9,9 @@ import {
   FileText,
   Loader2,
   CheckCircle2,
+  Plus,
+  Minus,
+  RotateCcw,
 } from "lucide-react"
 
 export function CvView() {
@@ -19,6 +22,7 @@ export function CvView() {
   const [rendering, setRendering] = useState(false)
   const [numPages, setNumPages] = useState<number>(0)
   const [pdfDoc, setPdfDoc] = useState<any>(null)
+  const [zoomScale, setZoomScale] = useState<number>(100) // 70% à 150%
 
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -89,7 +93,7 @@ export function CvView() {
     }
   }, [pdfUrl])
 
-  // 3. Dessin des pages sur les éléments <canvas>
+  // 3. Dessin haute définition des pages sur les <canvas>
   useEffect(() => {
     if (!pdfDoc || numPages === 0 || !containerRef.current) return
 
@@ -102,7 +106,7 @@ export function CvView() {
       // Vider le conteneur avant rendu
       container.innerHTML = ""
 
-      const containerWidth = container.clientWidth || 600
+      const containerWidth = container.clientWidth || 560
 
       for (let pageNum = 1; pageNum <= numPages; pageNum++) {
         if (cancelled) break
@@ -112,9 +116,8 @@ export function CvView() {
           if (cancelled) break
 
           const unscaledViewport = page.getViewport({ scale: 1.0 })
-          // Ajustement parfait à 100% de la largeur du conteneur sans marge
           const scale = containerWidth / unscaledViewport.width
-          const viewport = page.getViewport({ scale: scale * 1.5 }) // Rendu HD 1.5x
+          const viewport = page.getViewport({ scale: scale * 1.5 }) // Rendu HD
 
           const canvas = document.createElement("canvas")
           canvas.className = "w-full h-auto bg-white block shadow-xs border-b border-border/40"
@@ -145,9 +148,13 @@ export function CvView() {
     }
   }, [pdfDoc, numPages])
 
+  const handleZoomIn = () => setZoomScale((prev) => Math.min(prev + 15, 150))
+  const handleZoomOut = () => setZoomScale((prev) => Math.max(prev - 15, 70))
+  const handleResetZoom = () => setZoomScale(100)
+
   return (
-    <div className="h-screen w-full bg-background flex flex-col overflow-hidden p-2 sm:p-4">
-      {/* Masquage strict et total des barres de scroll tout en permettant le défilement fluide */}
+    <div className="h-screen w-full bg-background flex flex-col overflow-hidden p-2 sm:p-4 pb-20 sm:pb-24 relative">
+      {/* Masquage strict des barres de scroll tout en conservant le défilement fluide */}
       <style jsx global>{`
         .hide-scrollbar::-webkit-scrollbar {
           display: none !important;
@@ -160,9 +167,49 @@ export function CvView() {
         }
       `}</style>
 
-      {/* CONTENEUR SUR MESURE (MAX-W-[640px]) */}
-      <div className="mx-auto w-full max-w-[640px] flex flex-col h-full space-y-2">
-        {/* EN-TÊTE COMPACTE */}
+      {/* CONTENEUR PRINCIPAL DU CADRE PDF ET DES BOUTONS DE ZOOM ACCOLÉS */}
+      <div className="mx-auto w-full max-w-[560px] flex flex-col h-full space-y-2 relative">
+        {/* BOUTONS DE ZOOM ACCOLÉS STRICTEMENT AU BORD DROIT DU CADRE PDF */}
+        {pdfUrl && (
+          <div className="absolute -right-11 sm:-right-13 top-1/2 -translate-y-1/2 z-40 flex flex-col items-center gap-1 rounded-2xl border border-border bg-card/95 backdrop-blur-md p-1 sm:p-1.5 shadow-xl">
+            <button
+              type="button"
+              onClick={handleZoomIn}
+              disabled={zoomScale >= 150}
+              className="cursor-pointer inline-flex size-8 sm:size-9 items-center justify-center rounded-xl bg-background text-foreground border border-border hover:bg-primary hover:text-primary-foreground disabled:opacity-40 transition-all shadow-xs"
+              title="Zoomer (+)"
+            >
+              <Plus className="size-4" />
+            </button>
+
+            <span className="text-[10px] font-mono font-bold text-muted-foreground py-0.5 text-center select-none">
+              {zoomScale}%
+            </span>
+
+            <button
+              type="button"
+              onClick={handleZoomOut}
+              disabled={zoomScale <= 70}
+              className="cursor-pointer inline-flex size-8 sm:size-9 items-center justify-center rounded-xl bg-background text-foreground border border-border hover:bg-primary hover:text-primary-foreground disabled:opacity-40 transition-all shadow-xs"
+              title="Dézoomer (-)"
+            >
+              <Minus className="size-4" />
+            </button>
+
+            {zoomScale !== 100 && (
+              <button
+                type="button"
+                onClick={handleResetZoom}
+                className="cursor-pointer mt-0.5 inline-flex size-7 items-center justify-center rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-accent transition-all"
+                title="Réinitialiser à 100%"
+              >
+                <RotateCcw className="size-3" />
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* EN-TÊTE COMPACTE ALIGNÉE AU CADRE */}
         <header className="flex items-center justify-between gap-2 bg-card px-3 py-1.5 rounded-xl border border-border/80 shadow-xs shrink-0">
           <div className="flex items-center gap-2">
             <Link
@@ -195,7 +242,7 @@ export function CvView() {
                   className="inline-flex items-center gap-1 rounded-lg border border-border bg-background px-2.5 py-1 text-xs font-semibold text-foreground hover:bg-accent transition-colors"
                 >
                   <ExternalLink className="size-3.5" />
-                  <span className="hidden sm:inline">Ouvrir PDF brut</span>
+                  <span className="hidden sm:inline">PDF brut</span>
                 </a>
 
                 <a
@@ -211,9 +258,9 @@ export function CvView() {
           </div>
         </header>
 
-        {/* ZONE PRINCIPALE DE VISIONNAGE RENDU CANVAS SANS AUCUNE BARRE DE SCROLL NAVIGATEUR */}
+        {/* CADRE FENÊTRE PRINCIPALE */}
         <main className="flex-1 min-h-0 relative w-full overflow-hidden rounded-xl border border-border/80 bg-white shadow-xs flex flex-col">
-          {/* BARRE FENÊTRE DE HAUT */}
+          {/* BARRE FENÊTRE MAC-STYLE DE HAUT */}
           <div className="flex items-center justify-between px-3 py-1.5 bg-muted/50 border-b border-border text-xs text-muted-foreground shrink-0 z-10">
             <div className="flex items-center gap-1.5">
               <span className="size-2 rounded-full bg-rose-500/80" />
@@ -237,11 +284,17 @@ export function CvView() {
               </div>
             </div>
           ) : pdfUrl ? (
-            /* RENDU HTML5 CANVAS PUR : Zéro iframe, Zéro barre de scroll navigateur visible, Zéro décalage */
-            <div
-              ref={containerRef}
-              className="flex-1 min-h-0 w-full relative bg-white overflow-y-auto hide-scrollbar flex flex-col items-center justify-start"
-            />
+            /* ZONE CANVAS : Défilement fluide avec mise à l'échelle instantanée en direct au clic sur + et - */
+            <div className="flex-1 min-h-0 w-full relative bg-white overflow-y-auto hide-scrollbar flex flex-col items-center justify-start p-1">
+              <div
+                ref={containerRef}
+                className="w-full flex flex-col items-center justify-start transition-transform duration-200 origin-top"
+                style={{
+                  transform: `scale(${zoomScale / 100})`,
+                  transformOrigin: "top center",
+                }}
+              />
+            </div>
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-3 bg-card">
               <div className="flex size-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
