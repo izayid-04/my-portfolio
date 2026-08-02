@@ -145,7 +145,7 @@
     mix-blend-mode: normal;
 }
 
-/* Force cursor pointer on all interactive elements */
+/* Force cursor pointer sur les éléments interactifs */
 button,
 [role="button"],
 input[type="submit"],
@@ -163,26 +163,40 @@ input:disabled {
   cursor: not-allowed !important;
 }
 
-/* Barre de scroll globale ultra-fine élégante (5px) */
-::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+/* Barre de scroll universelle ultra-fine (5px) pour TOUS les conteneurs */
+*::-webkit-scrollbar {
+  width: 5px !important;
+  height: 5px !important;
 }
 
-::-webkit-scrollbar-track {
-  background: transparent;
+*::-webkit-scrollbar-track {
+  background: transparent !important;
 }
 
-::-webkit-scrollbar-thumb {
-  background: rgba(140, 140, 140, 0.35);
-  border-radius: 9999px;
+*::-webkit-scrollbar-thumb {
+  background: rgba(140, 140, 140, 0.35) !important;
+  border-radius: 9999px !important;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(140, 140, 140, 0.65);
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(140, 140, 140, 0.65) !important;
 }
 
+/* Adaptation automatique en Mode Sombre (Dark Mode) */
+.dark *::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2) !important;
+}
+
+.dark *::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.45) !important;
+}
+
+/* Firefox universel */
 * {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(140, 140, 140, 0.35) transparent;
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(140, 140, 140, 0.35) transparent !important;
+}
+
+.dark * {
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent !important;
 }

@@ -15,6 +15,88 @@ import {
   Trash2,
 } from "lucide-react"
 
+// Composant de prévisualisation HD Canvas (élimine la scrollbar native Chrome et utilise notre scrollbar fine universelle)
+function AdminCvPreview({ pdfUrl }: { pdfUrl: string }) {
+  const containerRef = React.useRef<HTMLDivElement>(null)
+  const [rendering, setRendering] = React.useState(true)
+
+  React.useEffect(() => {
+    if (!pdfUrl) return
+    let active = true
+
+    async function renderPreview() {
+      try {
+        setRendering(true)
+        if (!(window as any).pdfjsLib) {
+          await new Promise<void>((resolve, reject) => {
+            const script = document.createElement("script")
+            script.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"
+            script.onload = () => resolve()
+            script.onerror = () => reject(new Error("Impossible de charger PDF.js"))
+            document.head.appendChild(script)
+          })
+        }
+
+        const pdfjsLib = (window as any).pdfjsLib
+        pdfjsLib.GlobalWorkerOptions.workerSrc =
+          "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"
+
+        const doc = await pdfjsLib.getDocument(pdfUrl).promise
+        if (!active) return
+
+        const container = containerRef.current
+        if (!container) return
+        container.innerHTML = ""
+
+        const containerWidth = container.clientWidth || 600
+
+        for (let pageNum = 1; pageNum <= doc.numPages; pageNum++) {
+          if (!active) break
+          const page = await doc.getPage(pageNum)
+          const unscaledViewport = page.getViewport({ scale: 1.0 })
+          const scale = containerWidth / unscaledViewport.width
+          const viewport = page.getViewport({ scale: scale * 1.5 })
+
+          const canvas = document.createElement("canvas")
+          canvas.className = "w-full h-auto bg-white block shadow-xs border-b border-border/40"
+          canvas.height = viewport.height
+          canvas.width = viewport.width
+
+          const context = canvas.getContext("2d")
+          if (context) {
+            await page.render({ canvasContext: context, viewport }).promise
+          }
+          if (active) container.appendChild(canvas)
+        }
+      } catch (err) {
+        console.error("Erreur de rendu de l'aperçu PDF:", err)
+      } finally {
+        if (active) setRendering(false)
+      }
+    }
+
+    renderPreview()
+    return () => {
+      active = false
+    }
+  }, [pdfUrl])
+
+  return (
+    <div className="relative w-full h-[650px] overflow-y-auto rounded-2xl border border-border bg-white p-2 shadow-inner">
+      {rendering && (
+        <div className="flex h-full flex-col items-center justify-center gap-2 text-xs text-muted-foreground bg-white">
+          <Loader2 className="size-6 animate-spin text-primary" />
+          <span>Génération de l'aperçu HD...</span>
+        </div>
+      )}
+      <div
+        ref={containerRef}
+        className="w-full flex flex-col items-center justify-start"
+      />
+    </div>
+  )
+}
+
 export function CvTab() {
   const [pdfUrl, setPdfUrl] = React.useState("")
   const [fileName, setFileName] = React.useState("")
@@ -323,7 +405,7 @@ export function CvTab() {
         </form>
       </div>
 
-      {/* 📄 PRÉVISUALISATION DU CV PDF (CADRE) */}
+      {/* 📄 PRÉVISUALISATION DU CV PDF (RENDU CANVAS AVEC NOTRE SCROLLBAR ULTRA-FINE) */}
       <div className="rounded-3xl border border-border bg-card p-6 shadow-sm space-y-4">
         <div className="flex items-center justify-between border-b border-border pb-3">
           <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
@@ -342,13 +424,7 @@ export function CvTab() {
         </div>
 
         {pdfUrl ? (
-          <div className="relative w-full overflow-hidden rounded-2xl border border-border bg-muted/30 shadow-inner">
-            <iframe
-              src={`${pdfUrl}#toolbar=1`}
-              className="w-full h-[700px] border-0 rounded-2xl"
-              title="Aperçu du CV PDF"
-            />
-          </div>
+          <AdminCvPreview pdfUrl={pdfUrl} />
         ) : (
           <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/10 p-12 text-center space-y-3">
             <div className="flex size-14 items-center justify-center rounded-2xl bg-muted text-muted-foreground">
