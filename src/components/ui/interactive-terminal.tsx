@@ -78,6 +78,19 @@ const SCENARIOS: ScenarioStep[] = [
   },
 ]
 
+function PromptPrefix() {
+  return (
+    <div className="inline-flex items-center gap-0.5 font-mono font-bold shrink-0">
+      <span className="text-primary">izayid</span>
+      <span className="text-muted-foreground/50">@</span>
+      <span className="text-emerald-500 dark:text-emerald-400">portfolio</span>
+      <span className="text-muted-foreground/50">:</span>
+      <span className="text-amber-500 dark:text-amber-400">~</span>
+      <span className="text-emerald-500 dark:text-emerald-400 font-extrabold ml-0.5">$</span>
+    </div>
+  )
+}
+
 export function InteractiveTerminal() {
   const [lines, setLines] = useState<Array<{ type: "cmd" | "out"; text: string; highlight?: boolean; accent?: boolean }>>([])
   const [currentCmd, setCurrentCmd] = useState("")
@@ -165,7 +178,7 @@ export function InteractiveTerminal() {
         }
       `}</style>
 
-      {/* EN-TÊTE DU TERMINAL */}
+      {/* EN-TÊTE DU TERMINAL AVEC PROMPT ÉMERAUDE/VERT */}
       <div className="flex items-center justify-between px-4 py-3 bg-muted/60 border-b border-border shrink-0">
         <div className="flex items-center gap-2">
           <span className="size-3 rounded-full bg-rose-500/80 inline-block" />
@@ -174,17 +187,17 @@ export function InteractiveTerminal() {
         </div>
 
         <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
-          <TerminalIcon className="size-3.5 text-primary" />
-          <span>izayid@portfolio:~ (zsh)</span>
+          <TerminalIcon className="size-3.5 text-emerald-500" />
+          <PromptPrefix />
         </div>
 
         <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-          <Sparkles className="size-3 text-primary" />
-          <span>Auto-scroll</span>
+          <Sparkles className="size-3 text-emerald-500" />
+          <span>zsh</span>
         </div>
       </div>
 
-      {/* CORPS DU TERMINAL AVEC AUTO-SCROLL SMOOTH ET DÉTAILS COMPLETS */}
+      {/* CORPS DU TERMINAL AVEC TOUCHES VERTES ÉMERAUDE */}
       <div
         ref={containerRef}
         className="flex-1 p-4 sm:p-5 overflow-y-auto terminal-no-scrollbar space-y-2 bg-card"
@@ -193,14 +206,14 @@ export function InteractiveTerminal() {
           <div key={idx} className="leading-relaxed">
             {line.type === "cmd" ? (
               <div className="flex items-center gap-2 font-bold text-foreground mt-3 pt-1 border-t border-border/20">
-                <span className="text-primary font-semibold">izayid@portfolio:~$</span>
-                <span>{line.text}</span>
+                <PromptPrefix />
+                <span className="text-foreground">{line.text}</span>
               </div>
             ) : (
               <div
-                className={`pl-4 ${
+                className={`pl-5 ${
                   line.accent
-                    ? "text-primary font-semibold"
+                    ? "text-emerald-500 dark:text-emerald-400 font-semibold"
                     : line.highlight
                     ? "text-foreground font-medium"
                     : "text-muted-foreground"
@@ -215,9 +228,9 @@ export function InteractiveTerminal() {
         {/* LIGNE EN COURS DE FRAPPE */}
         {currentCmd && (
           <div className="flex items-center gap-2 font-bold text-foreground mt-3">
-            <span className="text-primary font-semibold">izayid@portfolio:~$</span>
-            <span>{currentCmd}</span>
-            <span className="animate-pulse bg-primary w-2 h-4 inline-block" />
+            <PromptPrefix />
+            <span className="text-foreground">{currentCmd}</span>
+            <span className="animate-pulse bg-emerald-500 w-2 h-4 inline-block ml-0.5" />
           </div>
         )}
       </div>
