@@ -14,6 +14,7 @@ import {
   Sparkles,
   Trash2,
 } from "lucide-react"
+import { ConfirmModal } from "@/components/ui/confirm-modal"
 
 // Composant de prévisualisation HD Canvas (élimine la scrollbar native Chrome et utilise notre scrollbar fine universelle)
 function AdminCvPreview({ pdfUrl }: { pdfUrl: string }) {
@@ -105,6 +106,7 @@ export function CvTab() {
   const [uploading, setUploading] = React.useState(false)
   const [saving, setSaving] = React.useState(false)
   const [deleting, setDeleting] = React.useState(false)
+  const [showDeleteModal, setShowDeleteModal] = React.useState(false)
   const [statusMessage, setStatusMessage] = React.useState<{ type: "success" | "error"; text: string } | null>(null)
 
   // Charger le CV actuellement enregistré en BDD
@@ -212,10 +214,6 @@ export function CvTab() {
 
   // Suppression du CV actif
   const handleDelete = async () => {
-    if (!window.confirm("Êtes-vous sûr de vouloir supprimer le CV PDF actuel ? Il ne sera plus visible sur le site public.")) {
-      return
-    }
-
     try {
       setDeleting(true)
       setStatusMessage(null)
@@ -239,6 +237,7 @@ export function CvTab() {
       setStatusMessage({ type: "error", text: "Erreur serveur lors de la suppression." })
     } finally {
       setDeleting(false)
+      setShowDeleteModal(false)
     }
   }
 
@@ -255,6 +254,20 @@ export function CvTab() {
 
   return (
     <div className="space-y-8">
+      {/* MODALE DE CONFIRMATION SHADCN POUR LA SUPPRESSION DU CV */}
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
+        title="Supprimer le CV PDF actuellement publié ?"
+        description="Êtes-vous sûr de vouloir supprimer le CV PDF actuel ? Il ne sera plus du tout visible sur le site public."
+        confirmText="Oui, supprimer définitivement"
+        cancelText="Annuler"
+        variant="destructive"
+        isLoading={deleting}
+        icon={<Trash2 className="size-6 text-rose-500" />}
+      />
+
       {/* BANNIÈRE & HEADER CV */}
       <div className="rounded-3xl border border-border bg-card p-6 shadow-sm space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border pb-4">
@@ -364,7 +377,7 @@ export function CvTab() {
             {pdfUrl ? (
               <button
                 type="button"
-                onClick={handleDelete}
+                onClick={() => setShowDeleteModal(true)}
                 disabled={deleting || saving || uploading}
                 className="cursor-pointer inline-flex items-center gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-2.5 text-xs font-semibold text-rose-500 hover:bg-rose-500/20 disabled:opacity-50 transition-all"
               >
@@ -405,7 +418,7 @@ export function CvTab() {
         </form>
       </div>
 
-      {/* 📄 PRÉVISUALISATION DU CV PDF (RENDU CANVAS AVEC NOTRE SCROLLBAR ULTRA-FINE) */}
+      {/* 📄 PRÉVISUALISATION DU CV PDF */}
       <div className="rounded-3xl border border-border bg-card p-6 shadow-sm space-y-4">
         <div className="flex items-center justify-between border-b border-border pb-3">
           <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
