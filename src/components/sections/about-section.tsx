@@ -15,7 +15,7 @@ interface AboutSectionProps {
 }
 
 const defaultParagraphs = [
-  "Après plusieurs années d'expérience en développement web, je m'attache à livrer des produits à la fois robustes techniquement et agréables à utiliser. Mon approche combine rigueur backend, front moderne et sens du design.",
+  "Fort d'un an d'expérience au sein de l'entreprise UEZO, j'y ai développé de solides compétences concrètes en conception d'applications web modernes. Cette expérience terrain m'a permis de perfectionner mon approche en combinant rigueur backend, interfaces réactives et sens du produit.",
   "Je code principalement côté serveur avec Laravel, Spring Boot et Nest.js, et côté front avec Angular et Next.js. J'ai aussi une forte sensibilité DevOps : Linux au quotidien, Docker, intégration continue et déploiement sur le cloud.",
 ]
 

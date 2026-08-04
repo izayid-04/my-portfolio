@@ -14,17 +14,17 @@ const SCENARIOS: ScenarioStep[] = [
     outputs: [
       { text: "⏳ Initialisation du profil développeur..." },
       { text: "✔ Nom : Izayid Ali", highlight: true },
-      { text: "✔ Rôle : Développeur Full-Stack & DevOps", accent: true },
-      { text: "✔ Spécialités : Architectures Web scalables, APIs REST & UI/UX HD" },
+      { text: "✔ Rôle : Développeur Full-Stack (UEZO)", accent: true },
+      { text: "✔ Expérience : 1 an chez UEZO · Projets Web & DevOps" },
       { text: "✔ Localisation : France / Remote" },
     ],
   },
   {
     cmd: "cat bio.md",
     outputs: [
-      { text: "## Parcours & Philosophie", highlight: true },
-      { text: "Après plusieurs années d'expérience en développement web, je m'attache à livrer des produits à la fois robustes techniquement et agréables à utiliser." },
-      { text: "Mon approche combine la rigueur backend, la modernité des frameworks front-end modernes et une forte sensibilité DevOps." },
+      { text: "## Parcours & Expérience chez UEZO", highlight: true },
+      { text: "Fort d'un an d'expérience au sein de l'entreprise UEZO, j'y ai développé de solides compétences concrètes en ingénierie web." },
+      { text: "Mon approche combine la rigueur backend, la modernité des frameworks front-end et une forte sensibilité DevOps." },
     ],
   },
   {
