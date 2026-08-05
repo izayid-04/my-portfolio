@@ -175,25 +175,11 @@ function BrowserPreview({ url, title }: { url: string; title: string }) {
   }, [iframeReady])
 
   return (
-    <div className="flex flex-col overflow-hidden rounded-t-xl border-b border-border bg-muted/50">
-      <div className="flex items-center gap-2 border-b border-border bg-card px-2 py-1.5 sm:px-3 sm:py-2">
-        <div className="flex gap-1 sm:gap-1.5 shrink-0">
-          <span className="size-2 rounded-full bg-[#ff5f57] sm:size-2.5" aria-hidden />
-          <span className="size-2 rounded-full bg-[#febc2e] sm:size-2.5" aria-hidden />
-          <span className="size-2 rounded-full bg-[#28c840] sm:size-2.5" aria-hidden />
-        </div>
-        {/* Pas d’URL de domaine : barre factice, l’aperçu réel est l’iframe ci-dessous */}
-        <div
-          className="min-w-0 flex-1 min-h-7 rounded-md border border-border/60 bg-muted/40"
-          aria-hidden="true"
-        >
-          {/* Espace visuel, pas d’URL — évite les divergences SSR/client */}
-        </div>
-      </div>
+    <div className="flex flex-col overflow-hidden rounded-t-xl bg-card p-1.5 sm:p-2 border-b border-border">
       {/* Vue desktop : iframe 1280×960 → le site affiche sa version desktop, puis on scale pour remplir le cadre */}
       <div
         ref={wrapperRef}
-        className="relative w-full overflow-hidden bg-muted"
+        className="relative w-full overflow-hidden rounded-lg border border-border/60 bg-muted"
         style={{ aspectRatio: "4/3" }}
       >
         {!iframeReady ? (
@@ -409,13 +395,13 @@ export function ProjectsSection({
         project={
           selectedProject
             ? {
-                title: selectedProject.title,
-                description: selectedProject.description,
-                date: selectedProject.date,
-                tags: selectedProject.tags,
-                image: selectedProject.image,
-                href: selectedProject.href,
-              }
+              title: selectedProject.title,
+              description: selectedProject.description,
+              date: selectedProject.date,
+              tags: selectedProject.tags,
+              image: selectedProject.image,
+              href: selectedProject.href,
+            }
             : { title: "", description: "" }
         }
         post={selectedPost}
