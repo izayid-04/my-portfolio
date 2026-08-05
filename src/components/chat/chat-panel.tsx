@@ -65,7 +65,7 @@ function MessageBubble({ message }: { message: ChatMessage }) {
       <div className="flex flex-col gap-0.5">
         <div
           className={cn(
-            "rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed",
+            "rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-wrap",
             isUser
               ? "rounded-br-sm bg-primary text-primary-foreground"
               : "rounded-bl-sm bg-muted text-foreground",
