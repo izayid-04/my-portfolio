@@ -62,7 +62,7 @@ const defaultProjects: Project[] = [
     title: "TMCO – Transport Mobilité Centre-Ouest",
     description:
       "Plateforme web officielle du réseau de transport public collectif de la Communauté de Communes du Centre-Ouest (3CO) à Mayotte, couvrant 5 communes et plus de 50 000 habitants.",
-    date: "Octobre 2025",
+    date: "Avril 2026",
     slug: "tmco",
     tags: ["Transport", "Mayotte", "Frontend", "DevOps", "3CO"],
     image: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=800&q=80",
@@ -79,7 +79,7 @@ const defaultProjects: Project[] = [
     title: "YEE YÔ – SaaS de Gestion Commerciale",
     description:
       "Solution SaaS complète de gestion commerciale et d'ERP/CRM conçue pour optimiser le suivi des ventes, la facturation, la gestion des stocks et la caisse enregistreuse pour les entreprises.",
-    date: "Décembre 2025",
+    date: "Juin 2026",
     slug: "yeeyo",
     tags: ["SaaS", "ERP / CRM", "Full-Stack", "DevOps", "Facturation"],
     image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80",
@@ -96,7 +96,7 @@ const defaultProjects: Project[] = [
     title: "BonjourCitoyen – Préparation à l'Examen Civique",
     description:
       "Plateforme EdTech complète permettant aux usagers de se préparer aux examens civiques officiels en France (titre de séjour pluriannuel, carte de résident de 10 ans et naturalisation française).",
-    date: "Novembre 2025",
+    date: "Juillet 2026",
     slug: "bonjourcitoyen",
     tags: ["EdTech", "Examen Civique", "Frontend", "DevOps", "France"],
     image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&q=80",
@@ -113,7 +113,7 @@ const defaultProjects: Project[] = [
     title: "PhotoNum – Photo d'Identité Numérique e-Photo (ANTS)",
     description:
       "Service web et plateforme liée aux applications mobiles permettant d'obtenir en quelques minutes des photos d'identité numériques avec signature électronique agréées ANTS et Préfecture.",
-    date: "Février 2026",
+    date: "Août 2026",
     slug: "photonum",
     tags: ["e-Photo", "ANTS", "Full-Stack", "DevOps", "Préfecture"],
     image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80",
@@ -155,7 +155,7 @@ const defaultProjects: Project[] = [
     title: "BIACode",
     description:
       "Notre plateforme et agence tech, lancée à trois. BIACode est notre structure dédiée au développement et à l'accompagnement des projets numériques.",
-    date: "Septembre 2025",
+    date: "Décembre 2025",
     slug: "biacode",
     tags: ["Agence", "Plateforme"],
     image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80",
@@ -180,7 +180,7 @@ const defaultProjects: Project[] = [
     title: "EASYTECS — EasyGEC",
     description:
       "Premier client de l'agence : plateforme pour EASYTECS, structure sénégalaise spécialisée dans les logiciels métiers. EasyGEC est un système d'enregistrement sécurisé et simple pour gérer les faits d'état civil (naissance au décès), garantissant les droits fondamentaux : carte d'identité, droit de vote, héritage, accès à l'école, permis de conduire, etc.",
-    date: "Mars 2026",
+    date: "Début 2026",
     slug: "easytecs",
     tags: ["État civil", "e-Gouvernance", "Sénégal"],
     image: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=800&q=80",
@@ -205,7 +205,7 @@ const defaultProjects: Project[] = [
     title: "Nora — Assistant IA",
     description:
       "Assistant IA conversationnel : interface web minimaliste pour poser des questions et recevoir des réponses naturelles. Front HTML/CSS/JavaScript, backend Python Flask, déployé sur Render.",
-    date: "Janvier 2024",
+    date: "2025",
     slug: "nora",
     tags: ["IA", "Chatbot", "Flask"],
     image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80",
