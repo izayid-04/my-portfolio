@@ -6,6 +6,7 @@ export async function GET() {
   try {
     const projects = await prisma.project.findMany({
       orderBy: [{ order: "asc" }, { createdAt: "desc" }],
+      include: { company: true },
     })
     return NextResponse.json({ projects })
   } catch (error: any) {
@@ -18,7 +19,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { title, description, date, slug, tags, image, video, href, embedSite, published, order } = body
+    const { title, description, date, slug, tags, image, video, href, embedSite, published, order, companyId } = body
 
     if (!title || !description) {
       return NextResponse.json({ error: "Titre et description requis." }, { status: 400 })
@@ -37,7 +38,9 @@ export async function POST(request: Request) {
         embedSite: typeof embedSite === "boolean" ? embedSite : true,
         published: typeof published === "boolean" ? published : true,
         order: typeof order === "number" ? order : 0,
+        companyId: companyId || null,
       },
+      include: { company: true },
     })
 
     return NextResponse.json({ project: newProject }, { status: 201 })
@@ -51,7 +54,7 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   try {
     const body = await request.json()
-    const { id, title, description, date, slug, tags, image, video, href, embedSite, published, order } = body
+    const { id, title, description, date, slug, tags, image, video, href, embedSite, published, order, companyId } = body
 
     if (!id) {
       return NextResponse.json({ error: "ID du projet requis pour la modification." }, { status: 400 })
@@ -71,7 +74,9 @@ export async function PUT(request: Request) {
         embedSite: typeof embedSite === "boolean" ? embedSite : true,
         published: typeof published === "boolean" ? published : true,
         order: typeof order === "number" ? order : 0,
+        companyId: companyId || null,
       },
+      include: { company: true },
     })
 
     return NextResponse.json({ project: updatedProject })

@@ -42,6 +42,36 @@ const nextConfig: NextConfig = {
         hostname: "*.supabase.co",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "biacode.tech",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "www.biacode.tech",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "easytecs.tech",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "www.easytecs.tech",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "uwezo.yt",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "www.uwezo.yt",
+        pathname: "/**",
+      },
     ],
   },
 };

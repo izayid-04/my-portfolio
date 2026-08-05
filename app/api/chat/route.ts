@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { CHATBOT_SYSTEM_PROMPT } from "@/lib/chatbot-prompt"
+import { getDynamicChatbotSystemPrompt } from "@/lib/chatbot-prompt"
 
 /**
  * POST /api/chat
@@ -31,6 +31,9 @@ export async function POST(request: Request) {
       )
     }
 
+    // Récupération dynamique du prompt avec tous les projets réels de la BDD
+    const systemPrompt = await getDynamicChatbotSystemPrompt()
+
     const res = await fetch(apiUrl, {
       method: "POST",
       headers: {
@@ -40,7 +43,7 @@ export async function POST(request: Request) {
       body: JSON.stringify({
         model,
         messages: [
-          { role: "system", content: CHATBOT_SYSTEM_PROMPT },
+          { role: "system", content: systemPrompt },
           { role: "user", content: message },
         ],
         max_tokens: 512,
@@ -60,9 +63,15 @@ export async function POST(request: Request) {
     const data = (await res.json()) as {
       choices?: Array<{ message?: { content?: string } }>
     }
-    const reply =
+    const rawReply =
       data?.choices?.[0]?.message?.content?.trim() ||
       "Désolé, je n’ai pas pu générer une réponse. Tu peux me contacter via la page Contact du site."
+
+    // Nettoyage des astérisques Markdown pour un rendu propre sans ** ni *
+    const reply = rawReply
+      .replace(/\*\*/g, "")
+      .replace(/\*/g, "")
+      .trim()
 
     return NextResponse.json({ reply })
   } catch (e) {

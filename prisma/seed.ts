@@ -29,16 +29,7 @@ async function main() {
   for (const post of blogPosts) {
     await prisma.blogPost.upsert({
       where: { slug: post.slug },
-      update: {
-        title: post.title,
-        excerpt: post.excerpt,
-        content: post.content,
-        date: new Date(post.date),
-        readingTime: post.readingTime,
-        tags: post.tags,
-        image: post.image || null,
-        published: true,
-      },
+      update: {},
       create: {
         slug: post.slug,
         title: post.title,
@@ -57,13 +48,7 @@ async function main() {
   console.log("🏫 Seeding institutions and diplomas...")
   const udb = await prisma.institution.upsert({
     where: { id: "udb-dakar" },
-    update: {
-      name: "Université Dakar-Bourguiba",
-      logo: "https://oteutsntabtnhwhsnjzz.supabase.co/storage/v1/object/public/portfolio-assets/institutions/udb-dakar-logo.png",
-      website: "https://www.udb.sn/",
-      city: "Dakar",
-      country: "Sénégal",
-    },
+    update: {},
     create: {
       id: "udb-dakar",
       name: "Université Dakar-Bourguiba",
@@ -76,18 +61,7 @@ async function main() {
 
   await prisma.diploma.upsert({
     where: { id: "diploma-licence-gl" },
-    update: {
-      title: "Licence 3 en Génie Logiciel",
-      degreeType: "LICENCE",
-      fieldOfStudy: "Génie Logiciel (GL)",
-      date: "2025",
-      url: "https://www.udb.sn/",
-      description:
-        "Licence 3 en Génie Logiciel (GL) obtenue à l'Université Dakar-Bourguiba. Formation en développement logiciel, bases de données, architectures et projets en équipe.",
-      institutionId: udb.id,
-      published: true,
-      order: 1,
-    },
+    update: {},
     create: {
       id: "diploma-licence-gl",
       title: "Licence 3 en Génie Logiciel",
@@ -105,18 +79,7 @@ async function main() {
 
   await prisma.diploma.upsert({
     where: { id: "diploma-certificat-stage" },
-    update: {
-      title: "Certificat de stage",
-      degreeType: "CERTIFICAT",
-      fieldOfStudy: "Développement Web (Laravel & Angular)",
-      date: "2025",
-      url: "https://www.udb.sn/",
-      description:
-        "Stage réalisé dans le cadre du projet de plateforme web de l'Université Dakar-Bourguiba (udb.sn), développée en équipe de 4 avec Laravel, Angular et MySQL, hébergée sur OVH.",
-      institutionId: udb.id,
-      published: true,
-      order: 2,
-    },
+    update: {},
     create: {
       id: "diploma-certificat-stage",
       title: "Certificat de stage",
@@ -134,8 +97,113 @@ async function main() {
 
   console.log("✅ Établissement UDB & Diplômes créés avec succès !")
 
+  console.log("🏢 Seeding companies...")
+  const biacodeCompany = await prisma.company.upsert({
+    where: { id: "company-biacode" },
+    update: {},
+    create: {
+      id: "company-biacode",
+      name: "BIACode",
+      logo: "https://www.biacode.tech/favicon.ico",
+      website: "https://www.biacode.tech/",
+    },
+  })
+
+  const easytecsCompany = await prisma.company.upsert({
+    where: { id: "company-easytecs" },
+    update: {},
+    create: {
+      id: "company-easytecs",
+      name: "EASYTECS",
+      logo: "https://www.easytecs.tech/favicon.ico",
+      website: "https://www.easytecs.tech/",
+    },
+  })
+
+  const udbCompany = await prisma.company.upsert({
+    where: { id: "company-udb" },
+    update: {},
+    create: {
+      id: "company-udb",
+      name: "Université Dakar-Bourguiba",
+      logo: "https://oteutsntabtnhwhsnjzz.supabase.co/storage/v1/object/public/portfolio-assets/institutions/udb-dakar-logo.png",
+      website: "https://www.udb.sn/",
+    },
+  })
+
+  const uwezoCompany = await prisma.company.upsert({
+    where: { id: "company-uwezo" },
+    update: {},
+    create: {
+      id: "company-uwezo",
+      name: "Agence UWEZO",
+      logo: "https://uwezo.yt/favicon.ico",
+      website: "https://uwezo.yt/",
+    },
+  })
+
   console.log("🚀 Seeding projects...")
   const projectsSeed = [
+    {
+      id: "project-tmco",
+      title: "TMCO – Transport Mobilité Centre-Ouest",
+      description:
+        "Plateforme web officielle du réseau de transport public collectif de la Communauté de Communes du Centre-Ouest (3CO) à Mayotte, couvrant 5 communes et plus de 50 000 habitants.",
+      date: "Octobre 2025",
+      slug: "tmco",
+      tags: ["Transport", "Mayotte", "Frontend", "DevOps", "3CO"],
+      image: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=800&q=80",
+      href: "https://tmco.yt/",
+      embedSite: true,
+      published: true,
+      order: 1,
+      companyId: uwezoCompany.id,
+    },
+    {
+      id: "project-yeeyo",
+      title: "YEE YÔ – SaaS de Gestion Commerciale",
+      description:
+        "Solution SaaS complète de gestion commerciale et d'ERP/CRM conçue pour optimiser le suivi des ventes, la facturation, la gestion des stocks et la caisse enregistreuse pour les entreprises.",
+      date: "Décembre 2025",
+      slug: "yeeyo",
+      tags: ["SaaS", "ERP / CRM", "Full-Stack", "DevOps", "Facturation"],
+      image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80",
+      href: "https://www.yeeyo.org/",
+      embedSite: false,
+      published: true,
+      order: 2,
+      companyId: biacodeCompany.id,
+    },
+    {
+      id: "project-bonjourcitoyen",
+      title: "BonjourCitoyen – Préparation à l'Examen Civique",
+      description:
+        "Plateforme EdTech complète permettant aux usagers de se préparer aux examens civiques officiels en France (titre de séjour pluriannuel, carte de résident de 10 ans et naturalisation française).",
+      date: "Novembre 2025",
+      slug: "bonjourcitoyen",
+      tags: ["EdTech", "Examen Civique", "Frontend", "DevOps", "France"],
+      image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&q=80",
+      href: "https://bonjourcitoyen.fr/",
+      embedSite: true,
+      published: true,
+      order: 3,
+      companyId: uwezoCompany.id,
+    },
+    {
+      id: "project-photonum",
+      title: "PhotoNum – Photo d'Identité Numérique e-Photo (ANTS)",
+      description:
+        "Service web et plateforme liée aux applications mobiles permettant d'obtenir en quelques minutes des photos d'identité numériques avec signature électronique agréées ANTS et Préfecture.",
+      date: "Février 2026",
+      slug: "photonum",
+      tags: ["e-Photo", "ANTS", "Full-Stack", "DevOps", "Préfecture"],
+      image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80",
+      href: "https://photonum.xyz/",
+      embedSite: true,
+      published: true,
+      order: 4,
+      companyId: uwezoCompany.id,
+    },
     {
       id: "project-udb",
       title: "Université Dakar-Bourguiba (UDB)",
@@ -148,7 +216,8 @@ async function main() {
       href: "https://udb.sn/",
       embedSite: true,
       published: true,
-      order: 1,
+      order: 5,
+      companyId: udbCompany.id,
     },
     {
       id: "project-biacode",
@@ -162,7 +231,8 @@ async function main() {
       href: "https://www.biacode.tech/",
       embedSite: true,
       published: true,
-      order: 2,
+      order: 6,
+      companyId: biacodeCompany.id,
     },
     {
       id: "project-easytecs",
@@ -176,7 +246,8 @@ async function main() {
       href: "https://www.easytecs.tech/",
       embedSite: true,
       published: true,
-      order: 3,
+      order: 7,
+      companyId: easytecsCompany.id,
     },
     {
       id: "project-nora",
@@ -190,14 +261,15 @@ async function main() {
       href: "https://noraia.onrender.com/",
       embedSite: true,
       published: true,
-      order: 4,
+      order: 8,
+      companyId: null,
     },
   ]
 
   for (const proj of projectsSeed) {
     await prisma.project.upsert({
       where: { id: proj.id },
-      update: proj,
+      update: {},
       create: proj,
     })
   }
