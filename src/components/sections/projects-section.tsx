@@ -84,7 +84,7 @@ const defaultProjects: Project[] = [
     tags: ["SaaS", "ERP / CRM", "Full-Stack", "DevOps", "Facturation"],
     image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80",
     href: "https://www.yeeyo.org/",
-    embedSite: true,
+    embedSite: false,
     company: {
       id: "company-biacode",
       name: "BIACode",

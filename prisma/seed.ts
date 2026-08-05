@@ -29,16 +29,7 @@ async function main() {
   for (const post of blogPosts) {
     await prisma.blogPost.upsert({
       where: { slug: post.slug },
-      update: {
-        title: post.title,
-        excerpt: post.excerpt,
-        content: post.content,
-        date: new Date(post.date),
-        readingTime: post.readingTime,
-        tags: post.tags,
-        image: post.image || null,
-        published: true,
-      },
+      update: {},
       create: {
         slug: post.slug,
         title: post.title,
@@ -57,13 +48,7 @@ async function main() {
   console.log("🏫 Seeding institutions and diplomas...")
   const udb = await prisma.institution.upsert({
     where: { id: "udb-dakar" },
-    update: {
-      name: "Université Dakar-Bourguiba",
-      logo: "https://oteutsntabtnhwhsnjzz.supabase.co/storage/v1/object/public/portfolio-assets/institutions/udb-dakar-logo.png",
-      website: "https://www.udb.sn/",
-      city: "Dakar",
-      country: "Sénégal",
-    },
+    update: {},
     create: {
       id: "udb-dakar",
       name: "Université Dakar-Bourguiba",
@@ -76,18 +61,7 @@ async function main() {
 
   await prisma.diploma.upsert({
     where: { id: "diploma-licence-gl" },
-    update: {
-      title: "Licence 3 en Génie Logiciel",
-      degreeType: "LICENCE",
-      fieldOfStudy: "Génie Logiciel (GL)",
-      date: "2025",
-      url: "https://www.udb.sn/",
-      description:
-        "Licence 3 en Génie Logiciel (GL) obtenue à l'Université Dakar-Bourguiba. Formation en développement logiciel, bases de données, architectures et projets en équipe.",
-      institutionId: udb.id,
-      published: true,
-      order: 1,
-    },
+    update: {},
     create: {
       id: "diploma-licence-gl",
       title: "Licence 3 en Génie Logiciel",
@@ -105,18 +79,7 @@ async function main() {
 
   await prisma.diploma.upsert({
     where: { id: "diploma-certificat-stage" },
-    update: {
-      title: "Certificat de stage",
-      degreeType: "CERTIFICAT",
-      fieldOfStudy: "Développement Web (Laravel & Angular)",
-      date: "2025",
-      url: "https://www.udb.sn/",
-      description:
-        "Stage réalisé dans le cadre du projet de plateforme web de l'Université Dakar-Bourguiba (udb.sn), développée en équipe de 4 avec Laravel, Angular et MySQL, hébergée sur OVH.",
-      institutionId: udb.id,
-      published: true,
-      order: 2,
-    },
+    update: {},
     create: {
       id: "diploma-certificat-stage",
       title: "Certificat de stage",
@@ -137,11 +100,7 @@ async function main() {
   console.log("🏢 Seeding companies...")
   const biacodeCompany = await prisma.company.upsert({
     where: { id: "company-biacode" },
-    update: {
-      name: "BIACode",
-      logo: "https://www.biacode.tech/favicon.ico",
-      website: "https://www.biacode.tech/",
-    },
+    update: {},
     create: {
       id: "company-biacode",
       name: "BIACode",
@@ -152,11 +111,7 @@ async function main() {
 
   const easytecsCompany = await prisma.company.upsert({
     where: { id: "company-easytecs" },
-    update: {
-      name: "EASYTECS",
-      logo: "https://www.easytecs.tech/favicon.ico",
-      website: "https://www.easytecs.tech/",
-    },
+    update: {},
     create: {
       id: "company-easytecs",
       name: "EASYTECS",
@@ -167,11 +122,7 @@ async function main() {
 
   const udbCompany = await prisma.company.upsert({
     where: { id: "company-udb" },
-    update: {
-      name: "Université Dakar-Bourguiba",
-      logo: "https://oteutsntabtnhwhsnjzz.supabase.co/storage/v1/object/public/portfolio-assets/institutions/udb-dakar-logo.png",
-      website: "https://www.udb.sn/",
-    },
+    update: {},
     create: {
       id: "company-udb",
       name: "Université Dakar-Bourguiba",
@@ -182,11 +133,7 @@ async function main() {
 
   const uwezoCompany = await prisma.company.upsert({
     where: { id: "company-uwezo" },
-    update: {
-      name: "Agence UWEZO",
-      logo: "https://uwezo.yt/favicon.ico",
-      website: "https://uwezo.yt/",
-    },
+    update: {},
     create: {
       id: "company-uwezo",
       name: "Agence UWEZO",
@@ -222,7 +169,7 @@ async function main() {
       tags: ["SaaS", "ERP / CRM", "Full-Stack", "DevOps", "Facturation"],
       image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80",
       href: "https://www.yeeyo.org/",
-      embedSite: true,
+      embedSite: false,
       published: true,
       order: 2,
       companyId: biacodeCompany.id,
@@ -322,7 +269,7 @@ async function main() {
   for (const proj of projectsSeed) {
     await prisma.project.upsert({
       where: { id: proj.id },
-      update: proj,
+      update: {},
       create: proj,
     })
   }
