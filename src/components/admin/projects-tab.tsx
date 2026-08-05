@@ -19,6 +19,13 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 export interface CompanyData {
   id: string
@@ -443,18 +450,22 @@ export function ProjectsTab() {
                     + Créer entreprise
                   </button>
                 </div>
-                <select
-                  value={companyId}
-                  onChange={(e) => setCompanyId(e.target.value)}
-                  className="w-full rounded-xl border border-input bg-background px-3 py-2 text-xs text-foreground focus:border-primary focus:outline-none cursor-pointer"
+                <Select
+                  value={companyId || "none"}
+                  onValueChange={(val) => setCompanyId(val === "none" ? "" : val)}
                 >
-                  <option value="">👤 Projet Personnel (Aucune entreprise / structure)</option>
-                  {companies.map((comp) => (
-                    <option key={comp.id} value={comp.id}>
-                      🏢 {comp.name}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger className="w-full rounded-xl border border-input bg-background px-3 py-2 text-xs text-foreground">
+                    <SelectValue placeholder="Sélectionner une entreprise / structure" />
+                  </SelectTrigger>
+                  <SelectContent position="popper" align="start">
+                    <SelectItem value="none">👤 Projet Personnel (Aucune entreprise / structure)</SelectItem>
+                    {companies.map((comp) => (
+                      <SelectItem key={comp.id} value={comp.id}>
+                        🏢 {comp.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <p className="text-[11px] text-muted-foreground italic">
                   {companyId
                     ? `Le projet sera relié à l'entreprise : ${companies.find((c) => c.id === companyId)?.name || ""}`
@@ -665,7 +676,7 @@ export function ProjectsTab() {
                             {proj.company ? (
                               <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 border border-primary/20 px-2 py-0.5 text-[10px] font-semibold text-primary">
                                 {proj.company.logo ? (
-                                  <Image src={proj.company.logo} alt={proj.company.name} width={12} height={12} className="size-3 object-contain rounded-xs" />
+                                  <Image src={proj.company.logo} alt={proj.company.name} width={12} height={12} className="size-3 object-contain rounded-xs" unoptimized />
                                 ) : (
                                   <Building2 className="size-3" />
                                 )}
@@ -857,7 +868,7 @@ export function ProjectsTab() {
                   <div key={comp.id} className="flex items-center justify-between rounded-lg border border-border bg-card px-3 py-2 text-xs">
                     <div className="flex items-center gap-2.5">
                       {comp.logo ? (
-                        <Image src={comp.logo} alt={comp.name} width={24} height={24} className="size-6 object-contain rounded-xs" />
+                        <Image src={comp.logo} alt={comp.name} width={24} height={24} className="size-6 object-contain rounded-xs" unoptimized />
                       ) : (
                         <Building2 className="size-4 text-muted-foreground" />
                       )}

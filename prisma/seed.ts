@@ -180,8 +180,83 @@ async function main() {
     },
   })
 
+  const uwezoCompany = await prisma.company.upsert({
+    where: { id: "company-uwezo" },
+    update: {
+      name: "Agence UWEZO",
+      logo: null,
+      website: "https://uwezo.yt/",
+    },
+    create: {
+      id: "company-uwezo",
+      name: "Agence UWEZO",
+      logo: null,
+      website: "https://uwezo.yt/",
+    },
+  })
+
   console.log("🚀 Seeding projects...")
   const projectsSeed = [
+    {
+      id: "project-tmco",
+      title: "TMCO – Transport Mobilité Centre-Ouest",
+      description:
+        "Plateforme web officielle du réseau de transport public collectif de la Communauté de Communes du Centre-Ouest (3CO) à Mayotte, couvrant 5 communes et plus de 50 000 habitants.",
+      date: "Octobre 2025",
+      slug: "tmco",
+      tags: ["Transport", "Mayotte", "Frontend", "DevOps", "3CO"],
+      image: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=800&q=80",
+      href: "https://tmco.yt/",
+      embedSite: true,
+      published: true,
+      order: 1,
+      companyId: uwezoCompany.id,
+    },
+    {
+      id: "project-yeeyo",
+      title: "YEE YÔ – SaaS de Gestion Commerciale",
+      description:
+        "Solution SaaS complète de gestion commerciale et d'ERP/CRM conçue pour optimiser le suivi des ventes, la facturation, la gestion des stocks et la caisse enregistreuse pour les entreprises.",
+      date: "Décembre 2025",
+      slug: "yeeyo",
+      tags: ["SaaS", "ERP / CRM", "Full-Stack", "DevOps", "Facturation"],
+      image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80",
+      href: "https://www.yeeyo.org/",
+      embedSite: true,
+      published: true,
+      order: 2,
+      companyId: biacodeCompany.id,
+    },
+    {
+      id: "project-bonjourcitoyen",
+      title: "BonjourCitoyen – Préparation à l'Examen Civique",
+      description:
+        "Plateforme EdTech complète permettant aux usagers de se préparer aux examens civiques officiels en France (titre de séjour pluriannuel, carte de résident de 10 ans et naturalisation française).",
+      date: "Novembre 2025",
+      slug: "bonjourcitoyen",
+      tags: ["EdTech", "Examen Civique", "Frontend", "DevOps", "France"],
+      image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&q=80",
+      href: "https://bonjourcitoyen.fr/",
+      embedSite: true,
+      published: true,
+      order: 3,
+      companyId: uwezoCompany.id,
+    },
+    {
+      id: "project-photonum",
+      title: "PhotoNum – Photo d'Identité Numérique e-Photo (ANTS)",
+      description:
+        "Service web et plateforme liée aux applications mobiles permettant d'obtenir en quelques minutes des photos d'identité numériques avec signature électronique agréées ANTS et Préfecture.",
+      date: "Février 2026",
+      slug: "photonum",
+      tags: ["e-Photo", "ANTS", "Full-Stack", "DevOps", "Préfecture"],
+      image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80",
+      href: "https://photonum.xyz/",
+      embedSite: true,
+      published: true,
+      order: 4,
+      companyId: uwezoCompany.id,
+    },
     {
       id: "project-udb",
       title: "Université Dakar-Bourguiba (UDB)",
@@ -194,7 +269,7 @@ async function main() {
       href: "https://udb.sn/",
       embedSite: true,
       published: true,
-      order: 1,
+      order: 5,
       companyId: udbCompany.id,
     },
     {
@@ -209,7 +284,7 @@ async function main() {
       href: "https://www.biacode.tech/",
       embedSite: true,
       published: true,
-      order: 2,
+      order: 6,
       companyId: biacodeCompany.id,
     },
     {
@@ -224,7 +299,7 @@ async function main() {
       href: "https://www.easytecs.tech/",
       embedSite: true,
       published: true,
-      order: 3,
+      order: 7,
       companyId: easytecsCompany.id,
     },
     {
@@ -239,7 +314,7 @@ async function main() {
       href: "https://noraia.onrender.com/",
       embedSite: true,
       published: true,
-      order: 4,
+      order: 8,
       companyId: null,
     },
   ]
