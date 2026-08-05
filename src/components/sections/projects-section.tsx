@@ -4,7 +4,7 @@ import { useRef, useEffect, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { motion } from "motion/react"
-import { ExternalLink } from "lucide-react"
+import { ExternalLink, Building2, User } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { siteConfig } from "@/config/site"
 import { SectionWrapper } from "@/components/layout"
@@ -15,6 +15,13 @@ import { ProjectDetailModal } from "./project-detail-modal"
 export interface ProjectTechIcon {
   url: string
   name: string
+}
+
+export interface ProjectCompany {
+  id: string
+  name: string
+  logo?: string | null
+  website?: string | null
 }
 
 export interface Project {
@@ -34,6 +41,8 @@ export interface Project {
   href?: string
   /** Afficher le site en direct dans un cadre (iframe) sur mobile et desktop */
   embedSite?: boolean
+  /** Entreprise / Structure reliée */
+  company?: ProjectCompany | null
 }
 
 function getProjectBlogSlug(project: Project): string | null {
@@ -67,6 +76,12 @@ const defaultProjects: Project[] = [
     ],
     href: "https://udb.sn/",
     embedSite: true,
+    company: {
+      id: "company-udb",
+      name: "Université Dakar-Bourguiba",
+      logo: "https://oteutsntabtnhwhsnjzz.supabase.co/storage/v1/object/public/portfolio-assets/institutions/udb-dakar-logo.png",
+      website: "https://www.udb.sn/",
+    },
   },
   {
     title: "BIACode",
@@ -86,6 +101,12 @@ const defaultProjects: Project[] = [
     ],
     href: "https://www.biacode.tech/",
     embedSite: true,
+    company: {
+      id: "company-biacode",
+      name: "BIACode",
+      logo: "https://www.biacode.tech/favicon.ico",
+      website: "https://www.biacode.tech/",
+    },
   },
   {
     title: "EASYTECS — EasyGEC",
@@ -105,6 +126,12 @@ const defaultProjects: Project[] = [
     ],
     href: "https://www.easytecs.tech/",
     embedSite: true,
+    company: {
+      id: "company-easytecs",
+      name: "EASYTECS",
+      logo: "https://www.easytecs.tech/favicon.ico",
+      website: "https://www.easytecs.tech/",
+    },
   },
   {
     title: "Nora — Assistant IA",
@@ -125,6 +152,7 @@ const defaultProjects: Project[] = [
     ],
     href: "https://noraia.onrender.com/",
     embedSite: true,
+    company: null,
   },
 ]
 
@@ -254,6 +282,7 @@ export function ProjectsSection({
                 href: p.href || undefined,
                 embedSite: Boolean(p.embedSite),
                 techIcons: techIcons.length > 0 ? techIcons : undefined,
+                company: p.company || null,
               }
             })
             setItems(mapped)
@@ -325,10 +354,27 @@ export function ProjectsSection({
                 </div>
               )}
               <div className="flex flex-1 flex-col p-4 sm:p-6">
-                {project.date && (
-                  <p className="text-xs font-medium text-muted-foreground">{project.date}</p>
-                )}
-                <h3 className={cn("font-semibold text-foreground", project.date && "mt-0.5")}>
+                <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
+                  {project.date ? (
+                    <p className="text-xs font-medium text-muted-foreground">{project.date}</p>
+                  ) : <span />}
+                  {project.company ? (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 border border-primary/20 px-2.5 py-0.5 text-[11px] font-semibold text-primary">
+                      {project.company.logo ? (
+                        <Image src={project.company.logo} alt="" width={12} height={12} className="size-3 object-contain rounded-xs" unoptimized />
+                      ) : (
+                        <Building2 className="size-3" />
+                      )}
+                      {project.company.name}
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-muted border border-border px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground">
+                      <User className="size-3" />
+                      Personnel
+                    </span>
+                  )}
+                </div>
+                <h3 className="font-semibold text-foreground">
                   {project.title}
                 </h3>
                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground line-clamp-2">
@@ -401,6 +447,7 @@ export function ProjectsSection({
               tags: selectedProject.tags,
               image: selectedProject.image,
               href: selectedProject.href,
+              company: selectedProject.company,
             }
             : { title: "", description: "" }
         }

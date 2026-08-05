@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from "motion/react"
 import Image from "next/image"
-import { ExternalLink, X } from "lucide-react"
+import { ExternalLink, X, Building2, User } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { BlogPostContent } from "@/components/blog/blog-post-content"
 import type { BlogPost } from "@/types"
@@ -17,6 +17,12 @@ export interface ProjectDetailModalProps {
     tags?: string[]
     image?: string
     href?: string
+    company?: {
+      id: string
+      name: string
+      logo?: string | null
+      website?: string | null
+    } | null
   }
   post?: BlogPost
 }
@@ -52,12 +58,29 @@ export function ProjectDetailModal({
           >
             <div className="flex items-start justify-between gap-4 border-b border-border bg-muted/30 p-5">
               <div className="min-w-0">
-                <h2
-                  id="project-detail-title"
-                  className="text-xl font-semibold text-foreground"
-                >
-                  {project.title}
-                </h2>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h2
+                    id="project-detail-title"
+                    className="text-xl font-semibold text-foreground"
+                  >
+                    {project.title}
+                  </h2>
+                  {project.company ? (
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 px-2.5 py-0.5 text-xs font-semibold text-primary">
+                      {project.company.logo ? (
+                        <Image src={project.company.logo} alt="" width={14} height={14} className="size-3.5 object-contain rounded-xs" unoptimized />
+                      ) : (
+                        <Building2 className="size-3.5" />
+                      )}
+                      {project.company.name}
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-muted border border-border px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+                      <User className="size-3" />
+                      Projet Personnel
+                    </span>
+                  )}
+                </div>
                 {project.date && (
                   <p className="mt-1 text-xs text-muted-foreground">
                     {project.date}

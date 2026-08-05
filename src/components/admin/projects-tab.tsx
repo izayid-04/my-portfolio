@@ -12,11 +12,20 @@ import {
   Upload,
   Loader2,
   CheckCircle2,
-  Globe,
-  Image as ImageIcon,
+  Building2,
+  X,
+  Briefcase,
+  User,
   Eye,
   EyeOff,
 } from "lucide-react"
+
+export interface CompanyData {
+  id: string
+  name: string
+  logo?: string | null
+  website?: string | null
+}
 
 export interface ProjectData {
   id: string
@@ -31,6 +40,8 @@ export interface ProjectData {
   embedSite: boolean
   published: boolean
   order: number
+  companyId?: string | null
+  company?: CompanyData | null
   createdAt: string
   updatedAt: string
 }
@@ -39,8 +50,18 @@ export function ProjectsTab() {
   const [mounted, setMounted] = React.useState(false)
   const [loading, setLoading] = React.useState(true)
   const [projects, setProjects] = React.useState<ProjectData[]>([])
+  const [companies, setCompanies] = React.useState<CompanyData[]>([])
 
-  // Form State (Create / Edit)
+  // Modal pour créer/gérer les Entreprises
+  const [showCompanyModal, setShowCompanyModal] = React.useState(false)
+  const [editingCompanyId, setEditingCompanyId] = React.useState<string | null>(null)
+  const [companyName, setCompanyName] = React.useState("")
+  const [companyLogo, setCompanyLogo] = React.useState("")
+  const [companyWebsite, setCompanyWebsite] = React.useState("")
+  const [uploadingCompanyLogo, setUploadingCompanyLogo] = React.useState(false)
+  const [savingCompany, setSavingCompany] = React.useState(false)
+
+  // Form State (Projet)
   const [editingId, setEditingId] = React.useState<string | null>(null)
   const [title, setTitle] = React.useState("")
   const [description, setDescription] = React.useState("")
@@ -50,6 +71,7 @@ export function ProjectsTab() {
   const [image, setImage] = React.useState("")
   const [video, setVideo] = React.useState("")
   const [href, setHref] = React.useState("")
+  const [companyId, setCompanyId] = React.useState("")
   const [embedSite, setEmbedSite] = React.useState(true)
   const [published, setPublished] = React.useState(true)
   const [order, setOrder] = React.useState("0")
@@ -77,9 +99,30 @@ export function ProjectsTab() {
     }
   }, [])
 
+  const fetchCompanies = React.useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/companies")
+      if (res.ok) {
+        const data = await res.json()
+        setCompanies(data.companies || [])
+      }
+    } catch (err) {
+      console.error("Erreur de chargement des entreprises:", err)
+    }
+  }, [])
+
   React.useEffect(() => {
     fetchProjects()
-  }, [fetchProjects])
+    fetchCompanies()
+  }, [fetchProjects, fetchCompanies])
+
+  const resetCompanyForm = () => {
+    setShowCompanyModal(false)
+    setEditingCompanyId(null)
+    setCompanyName("")
+    setCompanyLogo("")
+    setCompanyWebsite("")
+  }
 
   const resetForm = () => {
     setEditingId(null)
@@ -91,6 +134,7 @@ export function ProjectsTab() {
     setImage("")
     setVideo("")
     setHref("")
+    setCompanyId("")
     setEmbedSite(true)
     setPublished(true)
     setOrder("0")
@@ -107,6 +151,7 @@ export function ProjectsTab() {
     setImage(project.image || "")
     setVideo(project.video || "")
     setHref(project.href || "")
+    setCompanyId(project.companyId || "")
     setEmbedSite(project.embedSite)
     setPublished(project.published)
     setOrder(String(project.order || 0))
@@ -114,13 +159,15 @@ export function ProjectsTab() {
   }
 
   // Upload d'image vers Supabase Storage API
-  const handleUploadImage = async (file: File) => {
+  const handleUploadImage = async (file: File, isCompanyLogo = false) => {
     const formData = new FormData()
     formData.append("file", file)
-    formData.append("folder", "projects")
+    formData.append("folder", isCompanyLogo ? "companies" : "projects")
 
     try {
-      setUploadingImage(true)
+      if (isCompanyLogo) setUploadingCompanyLogo(true)
+      else setUploadingImage(true)
+
       const res = await fetch("/api/admin/uploads", {
         method: "POST",
         body: formData,
@@ -132,12 +179,72 @@ export function ProjectsTab() {
         return
       }
 
-      setImage(data.url)
+      if (isCompanyLogo) {
+        setCompanyLogo(data.url)
+      } else {
+        setImage(data.url)
+      }
     } catch (err) {
       console.error(err)
       alert("Erreur lors de l'upload")
     } finally {
-      setUploadingImage(false)
+      if (isCompanyLogo) setUploadingCompanyLogo(false)
+      else setUploadingImage(false)
+    }
+  }
+
+  // Créer ou éditer une Entreprise
+  const handleSaveCompany = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!companyName.trim()) return
+
+    try {
+      setSavingCompany(true)
+      const method = editingCompanyId ? "PUT" : "POST"
+      const payload = {
+        id: editingCompanyId || undefined,
+        name: companyName.trim(),
+        logo: companyLogo || null,
+        website: companyWebsite || null,
+      }
+
+      const res = await fetch("/api/admin/companies", {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+
+      const data = await res.json()
+      if (res.ok && data.company) {
+        if (editingCompanyId) {
+          setCompanies((prev) => prev.map((c) => (c.id === editingCompanyId ? data.company : c)))
+        } else {
+          setCompanies((prev) => [...prev, data.company])
+          // Sélectionner automatiquement la nouvelle entreprise créée
+          setCompanyId(data.company.id)
+        }
+        resetCompanyForm()
+      } else {
+        alert(data.error || "Erreur lors de l'enregistrement de l'entreprise")
+      }
+    } catch (err) {
+      console.error(err)
+      alert("Erreur réseau lors de la sauvegarde")
+    } finally {
+      setSavingCompany(false)
+    }
+  }
+
+  const handleDeleteCompany = async (id: string) => {
+    if (!confirm("Voulez-vous vraiment supprimer cette entreprise ?")) return
+    try {
+      const res = await fetch(`/api/admin/companies?id=${id}`, { method: "DELETE" })
+      if (res.ok) {
+        setCompanies((prev) => prev.filter((c) => c.id !== id))
+        if (companyId === id) setCompanyId("")
+      }
+    } catch (err) {
+      console.error(err)
     }
   }
 
@@ -167,6 +274,7 @@ export function ProjectsTab() {
         image: image || null,
         video: video || null,
         href: href || null,
+        companyId: companyId || null,
         embedSite,
         published,
         order: parseInt(order) || 0,
@@ -241,16 +349,32 @@ export function ProjectsTab() {
             Gestion des Projets
           </h2>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Créez, modifiez et organisez vos projets affichés dynamiquement sur la page d'accueil.
+            Créez, modifiez et reliez vos projets à des entreprises/structures ou marquez-les en projets personnels.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={fetchProjects}
-          className="cursor-pointer rounded-xl border border-border bg-background px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-muted transition-colors"
-        >
-          Rafraîchir
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              resetCompanyForm()
+              setShowCompanyModal(true)
+            }}
+            className="cursor-pointer inline-flex items-center gap-1.5 rounded-xl bg-primary/10 border border-primary/20 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary/20 transition-colors"
+          >
+            <Building2 className="size-3.5" />
+            Gérer les Entreprises ({companies.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              fetchProjects()
+              fetchCompanies()
+            }}
+            className="cursor-pointer rounded-xl border border-border bg-background px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-muted transition-colors"
+          >
+            Rafraîchir
+          </button>
+        </div>
       </div>
 
       {/* FORM & LIST GRID */}
@@ -299,6 +423,43 @@ export function ProjectsTab() {
                   onChange={(e) => setTitle(e.target.value)}
                   className="w-full rounded-xl border border-input bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
                 />
+              </div>
+
+              {/* SÉLECTION ENTREPRISE / STRUCTURE OU PERSONNEL */}
+              <div className="rounded-xl border border-border/80 bg-muted/20 p-3 space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                    <Briefcase className="size-3.5 text-primary" />
+                    Structure / Entreprise de réalisation
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      resetCompanyForm()
+                      setShowCompanyModal(true)
+                    }}
+                    className="cursor-pointer text-[11px] text-primary hover:underline font-medium"
+                  >
+                    + Créer entreprise
+                  </button>
+                </div>
+                <select
+                  value={companyId}
+                  onChange={(e) => setCompanyId(e.target.value)}
+                  className="w-full rounded-xl border border-input bg-background px-3 py-2 text-xs text-foreground focus:border-primary focus:outline-none cursor-pointer"
+                >
+                  <option value="">👤 Projet Personnel (Aucune entreprise / structure)</option>
+                  {companies.map((comp) => (
+                    <option key={comp.id} value={comp.id}>
+                      🏢 {comp.name}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-[11px] text-muted-foreground italic">
+                  {companyId
+                    ? `Le projet sera relié à l'entreprise : ${companies.find((c) => c.id === companyId)?.name || ""}`
+                    : "Si non sélectionné, ce projet sera identifié comme un Projet Personnel."}
+                </p>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -393,7 +554,7 @@ export function ProjectsTab() {
                     className="hidden"
                     onChange={(e) => {
                       const file = e.target.files?.[0]
-                      if (file) handleUploadImage(file)
+                      if (file) handleUploadImage(file, false)
                     }}
                   />
                 </label>
@@ -500,6 +661,22 @@ export function ProjectsTab() {
                             >
                               {proj.published ? "Publié" : "Brouillon"}
                             </span>
+
+                            {proj.company ? (
+                              <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 border border-primary/20 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                                {proj.company.logo ? (
+                                  <Image src={proj.company.logo} alt={proj.company.name} width={12} height={12} className="size-3 object-contain rounded-xs" />
+                                ) : (
+                                  <Building2 className="size-3" />
+                                )}
+                                {proj.company.name}
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground border border-border">
+                                <User className="size-3" />
+                                Personnel
+                              </span>
+                            )}
                           </div>
                           <p className="text-xs text-muted-foreground mt-0.5">
                             {proj.date || "Date non définie"}
@@ -571,6 +748,156 @@ export function ProjectsTab() {
           </div>
         </div>
       </div>
+
+      {/* MODAL CRÉATION / ÉDITION ENTREPRISE */}
+      {showCompanyModal && mounted && createPortal(
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 overflow-y-auto min-h-screen w-full">
+          <div className="w-full max-w-lg rounded-2xl border border-border bg-background p-6 shadow-2xl space-y-4 my-auto">
+            <div className="flex items-center justify-between border-b border-border pb-3">
+              <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                <Building2 className="size-4 text-primary" />
+                Gérer les Entreprises & Structures ({companies.length})
+              </h3>
+              <button
+                type="button"
+                onClick={resetCompanyForm}
+                className="cursor-pointer text-muted-foreground hover:text-foreground"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+
+            {/* FORMULAIRE D'AJOUT D'ENTREPRISE */}
+            <form onSubmit={handleSaveCompany} className="rounded-xl border border-border bg-muted/20 p-4 space-y-3">
+              <h4 className="text-xs font-semibold text-foreground">
+                {editingCompanyId ? "Modifier l'entreprise" : "Nouvelle Entreprise / Structure"}
+              </h4>
+
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-muted-foreground">Nom de l'entreprise *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Ex: BIACode, EASYTECS"
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value)}
+                  className="w-full rounded-lg border border-input bg-background px-3 py-2 text-xs text-foreground focus:border-primary focus:outline-none"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-muted-foreground">Logo de l'entreprise (Supabase Storage)</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="url"
+                    placeholder="URL du logo"
+                    value={companyLogo}
+                    onChange={(e) => setCompanyLogo(e.target.value)}
+                    className="flex-1 rounded-lg border border-input bg-background px-3 py-1.5 text-xs text-foreground"
+                  />
+                  <label className="cursor-pointer inline-flex items-center gap-1 rounded-lg border border-border bg-muted px-2.5 py-1.5 text-xs font-medium hover:bg-accent">
+                    {uploadingCompanyLogo ? <Loader2 className="size-3.5 animate-spin" /> : <Upload className="size-3.5" />}
+                    Upload
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        if (file) handleUploadImage(file, true)
+                      }}
+                    />
+                  </label>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-muted-foreground">Site Web (Optionnel)</label>
+                <input
+                  type="url"
+                  placeholder="https://www.biacode.tech/"
+                  value={companyWebsite}
+                  onChange={(e) => setCompanyWebsite(e.target.value)}
+                  className="w-full rounded-lg border border-input bg-background px-3 py-2 text-xs text-foreground"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-1">
+                {editingCompanyId && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditingCompanyId(null)
+                      setCompanyName("")
+                      setCompanyLogo("")
+                      setCompanyWebsite("")
+                    }}
+                    className="cursor-pointer text-xs text-muted-foreground hover:underline"
+                  >
+                    Annuler
+                  </button>
+                )}
+                <button
+                  type="submit"
+                  disabled={savingCompany}
+                  className="cursor-pointer rounded-lg bg-primary px-3.5 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary/90"
+                >
+                  {savingCompany ? "Enregistrement..." : editingCompanyId ? "Mettre à jour" : "Ajouter entreprise"}
+                </button>
+              </div>
+            </form>
+
+            {/* LISTE DES ENTREPRISES CRÉÉES */}
+            <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+              <p className="text-xs font-medium text-muted-foreground">Entreprises existantes :</p>
+              {companies.length === 0 ? (
+                <p className="text-xs text-muted-foreground italic py-1">Aucune entreprise créée pour le moment.</p>
+              ) : (
+                companies.map((comp) => (
+                  <div key={comp.id} className="flex items-center justify-between rounded-lg border border-border bg-card px-3 py-2 text-xs">
+                    <div className="flex items-center gap-2.5">
+                      {comp.logo ? (
+                        <Image src={comp.logo} alt={comp.name} width={24} height={24} className="size-6 object-contain rounded-xs" />
+                      ) : (
+                        <Building2 className="size-4 text-muted-foreground" />
+                      )}
+                      <div>
+                        <span className="font-semibold text-foreground block">{comp.name}</span>
+                        {comp.website && <span className="text-[10px] text-muted-foreground">{comp.website}</span>}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingCompanyId(comp.id)
+                          setCompanyName(comp.name)
+                          setCompanyLogo(comp.logo || "")
+                          setCompanyWebsite(comp.website || "")
+                        }}
+                        className="cursor-pointer text-muted-foreground hover:text-primary p-1 rounded-md"
+                        title="Modifier"
+                      >
+                        <Edit2 className="size-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteCompany(comp.id)}
+                        className="cursor-pointer text-muted-foreground hover:text-destructive p-1 rounded-md"
+                        title="Supprimer"
+                      >
+                        <Trash2 className="size-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   )
 }

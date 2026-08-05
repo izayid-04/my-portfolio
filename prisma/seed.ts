@@ -134,6 +134,52 @@ async function main() {
 
   console.log("✅ Établissement UDB & Diplômes créés avec succès !")
 
+  console.log("🏢 Seeding companies...")
+  const biacodeCompany = await prisma.company.upsert({
+    where: { id: "company-biacode" },
+    update: {
+      name: "BIACode",
+      logo: "https://www.biacode.tech/favicon.ico",
+      website: "https://www.biacode.tech/",
+    },
+    create: {
+      id: "company-biacode",
+      name: "BIACode",
+      logo: "https://www.biacode.tech/favicon.ico",
+      website: "https://www.biacode.tech/",
+    },
+  })
+
+  const easytecsCompany = await prisma.company.upsert({
+    where: { id: "company-easytecs" },
+    update: {
+      name: "EASYTECS",
+      logo: "https://www.easytecs.tech/favicon.ico",
+      website: "https://www.easytecs.tech/",
+    },
+    create: {
+      id: "company-easytecs",
+      name: "EASYTECS",
+      logo: "https://www.easytecs.tech/favicon.ico",
+      website: "https://www.easytecs.tech/",
+    },
+  })
+
+  const udbCompany = await prisma.company.upsert({
+    where: { id: "company-udb" },
+    update: {
+      name: "Université Dakar-Bourguiba",
+      logo: "https://oteutsntabtnhwhsnjzz.supabase.co/storage/v1/object/public/portfolio-assets/institutions/udb-dakar-logo.png",
+      website: "https://www.udb.sn/",
+    },
+    create: {
+      id: "company-udb",
+      name: "Université Dakar-Bourguiba",
+      logo: "https://oteutsntabtnhwhsnjzz.supabase.co/storage/v1/object/public/portfolio-assets/institutions/udb-dakar-logo.png",
+      website: "https://www.udb.sn/",
+    },
+  })
+
   console.log("🚀 Seeding projects...")
   const projectsSeed = [
     {
@@ -149,6 +195,7 @@ async function main() {
       embedSite: true,
       published: true,
       order: 1,
+      companyId: udbCompany.id,
     },
     {
       id: "project-biacode",
@@ -163,6 +210,7 @@ async function main() {
       embedSite: true,
       published: true,
       order: 2,
+      companyId: biacodeCompany.id,
     },
     {
       id: "project-easytecs",
@@ -177,6 +225,7 @@ async function main() {
       embedSite: true,
       published: true,
       order: 3,
+      companyId: easytecsCompany.id,
     },
     {
       id: "project-nora",
@@ -191,6 +240,7 @@ async function main() {
       embedSite: true,
       published: true,
       order: 4,
+      companyId: null,
     },
   ]
 

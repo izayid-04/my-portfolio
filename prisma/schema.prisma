@@ -85,6 +85,19 @@ model Diploma {
   @@map("diplomas")
 }
 
+model Company {
+  id        String    @id @default(cuid())
+  name      String
+  logo      String?
+  website   String?
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  projects  Project[]
+
+  @@map("companies")
+}
+
 model Project {
   id          String   @id @default(cuid())
   title       String
@@ -98,6 +111,9 @@ model Project {
   embedSite   Boolean  @default(true) @map("embed_site")
   published   Boolean  @default(true)
   order       Int      @default(0)
+
+  companyId   String?  @map("company_id")
+  company     Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
 
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
