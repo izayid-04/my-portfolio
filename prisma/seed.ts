@@ -184,13 +184,13 @@ async function main() {
     where: { id: "company-uwezo" },
     update: {
       name: "Agence UWEZO",
-      logo: null,
+      logo: "https://uwezo.yt/favicon.ico",
       website: "https://uwezo.yt/",
     },
     create: {
       id: "company-uwezo",
       name: "Agence UWEZO",
-      logo: null,
+      logo: "https://uwezo.yt/favicon.ico",
       website: "https://uwezo.yt/",
     },
   })

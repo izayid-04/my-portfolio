@@ -458,10 +458,29 @@ export function ProjectsTab() {
                     <SelectValue placeholder="Sélectionner une entreprise / structure" />
                   </SelectTrigger>
                   <SelectContent position="popper" align="start">
-                    <SelectItem value="none">👤 Projet Personnel (Aucune entreprise / structure)</SelectItem>
+                    <SelectItem value="none">
+                      <div className="flex items-center gap-2">
+                        <User className="size-4 text-muted-foreground shrink-0" />
+                        <span>Projet Personnel (Aucune entreprise / structure)</span>
+                      </div>
+                    </SelectItem>
                     {companies.map((comp) => (
                       <SelectItem key={comp.id} value={comp.id}>
-                        🏢 {comp.name}
+                        <div className="flex items-center gap-2">
+                          {comp.logo ? (
+                            <Image
+                              src={comp.logo}
+                              alt={comp.name}
+                              width={16}
+                              height={16}
+                              className="size-4 object-contain rounded-xs shrink-0"
+                              unoptimized
+                            />
+                          ) : (
+                            <Building2 className="size-4 text-muted-foreground shrink-0" />
+                          )}
+                          <span>{comp.name}</span>
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
