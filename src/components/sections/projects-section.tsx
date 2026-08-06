@@ -74,8 +74,12 @@ const defaultProjects: Project[] = [
       "Plateforme web officielle du réseau de transport public collectif de la Communauté de Communes du Centre-Ouest (3CO) à Mayotte, couvrant 5 communes et plus de 50 000 habitants.",
     date: "Avril 2026",
     slug: "tmco",
-    tags: ["Transport", "Mayotte", "Frontend", "DevOps", "3CO"],
+    tags: ["Django", "Next.js", "Transport", "Mayotte", "3CO"],
     image: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=800&q=80",
+    techIcons: [
+      { url: projectStackIcons.Django, name: "Django" },
+      { url: projectStackIcons["Next.js"], name: "Next.js" },
+    ],
     href: "https://tmco.yt/",
     embedSite: true,
     company: {
@@ -91,8 +95,14 @@ const defaultProjects: Project[] = [
       "Solution SaaS complète de gestion commerciale et d'ERP/CRM conçue pour optimiser le suivi des ventes, la facturation, la gestion des stocks et la caisse enregistreuse pour les entreprises.",
     date: "Juin 2026",
     slug: "yeeyo",
-    tags: ["SaaS", "ERP / CRM", "Full-Stack", "DevOps", "Facturation"],
+    tags: ["Next.js", "Nest.js", "Docker", "CI/CD", "SaaS", "ERP / CRM"],
     image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80",
+    techIcons: [
+      { url: projectStackIcons["Next.js"], name: "Next.js" },
+      { url: projectStackIcons["Nest.js"], name: "Nest.js" },
+      { url: projectStackIcons.Docker, name: "Docker" },
+      { url: projectStackIcons["CI/CD"], name: "CI/CD" },
+    ],
     href: "https://www.yeeyo.org/",
     embedSite: false,
     company: {
@@ -108,8 +118,12 @@ const defaultProjects: Project[] = [
       "Plateforme EdTech complète permettant aux usagers de se préparer aux examens civiques officiels en France (titre de séjour pluriannuel, carte de résident de 10 ans et naturalisation française).",
     date: "Juillet 2026",
     slug: "bonjourcitoyen",
-    tags: ["EdTech", "Examen Civique", "Frontend", "DevOps", "France"],
+    tags: ["Django", "Next.js", "EdTech", "Examen Civique", "France"],
     image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&q=80",
+    techIcons: [
+      { url: projectStackIcons.Django, name: "Django" },
+      { url: projectStackIcons["Next.js"], name: "Next.js" },
+    ],
     href: "https://bonjourcitoyen.fr/",
     embedSite: true,
     company: {
@@ -125,8 +139,12 @@ const defaultProjects: Project[] = [
       "Service web et plateforme liée aux applications mobiles permettant d'obtenir en quelques minutes des photos d'identité numériques avec signature électronique agréées ANTS et Préfecture.",
     date: "Août 2026",
     slug: "photonum",
-    tags: ["e-Photo", "ANTS", "Full-Stack", "DevOps", "Préfecture"],
+    tags: ["Next.js", "Flutter", "App Mobile", "e-Photo", "ANTS"],
     image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80",
+    techIcons: [
+      { url: projectStackIcons["Next.js"], name: "Next.js" },
+      { url: projectStackIcons.Flutter, name: "Flutter" },
+    ],
     href: "https://photonum.xyz/",
     embedSite: true,
     company: {
