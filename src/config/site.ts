@@ -17,7 +17,7 @@ export const siteConfig = {
 } as const
 
 export const socialLinks = [
-  { label: "GitHub", href: "https://github.com/ClayJense", icon: "github" },
+  { label: "GitHub", href: "https://github.com/izayid-04", icon: "github" },
   { label: "LinkedIn", href: "https://www.linkedin.com/in/ali-izayid/", icon: "linkedin" },
   { label: "X", href: "https://x.com/Izayid04", icon: "x" },
   { label: "Discord (iza06467)", href: "https://discord.com", icon: "discord" },

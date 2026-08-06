@@ -47,7 +47,7 @@ export function HeroSection({
   title?: string
   subtitle?: string
 }) {
-  const github = socialLinks.find((item) => item.label === "GitHub")?.href ?? "https://github.com/ClayJense"
+  const github = socialLinks.find((item) => item.label === "GitHub")?.href ?? "https://github.com/izayid-04"
   const linkedin =
     socialLinks.find((item) => item.label === "LinkedIn")?.href ?? "https://www.linkedin.com/in/ali-izayid/"
   const icons = heroIconUrls
