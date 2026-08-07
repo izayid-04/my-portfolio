@@ -1,6 +1,6 @@
 export const siteConfig = {
   name: "Mon Portfolio",
-  description: "Portfolio professionnel — Développement web & expériences utilisateur",
+  description: "Je conçois des produits web robustes, du prototype à la production. Architectures SaaS, plateformes EdTech, applications mobiles — des projets réels.",
   assistantName: "Nova",
   nav: [
     { label: "Accueil", href: "/" },

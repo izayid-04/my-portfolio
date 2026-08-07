@@ -40,8 +40,8 @@ const heroIconUrls = [
 
 export function HeroSection({
   className,
-  title = "Des produits web solides, elegants et memorables.",
-  subtitle = "Je conçois des experiences modernes qui allient performance, design et impact business.",
+  title = "Je conçois des produits web robustes, du prototype à la production.",
+  subtitle = "Architectures SaaS, plateformes EdTech, applications mobiles — des projets réels, utilisés chaque jour par des milliers d'utilisateurs.",
 }: {
   className?: string
   title?: string
