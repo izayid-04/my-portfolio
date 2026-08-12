@@ -19,7 +19,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { title, description, date, slug, tags, image, video, href, embedSite, published, order, companyId } = body
+    const { title, description, date, slug, tags, image, video, href, githubUrl, embedSite, published, order, companyId } = body
 
     if (!title || !description) {
       return NextResponse.json({ error: "Titre et description requis." }, { status: 400 })
@@ -35,6 +35,7 @@ export async function POST(request: Request) {
         image: image || null,
         video: video || null,
         href: href || null,
+        githubUrl: githubUrl || null,
         embedSite: typeof embedSite === "boolean" ? embedSite : true,
         published: typeof published === "boolean" ? published : true,
         order: typeof order === "number" ? order : 0,
@@ -54,7 +55,7 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   try {
     const body = await request.json()
-    const { id, title, description, date, slug, tags, image, video, href, embedSite, published, order, companyId } = body
+    const { id, title, description, date, slug, tags, image, video, href, githubUrl, embedSite, published, order, companyId } = body
 
     if (!id) {
       return NextResponse.json({ error: "ID du projet requis pour la modification." }, { status: 400 })
@@ -71,6 +72,7 @@ export async function PUT(request: Request) {
         image: image || null,
         video: video || null,
         href: href || null,
+        githubUrl: githubUrl || null,
         embedSite: typeof embedSite === "boolean" ? embedSite : true,
         published: typeof published === "boolean" ? published : true,
         order: typeof order === "number" ? order : 0,

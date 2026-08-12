@@ -108,6 +108,7 @@ model Project {
   image       String?
   video       String?
   href        String?
+  githubUrl   String?  @map("github_url")
   embedSite   Boolean  @default(true) @map("embed_site")
   published   Boolean  @default(true)
   order       Int      @default(0)

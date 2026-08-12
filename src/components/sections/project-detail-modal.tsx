@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from "motion/react"
 import Image from "next/image"
-import { ExternalLink, X, Building2, User } from "lucide-react"
+import { ExternalLink, Github, X, Building2, User } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { BlogPostContent } from "@/components/blog/blog-post-content"
 import type { BlogPost } from "@/types"
@@ -17,6 +17,7 @@ export interface ProjectDetailModalProps {
     tags?: string[]
     image?: string
     href?: string
+    githubUrl?: string | null
     company?: {
       id: string
       name: string
@@ -140,20 +141,37 @@ export function ProjectDetailModal({
                 </div>
               )}
 
-              {project.href ? (
-                <div className="mt-8">
-                  <a
-                    href={project.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={cn(
-                      "inline-flex items-center gap-2 rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium",
-                      "text-foreground hover:bg-muted cursor-pointer"
-                    )}
-                  >
-                    Voir le site
-                    <ExternalLink className="size-4" aria-hidden />
-                  </a>
+              {(project.href || project.githubUrl) ? (
+                <div className="mt-8 flex flex-wrap items-center gap-3">
+                  {project.href && (
+                    <a
+                      href={project.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={cn(
+                        "inline-flex items-center gap-2 rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium",
+                        "text-foreground hover:bg-muted cursor-pointer transition-colors"
+                      )}
+                    >
+                      Voir le site
+                      <ExternalLink className="size-4" aria-hidden />
+                    </a>
+                  )}
+                  {project.githubUrl && (
+                    <a
+                      href={project.githubUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={cn(
+                        "inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium",
+                        "text-foreground hover:border-primary/60 hover:bg-muted cursor-pointer transition-colors shadow-xs"
+                      )}
+                    >
+                      <Github className="size-4" aria-hidden />
+                      <span>Code Source GitHub</span>
+                      <ExternalLink className="size-3.5 opacity-70" aria-hidden />
+                    </a>
+                  )}
                 </div>
               ) : null}
             </div>

@@ -33,6 +33,11 @@ export function CvView() {
     scrollLeft: 0,
     scrollTop: 0,
   })
+  const touchPanRef = useRef<{ x: number; y: number; scrollLeft: number; scrollTop: number } | null>(
+    null
+  )
+  const pinchRef = useRef<{ distance: number; scale: number } | null>(null)
+  const zoomScaleRef = useRef(100)
 
   // 1. Récupération des données du CV
   useEffect(() => {
@@ -172,6 +177,80 @@ export function CvView() {
     viewport.addEventListener("wheel", handleWheel, { passive: false })
     return () => {
       viewport.removeEventListener("wheel", handleWheel)
+    }
+  }, [])
+
+  // Garde zoomScaleRef synchronisé pour lecture dans les listeners tactiles natifs (évite les closures obsolètes)
+  useEffect(() => {
+    zoomScaleRef.current = zoomScale
+  }, [zoomScale])
+
+  // 4bis. Gestion tactile : déplacer à un doigt, pincer pour zoomer à deux doigts
+  useEffect(() => {
+    const viewport = viewportRef.current
+    if (!viewport) return
+
+    function distanceBetween(t0: Touch, t1: Touch) {
+      return Math.hypot(t0.clientX - t1.clientX, t0.clientY - t1.clientY)
+    }
+
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        touchPanRef.current = null
+        pinchRef.current = {
+          distance: distanceBetween(e.touches[0], e.touches[1]),
+          scale: zoomScaleRef.current,
+        }
+      } else if (e.touches.length === 1) {
+        pinchRef.current = null
+        touchPanRef.current = {
+          x: e.touches[0].clientX,
+          y: e.touches[0].clientY,
+          scrollLeft: viewport.scrollLeft,
+          scrollTop: viewport.scrollTop,
+        }
+      }
+    }
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length === 2 && pinchRef.current) {
+        e.preventDefault()
+        const distance = distanceBetween(e.touches[0], e.touches[1])
+        const ratio = distance / pinchRef.current.distance
+        setZoomScale(Math.min(Math.max(Math.round(pinchRef.current.scale * ratio), 60), 170))
+      } else if (e.touches.length === 1 && touchPanRef.current) {
+        e.preventDefault()
+        const dx = e.touches[0].clientX - touchPanRef.current.x
+        const dy = e.touches[0].clientY - touchPanRef.current.y
+        viewport.scrollLeft = touchPanRef.current.scrollLeft - dx
+        viewport.scrollTop = touchPanRef.current.scrollTop - dy
+      }
+    }
+
+    const handleTouchEndOrCancel = (e: TouchEvent) => {
+      if (e.touches.length === 0) {
+        touchPanRef.current = null
+        pinchRef.current = null
+      } else if (e.touches.length === 1) {
+        pinchRef.current = null
+        touchPanRef.current = {
+          x: e.touches[0].clientX,
+          y: e.touches[0].clientY,
+          scrollLeft: viewport.scrollLeft,
+          scrollTop: viewport.scrollTop,
+        }
+      }
+    }
+
+    viewport.addEventListener("touchstart", handleTouchStart, { passive: true })
+    viewport.addEventListener("touchmove", handleTouchMove, { passive: false })
+    viewport.addEventListener("touchend", handleTouchEndOrCancel, { passive: true })
+    viewport.addEventListener("touchcancel", handleTouchEndOrCancel, { passive: true })
+    return () => {
+      viewport.removeEventListener("touchstart", handleTouchStart)
+      viewport.removeEventListener("touchmove", handleTouchMove)
+      viewport.removeEventListener("touchend", handleTouchEndOrCancel)
+      viewport.removeEventListener("touchcancel", handleTouchEndOrCancel)
     }
   }, [])
 
@@ -343,7 +422,7 @@ export function CvView() {
               onMouseMove={handleMouseMove}
               onMouseUp={handleMouseUpOrLeave}
               onMouseLeave={handleMouseUpOrLeave}
-              className={`flex-1 min-h-0 w-full relative bg-white overflow-auto hide-scrollbar flex flex-col p-1 transition-colors ${
+              className={`flex-1 min-h-0 w-full relative bg-white overflow-auto hide-scrollbar touch-none flex flex-col p-1 transition-colors ${
                 isDragging ? "cursor-grabbing" : "cursor-grab"
               } ${zoomScale > 100 ? "items-start" : "items-center"}`}
             >

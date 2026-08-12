@@ -19,6 +19,7 @@ import {
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler"
+import { Toaster } from "@/components/ui/sonner"
 import { StatusSelect } from "@/components/admin/status-select"
 import { DatePicker } from "@/components/ui/date-picker"
 import { ProfileTab } from "@/components/admin/profile-tab"
@@ -1208,6 +1209,7 @@ export default function AdminDashboardPage() {
           </div>
         </section>
       </div>
+      <Toaster position="top-right" />
     </main>
   )
 }

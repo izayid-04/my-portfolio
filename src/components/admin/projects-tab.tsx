@@ -3,6 +3,7 @@
 import * as React from "react"
 import { createPortal } from "react-dom"
 import Image from "next/image"
+import { toast } from "sonner"
 import {
   FolderGit2,
   Plus,
@@ -11,7 +12,6 @@ import {
   ExternalLink,
   Upload,
   Loader2,
-  CheckCircle2,
   Building2,
   X,
   Briefcase,
@@ -44,6 +44,7 @@ export interface ProjectData {
   image?: string | null
   video?: string | null
   href?: string | null
+  githubUrl?: string | null
   embedSite: boolean
   published: boolean
   order: number
@@ -78,6 +79,8 @@ export function ProjectsTab() {
   const [image, setImage] = React.useState("")
   const [video, setVideo] = React.useState("")
   const [href, setHref] = React.useState("")
+  const [hasPublicRepo, setHasPublicRepo] = React.useState(false)
+  const [githubUrl, setGithubUrl] = React.useState("")
   const [companyId, setCompanyId] = React.useState("")
   const [embedSite, setEmbedSite] = React.useState(true)
   const [published, setPublished] = React.useState(true)
@@ -85,7 +88,6 @@ export function ProjectsTab() {
 
   const [uploadingImage, setUploadingImage] = React.useState(false)
   const [saving, setSaving] = React.useState(false)
-  const [statusMessage, setStatusMessage] = React.useState<{ type: "success" | "error"; text: string } | null>(null)
 
   React.useEffect(() => {
     setMounted(true)
@@ -141,11 +143,12 @@ export function ProjectsTab() {
     setImage("")
     setVideo("")
     setHref("")
+    setHasPublicRepo(false)
+    setGithubUrl("")
     setCompanyId("")
     setEmbedSite(true)
     setPublished(true)
     setOrder("0")
-    setStatusMessage(null)
   }
 
   const handleEdit = (project: ProjectData) => {
@@ -158,6 +161,9 @@ export function ProjectsTab() {
     setImage(project.image || "")
     setVideo(project.video || "")
     setHref(project.href || "")
+    const hasGithub = Boolean(project.githubUrl && project.githubUrl.trim())
+    setHasPublicRepo(hasGithub)
+    setGithubUrl(project.githubUrl || "")
     setCompanyId(project.companyId || "")
     setEmbedSite(project.embedSite)
     setPublished(project.published)
@@ -182,7 +188,7 @@ export function ProjectsTab() {
 
       const data = await res.json()
       if (!res.ok) {
-        alert(data.error || "Échec de l'upload")
+        toast.error(data.error || "Échec de l'upload")
         return
       }
 
@@ -193,7 +199,7 @@ export function ProjectsTab() {
       }
     } catch (err) {
       console.error(err)
-      alert("Erreur lors de l'upload")
+      toast.error("Erreur lors de l'upload")
     } finally {
       if (isCompanyLogo) setUploadingCompanyLogo(false)
       else setUploadingImage(false)
@@ -225,18 +231,20 @@ export function ProjectsTab() {
       if (res.ok && data.company) {
         if (editingCompanyId) {
           setCompanies((prev) => prev.map((c) => (c.id === editingCompanyId ? data.company : c)))
+          toast.success("Entreprise mise à jour avec succès !")
         } else {
           setCompanies((prev) => [...prev, data.company])
           // Sélectionner automatiquement la nouvelle entreprise créée
           setCompanyId(data.company.id)
+          toast.success("Entreprise créée avec succès !")
         }
         resetCompanyForm()
       } else {
-        alert(data.error || "Erreur lors de l'enregistrement de l'entreprise")
+        toast.error(data.error || "Erreur lors de l'enregistrement de l'entreprise")
       }
     } catch (err) {
       console.error(err)
-      alert("Erreur réseau lors de la sauvegarde")
+      toast.error("Erreur réseau lors de la sauvegarde")
     } finally {
       setSavingCompany(false)
     }
@@ -249,22 +257,25 @@ export function ProjectsTab() {
       if (res.ok) {
         setCompanies((prev) => prev.filter((c) => c.id !== id))
         if (companyId === id) setCompanyId("")
+        toast.success("Entreprise supprimée.")
+      } else {
+        toast.error("Erreur lors de la suppression de l'entreprise")
       }
     } catch (err) {
       console.error(err)
+      toast.error("Erreur réseau lors de la suppression")
     }
   }
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!title.trim() || !description.trim()) {
-      setStatusMessage({ type: "error", text: "Le titre et la description sont requis." })
+      toast.error("Le titre et la description sont requis.")
       return
     }
 
     try {
       setSaving(true)
-      setStatusMessage(null)
 
       const tagsArray = tagsInput
         .split(",")
@@ -281,6 +292,7 @@ export function ProjectsTab() {
         image: image || null,
         video: video || null,
         href: href || null,
+        githubUrl: hasPublicRepo && githubUrl.trim() ? githubUrl.trim() : null,
         companyId: companyId || null,
         embedSite,
         published,
@@ -299,18 +311,18 @@ export function ProjectsTab() {
       if (res.ok && data.project) {
         if (editingId) {
           setProjects((prev) => prev.map((p) => (p.id === editingId ? data.project : p)))
-          setStatusMessage({ type: "success", text: "Projet mis à jour avec succès !" })
+          toast.success("Projet mis à jour avec succès !")
         } else {
           setProjects((prev) => [data.project, ...prev])
-          setStatusMessage({ type: "success", text: "Projet créé avec succès !" })
+          toast.success("Projet créé avec succès !")
         }
         resetForm()
       } else {
-        setStatusMessage({ type: "error", text: data.error || "Erreur lors de l'enregistrement" })
+        toast.error(data.error || "Erreur lors de l'enregistrement")
       }
     } catch (err) {
       console.error(err)
-      setStatusMessage({ type: "error", text: "Erreur réseau lors de la sauvegarde" })
+      toast.error("Erreur réseau lors de la sauvegarde")
     } finally {
       setSaving(false)
     }
@@ -324,9 +336,13 @@ export function ProjectsTab() {
       if (res.ok) {
         setProjects((prev) => prev.filter((p) => p.id !== id))
         if (editingId === id) resetForm()
+        toast.success("Projet supprimé.")
+      } else {
+        toast.error("Erreur lors de la suppression du projet")
       }
     } catch (err) {
       console.error(err)
+      toast.error("Erreur réseau lors de la suppression")
     }
   }
 
@@ -335,14 +351,17 @@ export function ProjectsTab() {
     setProjects((prev) => prev.map((p) => (p.id === project.id ? { ...p, published: nextState } : p)))
 
     try {
-      await fetch("/api/admin/projects", {
+      const res = await fetch("/api/admin/projects", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...project, published: nextState }),
       })
+      if (!res.ok) throw new Error("Échec de la mise à jour")
+      toast.success(nextState ? "Projet publié." : "Projet dépublié.")
     } catch (err) {
       console.error("Erreur bascule publication:", err)
       setProjects((prev) => prev.map((p) => (p.id === project.id ? { ...p, published: project.published } : p)))
+      toast.error("Erreur lors du changement de statut")
     }
   }
 
@@ -404,19 +423,6 @@ export function ProjectsTab() {
                 </button>
               )}
             </div>
-
-            {statusMessage && (
-              <div
-                className={`rounded-xl p-3 text-xs flex items-center gap-2 border ${
-                  statusMessage.type === "success"
-                    ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
-                    : "bg-destructive/10 border-destructive/30 text-destructive"
-                }`}
-              >
-                {statusMessage.type === "success" && <CheckCircle2 className="size-4 shrink-0" />}
-                {statusMessage.text}
-              </div>
-            )}
 
             {/* TITRE & DATE */}
             <div className="space-y-3">
@@ -515,27 +521,70 @@ export function ProjectsTab() {
               </div>
             </div>
 
-            {/* LIENS & SLUG */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs font-medium text-muted-foreground block mb-1">URL Démo / Site</label>
-                <input
-                  type="url"
-                  placeholder="https://..."
-                  value={href}
-                  onChange={(e) => setHref(e.target.value)}
-                  className="w-full rounded-xl border border-input bg-background px-3 py-2 text-xs text-foreground focus:border-primary focus:outline-none"
-                />
+            {/* LIENS & DÉPÔT GITHUB */}
+            <div className="space-y-4 rounded-xl border border-border/80 bg-muted/20 p-4">
+              <h4 className="text-xs font-semibold text-foreground uppercase tracking-wider flex items-center gap-2">
+                <FolderGit2 className="size-4 text-primary" />
+                Liens & Dépôt Source
+              </h4>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground block mb-1">URL Démo / Site public</label>
+                  <input
+                    type="url"
+                    placeholder="https://..."
+                    value={href}
+                    onChange={(e) => setHref(e.target.value)}
+                    className="w-full rounded-xl border border-input bg-background px-3 py-2 text-xs text-foreground focus:border-primary focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground block mb-1">Slug Article lié (optionnel)</label>
+                  <input
+                    type="text"
+                    placeholder="Ex: udb, biacode"
+                    value={slug}
+                    onChange={(e) => setSlug(e.target.value)}
+                    className="w-full rounded-xl border border-input bg-background px-3 py-2 text-xs text-foreground focus:border-primary focus:outline-none"
+                  />
+                </div>
               </div>
-              <div>
-                <label className="text-xs font-medium text-muted-foreground block mb-1">Slug Article lié (opt)</label>
-                <input
-                  type="text"
-                  placeholder="Ex: udb, biacode"
-                  value={slug}
-                  onChange={(e) => setSlug(e.target.value)}
-                  className="w-full rounded-xl border border-input bg-background px-3 py-2 text-xs text-foreground focus:border-primary focus:outline-none"
-                />
+
+              {/* BOUTON D'ACTIVATION DU DÉPÔT GITHUB PUBLIC */}
+              <div className="pt-3 border-t border-border/60 space-y-3">
+                <label className="flex items-center gap-2 text-xs font-semibold text-foreground cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={hasPublicRepo}
+                    onChange={(e) => {
+                      const checked = e.target.checked
+                      setHasPublicRepo(checked)
+                      if (!checked) setGithubUrl("")
+                    }}
+                    className="size-4 rounded border-input accent-primary"
+                  />
+                  <span>Ce projet dispose d'un dépôt GitHub public</span>
+                </label>
+
+                {hasPublicRepo && (
+                  <div className="pt-1 space-y-1.5">
+                    <label className="text-xs font-medium text-foreground block">
+                      Lien du dépôt GitHub (Code public) *
+                    </label>
+                    <input
+                      type="url"
+                      required={hasPublicRepo}
+                      placeholder="https://github.com/izayid-04/nom-du-projet"
+                      value={githubUrl}
+                      onChange={(e) => setGithubUrl(e.target.value)}
+                      className="w-full rounded-xl border border-primary/50 bg-background px-3.5 py-2.5 text-xs text-foreground focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none shadow-xs"
+                    />
+                    <p className="text-[11px] text-muted-foreground">
+                      Ce lien générera un bouton ouvrant le code source GitHub dans un nouvel onglet.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 
