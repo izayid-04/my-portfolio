@@ -354,7 +354,7 @@ export function ProjectsSection({
   const [selectedCompany, setSelectedCompany] = useState<string>("ALL")
   const [selectedTag, setSelectedTag] = useState<string>("ALL")
   const [searchQuery, setSearchQuery] = useState<string>("")
-  const [isMobileModalOpen, setIsMobileModalOpen] = useState<boolean>(false)
+  const [isFiltersModalOpen, setIsFiltersModalOpen] = useState<boolean>(false)
   const [isMounted, setIsMounted] = useState<boolean>(false)
 
   useEffect(() => {
@@ -525,17 +525,39 @@ export function ProjectsSection({
             )}
           </div>
 
-          {/* Reset button */}
-          {activeFiltersCount > 0 && (
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Plus de filtres */}
             <button
               type="button"
-              onClick={resetFilters}
-              className="cursor-pointer inline-flex items-center gap-1.5 rounded-xl border border-border bg-background px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              onClick={() => setIsFiltersModalOpen(true)}
+              className={cn(
+                "cursor-pointer inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-semibold transition-colors",
+                selectedTag !== "ALL"
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border bg-background text-muted-foreground hover:text-foreground hover:bg-muted"
+              )}
             >
-              <RotateCcw className="size-3.5 text-primary" />
-              Réinitialiser ({activeFiltersCount})
+              <SlidersHorizontal className="size-3.5" />
+              Plus de filtres
+              {selectedTag !== "ALL" && (
+                <span className="flex size-4 items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold">
+                  1
+                </span>
+              )}
             </button>
-          )}
+
+            {/* Reset button */}
+            {activeFiltersCount > 0 && (
+              <button
+                type="button"
+                onClick={resetFilters}
+                className="cursor-pointer inline-flex items-center gap-1.5 rounded-xl border border-border bg-background px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              >
+                <RotateCcw className="size-3.5 text-primary" />
+                Réinitialiser ({activeFiltersCount})
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Filtre Structure / Entreprise */}
@@ -593,42 +615,6 @@ export function ProjectsSection({
             </button>
           )}
         </div>
-
-        {/* Filtre Tags & Techs */}
-        {tagOptions.length > 0 && (
-          <div className="flex flex-wrap items-center gap-1.5 pt-1">
-            <span className="text-[11px] font-semibold text-muted-foreground mr-1 flex items-center gap-1">
-              <Filter className="size-3 text-primary" /> Tag :
-            </span>
-            <button
-              type="button"
-              onClick={() => setSelectedTag("ALL")}
-              className={cn(
-                "cursor-pointer rounded-md px-2 py-0.5 text-[11px] font-medium transition-all border",
-                selectedTag === "ALL"
-                  ? "border-primary/30 bg-primary/10 text-primary font-semibold"
-                  : "border-border/40 bg-muted/40 text-muted-foreground hover:text-foreground"
-              )}
-            >
-              Tous
-            </button>
-            {tagOptions.map((t) => (
-              <button
-                key={t.name}
-                type="button"
-                onClick={() => setSelectedTag(t.name)}
-                className={cn(
-                  "cursor-pointer rounded-md px-2 py-0.5 text-[11px] font-medium transition-all border",
-                  selectedTag === t.name
-                    ? "border-primary/30 bg-primary/10 text-primary font-semibold shadow-xs"
-                    : "border-border/40 bg-muted/40 text-muted-foreground hover:text-foreground"
-                )}
-              >
-                {t.name}
-              </button>
-            ))}
-          </div>
-        )}
       </div>
 
       {/* ================= BARRE DE FILTRES ACTION BAR (MOBILE < md) ================= */}
@@ -655,7 +641,7 @@ export function ProjectsSection({
 
         <button
           type="button"
-          onClick={() => setIsMobileModalOpen(true)}
+          onClick={() => setIsFiltersModalOpen(true)}
           className={cn(
             "cursor-pointer flex shrink-0 items-center gap-1.5 rounded-xl border px-3.5 py-2.5 text-xs font-semibold shadow-xs transition-all active:scale-95",
             activeFiltersCount > 0
@@ -857,14 +843,14 @@ export function ProjectsSection({
       {isMounted &&
         createPortal(
           <AnimatePresence>
-            {isMobileModalOpen && (
+            {isFiltersModalOpen && (
               <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center p-0 sm:p-4">
                 {/* Backdrop */}
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  onClick={() => setIsMobileModalOpen(false)}
+                  onClick={() => setIsFiltersModalOpen(false)}
                   className="fixed inset-0 bg-black/70 backdrop-blur-xs"
                 />
 
@@ -889,7 +875,7 @@ export function ProjectsSection({
                     </div>
                     <button
                       type="button"
-                      onClick={() => setIsMobileModalOpen(false)}
+                      onClick={() => setIsFiltersModalOpen(false)}
                       className="cursor-pointer text-muted-foreground hover:text-foreground p-1 rounded-lg hover:bg-muted"
                     >
                       <X className="size-5" />
@@ -1054,7 +1040,7 @@ export function ProjectsSection({
                     )}
                     <button
                       type="button"
-                      onClick={() => setIsMobileModalOpen(false)}
+                      onClick={() => setIsFiltersModalOpen(false)}
                       className="cursor-pointer flex-1 rounded-xl bg-primary py-2.5 text-xs font-semibold text-primary-foreground shadow-sm hover:opacity-90 transition-opacity text-center"
                     >
                       Afficher ({filteredProjects.length})
