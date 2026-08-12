@@ -11,6 +11,7 @@ interface ChatPanelProps {
   messages: ChatMessage[]
   input: string
   isTyping: boolean
+  disabled?: boolean
   onInputChange: (value: string) => void
   onSend: () => void
   onClose: () => void
@@ -72,6 +73,9 @@ function MessageBubble({ message }: { message: ChatMessage }) {
           )}
         >
           {message.content}
+          {message.isStreaming && (
+            <span className="ml-0.5 inline-block h-3.5 w-[2px] translate-y-[2px] animate-pulse bg-current" />
+          )}
         </div>
         <span
           className={cn(
@@ -90,6 +94,7 @@ export function ChatPanel({
   messages,
   input,
   isTyping,
+  disabled = false,
   onInputChange,
   onSend,
   onClose,
@@ -117,8 +122,8 @@ export function ChatPanel({
       className={cn(
         "fixed z-50 flex flex-col overflow-hidden",
         "bg-background/95 backdrop-blur-xl border border-border shadow-2xl",
-        "bottom-20 right-4 w-[calc(100vw-2rem)] max-w-[400px] h-[min(70vh,560px)] rounded-2xl",
-        "max-sm:top-0 max-sm:left-0 max-sm:right-0 max-sm:bottom-0 max-sm:w-full max-sm:max-w-none max-sm:h-auto max-sm:rounded-none",
+        "top-1/2 -translate-y-1/2 right-4 sm:right-6 w-[calc(100vw-2rem)] max-w-[460px] h-[min(82vh,700px)] rounded-2xl",
+        "max-sm:top-0 max-sm:translate-y-0 max-sm:left-0 max-sm:right-0 max-sm:bottom-0 max-sm:w-full max-sm:max-w-none max-sm:h-auto max-sm:rounded-none",
       )}
     >
       {/* Header */}
@@ -175,14 +180,15 @@ export function ChatPanel({
             onKeyDown={handleKeyDown}
             placeholder="Écris ton message…"
             rows={1}
-            className="flex-1 resize-none bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none max-h-24 min-h-[1.5rem]"
+            disabled={disabled}
+            className="flex-1 resize-none bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none max-h-24 min-h-[1.5rem] disabled:opacity-60"
           />
           <button
             onClick={onSend}
-            disabled={!input.trim()}
+            disabled={!input.trim() || disabled}
             className={cn(
               "flex size-8 shrink-0 items-center justify-center rounded-lg transition-all cursor-pointer",
-              input.trim()
+              input.trim() && !disabled
                 ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
                 : "bg-muted text-muted-foreground cursor-not-allowed",
             )}

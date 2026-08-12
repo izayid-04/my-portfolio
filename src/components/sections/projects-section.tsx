@@ -7,6 +7,7 @@ import Link from "next/link"
 import { motion, AnimatePresence } from "motion/react"
 import {
   ExternalLink,
+  Github,
   Building2,
   User,
   Search,
@@ -49,6 +50,8 @@ export interface Project {
   techIcons?: ProjectTechIcon[]
   /** Lien vers le site ou la démo du projet */
   href?: string
+  /** Lien vers le repository GitHub public */
+  githubUrl?: string
   /** Afficher le site en direct dans un cadre (iframe) sur mobile et desktop */
   embedSite?: boolean
   /** Entreprise / Structure reliée */
@@ -74,8 +77,12 @@ const defaultProjects: Project[] = [
       "Plateforme web officielle du réseau de transport public collectif de la Communauté de Communes du Centre-Ouest (3CO) à Mayotte, couvrant 5 communes et plus de 50 000 habitants.",
     date: "Avril 2026",
     slug: "tmco",
-    tags: ["Transport", "Mayotte", "Frontend", "DevOps", "3CO"],
+    tags: ["Django", "Next.js", "Transport", "Mayotte", "3CO"],
     image: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=800&q=80",
+    techIcons: [
+      { url: projectStackIcons.Django, name: "Django" },
+      { url: projectStackIcons["Next.js"], name: "Next.js" },
+    ],
     href: "https://tmco.yt/",
     embedSite: true,
     company: {
@@ -91,8 +98,14 @@ const defaultProjects: Project[] = [
       "Solution SaaS complète de gestion commerciale et d'ERP/CRM conçue pour optimiser le suivi des ventes, la facturation, la gestion des stocks et la caisse enregistreuse pour les entreprises.",
     date: "Juin 2026",
     slug: "yeeyo",
-    tags: ["SaaS", "ERP / CRM", "Full-Stack", "DevOps", "Facturation"],
+    tags: ["Next.js", "Nest.js", "Docker", "CI/CD", "SaaS", "ERP / CRM"],
     image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80",
+    techIcons: [
+      { url: projectStackIcons["Next.js"], name: "Next.js" },
+      { url: projectStackIcons["Nest.js"], name: "Nest.js" },
+      { url: projectStackIcons.Docker, name: "Docker" },
+      { url: projectStackIcons["CI/CD"], name: "CI/CD" },
+    ],
     href: "https://www.yeeyo.org/",
     embedSite: false,
     company: {
@@ -108,8 +121,12 @@ const defaultProjects: Project[] = [
       "Plateforme EdTech complète permettant aux usagers de se préparer aux examens civiques officiels en France (titre de séjour pluriannuel, carte de résident de 10 ans et naturalisation française).",
     date: "Juillet 2026",
     slug: "bonjourcitoyen",
-    tags: ["EdTech", "Examen Civique", "Frontend", "DevOps", "France"],
+    tags: ["Django", "Next.js", "EdTech", "Examen Civique", "France"],
     image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&q=80",
+    techIcons: [
+      { url: projectStackIcons.Django, name: "Django" },
+      { url: projectStackIcons["Next.js"], name: "Next.js" },
+    ],
     href: "https://bonjourcitoyen.fr/",
     embedSite: true,
     company: {
@@ -125,8 +142,12 @@ const defaultProjects: Project[] = [
       "Service web et plateforme liée aux applications mobiles permettant d'obtenir en quelques minutes des photos d'identité numériques avec signature électronique agréées ANTS et Préfecture.",
     date: "Août 2026",
     slug: "photonum",
-    tags: ["e-Photo", "ANTS", "Full-Stack", "DevOps", "Préfecture"],
+    tags: ["Next.js", "Flutter", "App Mobile", "e-Photo", "ANTS"],
     image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80",
+    techIcons: [
+      { url: projectStackIcons["Next.js"], name: "Next.js" },
+      { url: projectStackIcons.Flutter, name: "Flutter" },
+    ],
     href: "https://photonum.xyz/",
     embedSite: true,
     company: {
@@ -336,7 +357,7 @@ export function ProjectsSection({
   const [selectedCompany, setSelectedCompany] = useState<string>("ALL")
   const [selectedTag, setSelectedTag] = useState<string>("ALL")
   const [searchQuery, setSearchQuery] = useState<string>("")
-  const [isMobileModalOpen, setIsMobileModalOpen] = useState<boolean>(false)
+  const [isFiltersModalOpen, setIsFiltersModalOpen] = useState<boolean>(false)
   const [isMounted, setIsMounted] = useState<boolean>(false)
 
   useEffect(() => {
@@ -369,6 +390,7 @@ export function ProjectsSection({
                 image: p.image || undefined,
                 video: p.video || undefined,
                 href: p.href || undefined,
+                githubUrl: p.githubUrl || undefined,
                 embedSite: Boolean(p.embedSite),
                 techIcons: techIcons.length > 0 ? techIcons : undefined,
                 company: p.company || null,
@@ -507,17 +529,39 @@ export function ProjectsSection({
             )}
           </div>
 
-          {/* Reset button */}
-          {activeFiltersCount > 0 && (
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Plus de filtres */}
             <button
               type="button"
-              onClick={resetFilters}
-              className="cursor-pointer inline-flex items-center gap-1.5 rounded-xl border border-border bg-background px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              onClick={() => setIsFiltersModalOpen(true)}
+              className={cn(
+                "cursor-pointer inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-semibold transition-colors",
+                selectedTag !== "ALL"
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border bg-background text-muted-foreground hover:text-foreground hover:bg-muted"
+              )}
             >
-              <RotateCcw className="size-3.5 text-primary" />
-              Réinitialiser ({activeFiltersCount})
+              <SlidersHorizontal className="size-3.5" />
+              Plus de filtres
+              {selectedTag !== "ALL" && (
+                <span className="flex size-4 items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold">
+                  1
+                </span>
+              )}
             </button>
-          )}
+
+            {/* Reset button */}
+            {activeFiltersCount > 0 && (
+              <button
+                type="button"
+                onClick={resetFilters}
+                className="cursor-pointer inline-flex items-center gap-1.5 rounded-xl border border-border bg-background px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              >
+                <RotateCcw className="size-3.5 text-primary" />
+                Réinitialiser ({activeFiltersCount})
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Filtre Structure / Entreprise */}
@@ -575,42 +619,6 @@ export function ProjectsSection({
             </button>
           )}
         </div>
-
-        {/* Filtre Tags & Techs */}
-        {tagOptions.length > 0 && (
-          <div className="flex flex-wrap items-center gap-1.5 pt-1">
-            <span className="text-[11px] font-semibold text-muted-foreground mr-1 flex items-center gap-1">
-              <Filter className="size-3 text-primary" /> Tag :
-            </span>
-            <button
-              type="button"
-              onClick={() => setSelectedTag("ALL")}
-              className={cn(
-                "cursor-pointer rounded-md px-2 py-0.5 text-[11px] font-medium transition-all border",
-                selectedTag === "ALL"
-                  ? "border-primary/30 bg-primary/10 text-primary font-semibold"
-                  : "border-border/40 bg-muted/40 text-muted-foreground hover:text-foreground"
-              )}
-            >
-              Tous
-            </button>
-            {tagOptions.map((t) => (
-              <button
-                key={t.name}
-                type="button"
-                onClick={() => setSelectedTag(t.name)}
-                className={cn(
-                  "cursor-pointer rounded-md px-2 py-0.5 text-[11px] font-medium transition-all border",
-                  selectedTag === t.name
-                    ? "border-primary/30 bg-primary/10 text-primary font-semibold shadow-xs"
-                    : "border-border/40 bg-muted/40 text-muted-foreground hover:text-foreground"
-                )}
-              >
-                {t.name}
-              </button>
-            ))}
-          </div>
-        )}
       </div>
 
       {/* ================= BARRE DE FILTRES ACTION BAR (MOBILE < md) ================= */}
@@ -637,7 +645,7 @@ export function ProjectsSection({
 
         <button
           type="button"
-          onClick={() => setIsMobileModalOpen(true)}
+          onClick={() => setIsFiltersModalOpen(true)}
           className={cn(
             "cursor-pointer flex shrink-0 items-center gap-1.5 rounded-xl border px-3.5 py-2.5 text-xs font-semibold shadow-xs transition-all active:scale-95",
             activeFiltersCount > 0
@@ -779,34 +787,50 @@ export function ProjectsSection({
                     </div>
                   )}
 
-                  <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex items-center">
+                  {/* Footer: separator + actions */}
+                  <div className="mt-auto pt-4 border-t border-border/50 flex items-center justify-between gap-2">
+                    {/* Left: links */}
+                    <div className="flex items-center gap-2 flex-wrap">
                       {project.href && (
                         <Link
                           href={project.href}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+                          onClick={(e) => e.stopPropagation()}
+                          className="inline-flex items-center gap-1.5 h-8 rounded-lg border border-border bg-muted/50 px-3 text-xs font-semibold text-foreground transition-all hover:bg-muted hover:border-primary/40 hover:text-primary"
+                          title="Voir le site"
                         >
-                          Voir le site
-                          <ExternalLink className="size-4 shrink-0" aria-hidden />
+                          <ExternalLink className="size-3.5 shrink-0" aria-hidden />
+                          <span>Site</span>
                         </Link>
+                      )}
+                      {project.githubUrl && (
+                        <a
+                          href={project.githubUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="inline-flex items-center gap-1.5 h-8 rounded-lg border border-border bg-muted/50 px-3 text-xs font-semibold text-foreground transition-all hover:bg-muted hover:border-primary/40 hover:text-primary"
+                          title="Voir le code source sur GitHub"
+                        >
+                          <Github className="size-3.5 shrink-0" aria-hidden />
+                          <span>GitHub</span>
+                        </a>
                       )}
                     </div>
 
-                    <div className="flex justify-end">
-                      <button
-                        type="button"
-                        onClick={() => setSelectedProject(project)}
-                        className={cn(
-                          "inline-flex items-center justify-center rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium text-foreground",
-                          "hover:bg-muted transition-colors cursor-pointer",
-                          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                        )}
-                      >
-                        Voir le détail
-                      </button>
-                    </div>
+                    {/* Right: detail button */}
+                    <button
+                      type="button"
+                      onClick={() => setSelectedProject(project)}
+                      className={cn(
+                        "inline-flex items-center justify-center h-8 rounded-lg bg-primary/10 px-3.5 text-xs font-semibold text-primary",
+                        "hover:bg-primary/20 transition-colors cursor-pointer border border-primary/20 hover:border-primary/40",
+                        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 shrink-0"
+                      )}
+                    >
+                      Voir le détail →
+                    </button>
                   </div>
                 </div>
               </div>
@@ -839,14 +863,14 @@ export function ProjectsSection({
       {isMounted &&
         createPortal(
           <AnimatePresence>
-            {isMobileModalOpen && (
+            {isFiltersModalOpen && (
               <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center p-0 sm:p-4">
                 {/* Backdrop */}
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  onClick={() => setIsMobileModalOpen(false)}
+                  onClick={() => setIsFiltersModalOpen(false)}
                   className="fixed inset-0 bg-black/70 backdrop-blur-xs"
                 />
 
@@ -871,7 +895,7 @@ export function ProjectsSection({
                     </div>
                     <button
                       type="button"
-                      onClick={() => setIsMobileModalOpen(false)}
+                      onClick={() => setIsFiltersModalOpen(false)}
                       className="cursor-pointer text-muted-foreground hover:text-foreground p-1 rounded-lg hover:bg-muted"
                     >
                       <X className="size-5" />
@@ -1036,7 +1060,7 @@ export function ProjectsSection({
                     )}
                     <button
                       type="button"
-                      onClick={() => setIsMobileModalOpen(false)}
+                      onClick={() => setIsFiltersModalOpen(false)}
                       className="cursor-pointer flex-1 rounded-xl bg-primary py-2.5 text-xs font-semibold text-primary-foreground shadow-sm hover:opacity-90 transition-opacity text-center"
                     >
                       Afficher ({filteredProjects.length})

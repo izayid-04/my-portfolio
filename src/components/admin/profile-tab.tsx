@@ -1,7 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { CheckCircle2, Eye, EyeOff, KeyRound, Loader2, ShieldCheck, User, UserCheck } from "lucide-react"
+import { toast } from "sonner"
+import { Eye, EyeOff, KeyRound, Loader2, ShieldCheck, User, UserCheck } from "lucide-react"
 
 interface ProfileUser {
   id: string
@@ -29,7 +30,6 @@ export function ProfileTab({ onProfileUpdated }: ProfileTabProps) {
   // UI toggles & status
   const [showCurrentPassword, setShowCurrentPassword] = React.useState(false)
   const [showNewPassword, setShowNewPassword] = React.useState(false)
-  const [statusMessage, setStatusMessage] = React.useState<{ type: "success" | "error"; text: string } | null>(null)
 
   // Fetch initial profile data
   const fetchProfile = React.useCallback(async () => {
@@ -56,15 +56,14 @@ export function ProfileTab({ onProfileUpdated }: ProfileTabProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setStatusMessage(null)
 
     if (newPassword && newPassword !== confirmPassword) {
-      setStatusMessage({ type: "error", text: "Les nouveaux mots de passe ne correspondent pas." })
+      toast.error("Les nouveaux mots de passe ne correspondent pas.")
       return
     }
 
     if (newPassword && newPassword.length < 8) {
-      setStatusMessage({ type: "error", text: "Le nouveau mot de passe doit comporter au moins 8 caractères." })
+      toast.error("Le nouveau mot de passe doit comporter au moins 8 caractères.")
       return
     }
 
@@ -84,9 +83,9 @@ export function ProfileTab({ onProfileUpdated }: ProfileTabProps) {
       const data = await res.json()
 
       if (!res.ok) {
-        setStatusMessage({ type: "error", text: data.error || "Une erreur est survenue lors de la mise à jour." })
+        toast.error(data.error || "Une erreur est survenue lors de la mise à jour.")
       } else {
-        setStatusMessage({ type: "success", text: "Profil mis à jour avec succès !" })
+        toast.success("Profil mis à jour avec succès !")
         setCurrentPassword("")
         setNewPassword("")
         setConfirmPassword("")
@@ -96,7 +95,7 @@ export function ProfileTab({ onProfileUpdated }: ProfileTabProps) {
       }
     } catch (err) {
       console.error(err)
-      setStatusMessage({ type: "error", text: "Erreur de connexion au serveur." })
+      toast.error("Erreur de connexion au serveur.")
     } finally {
       setSaving(false)
     }
@@ -229,22 +228,6 @@ export function ProfileTab({ onProfileUpdated }: ProfileTabProps) {
             </div>
           </div>
         </div>
-
-        {/* FEEDBACK STATUS ALERT */}
-        {statusMessage && (
-          <div
-            className={`flex items-center gap-2 rounded-xl p-3 text-sm border ${
-              statusMessage.type === "success"
-                ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
-                : "bg-destructive/10 border-destructive/30 text-destructive"
-            }`}
-          >
-            {statusMessage.type === "success" ? (
-              <CheckCircle2 className="size-4 shrink-0 text-emerald-400" />
-            ) : null}
-            <span>{statusMessage.text}</span>
-          </div>
-        )}
 
         {/* SUBMIT BUTTON */}
         <div className="flex justify-end pt-2">

@@ -1,7 +1,7 @@
 "use client"
 
 import { motion, AnimatePresence } from "motion/react"
-import { MessageCircle, X } from "lucide-react"
+import { BotMessageSquare, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface ChatToggleButtonProps {
@@ -18,13 +18,13 @@ export function ChatToggleButton({ isOpen, onClick, className }: ChatToggleButto
         "fixed z-50 flex items-center justify-center rounded-full shadow-lg cursor-pointer",
         "bg-primary text-primary-foreground",
         "hover:shadow-xl hover:scale-105 active:scale-95 transition-shadow",
-        "size-11 right-3 bottom-4 sm:size-14 sm:right-4 sm:bottom-20",
+        "bottom-4 right-3 size-12 sm:top-1/2 sm:bottom-auto sm:-translate-y-1/2 sm:right-5 sm:size-14",
         "max-sm:right-[max(0.75rem,env(safe-area-inset-right))] max-sm:bottom-[max(1rem,env(safe-area-inset-bottom))]",
         className,
       )}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
-      aria-label={isOpen ? "Fermer le chat" : "Ouvrir le chat"}
+      aria-label={isOpen ? "Fermer l'assistant IA" : "Discuter avec l'assistant IA"}
     >
       {!isOpen && (
         <span className="absolute inset-0 rounded-full animate-ping bg-primary/30 pointer-events-none" />
@@ -48,7 +48,7 @@ export function ChatToggleButton({ isOpen, onClick, className }: ChatToggleButto
             exit={{ rotate: -90, opacity: 0 }}
             transition={{ duration: 0.2 }}
           >
-            <MessageCircle className="size-4 sm:size-6" />
+            <BotMessageSquare className="size-5 sm:size-6" />
           </motion.span>
         )}
       </AnimatePresence>

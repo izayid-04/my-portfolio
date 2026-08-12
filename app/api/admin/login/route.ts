@@ -23,10 +23,12 @@ export async function POST(request: Request) {
     })
 
     // If database has no users yet, check against environment variable default credentials
-    const defaultEmail = (process.env.ADMIN_DEFAULT_EMAIL || "admin@portfolio.dev").toLowerCase()
-    const defaultPassword = process.env.ADMIN_DEFAULT_PASSWORD || "Admin_Portfolio_2026!SecureKey"
+    // (aucune valeur par défaut codée en dur : si ces variables ne sont pas configurées,
+    // le bootstrap est simplement désactivé)
+    const defaultEmail = process.env.ADMIN_DEFAULT_EMAIL?.trim().toLowerCase()
+    const defaultPassword = process.env.ADMIN_DEFAULT_PASSWORD
 
-    if (!user && cleanEmail === defaultEmail) {
+    if (!user && defaultEmail && defaultPassword && cleanEmail === defaultEmail) {
       if (password === defaultPassword) {
         // Auto-create initial user in database
         const hashedPassword = await bcrypt.hash(defaultPassword, 10)

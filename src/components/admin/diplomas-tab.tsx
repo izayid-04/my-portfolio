@@ -3,10 +3,10 @@
 import * as React from "react"
 import { createPortal } from "react-dom"
 import Image from "next/image"
+import { toast } from "sonner"
 import {
   Award,
   Building2,
-  CheckCircle2,
   ExternalLink,
   GraduationCap,
   Image as ImageIcon,
@@ -93,8 +93,6 @@ export function DiplomasTab() {
   const [imageUploading, setImageUploading] = React.useState(false)
   const [savingDiploma, setSavingDiploma] = React.useState(false)
 
-  const [statusMessage, setStatusMessage] = React.useState<{ type: "success" | "error"; text: string } | null>(null)
-
   // Charger les établissements et diplômes
   const fetchData = React.useCallback(async () => {
     try {
@@ -140,7 +138,7 @@ export function DiplomasTab() {
 
       const data = await res.json()
       if (!res.ok) {
-        alert(data.error || "Échec de l'upload")
+        toast.error(data.error || "Échec de l'upload")
         return
       }
 
@@ -151,7 +149,7 @@ export function DiplomasTab() {
       }
     } catch (err) {
       console.error(err)
-      alert("Erreur lors de l'upload")
+      toast.error("Erreur lors de l'upload")
     } finally {
       if (isLogo) setInstUploading(false)
       else setImageUploading(false)
@@ -205,15 +203,18 @@ export function DiplomasTab() {
       if (res.ok && data.institution) {
         if (editingInstId) {
           setInstitutions((prev) => prev.map((inst) => (inst.id === editingInstId ? data.institution : inst)))
+          toast.success("Établissement mis à jour avec succès !")
         } else {
           setInstitutions((prev) => [...prev, data.institution])
+          toast.success("Établissement créé avec succès !")
         }
         resetInstForm()
       } else {
-        alert(data.error || "Erreur d'enregistrement")
+        toast.error(data.error || "Erreur d'enregistrement")
       }
     } catch (err) {
       console.error(err)
+      toast.error("Erreur réseau lors de la sauvegarde")
     } finally {
       setInstSaving(false)
     }
@@ -226,9 +227,13 @@ export function DiplomasTab() {
       const res = await fetch(`/api/admin/institutions?id=${id}`, { method: "DELETE" })
       if (res.ok) {
         setInstitutions((prev) => prev.filter((item) => item.id !== id))
+        toast.success("Établissement supprimé.")
+      } else {
+        toast.error("Erreur lors de la suppression de l'établissement")
       }
     } catch (err) {
       console.error(err)
+      toast.error("Erreur réseau lors de la suppression")
     }
   }
 
@@ -239,7 +244,6 @@ export function DiplomasTab() {
 
     try {
       setSavingDiploma(true)
-      setStatusMessage(null)
 
       const payload = {
         id: editingDiplomaId || undefined,
@@ -263,32 +267,23 @@ export function DiplomasTab() {
 
       const data = await res.json()
       if (res.ok && data.diploma) {
-        setStatusMessage({
-          type: "success",
-          text: editingDiplomaId ? "Diplôme mis à jour avec succès !" : "Nouveau diplôme ajouté avec succès !",
-        })
+        toast.success(editingDiplomaId ? "Diplôme mis à jour avec succès !" : "Nouveau diplôme ajouté avec succès !")
 
         // Rafraîchir immédiatement les diplômes depuis la BDD
         await fetchData()
         resetForm()
-
-        // Auto-effacer le message de succès après 3.5s
-        setTimeout(() => {
-          setStatusMessage(null)
-        }, 3500)
       } else {
-        setStatusMessage({ type: "error", text: data.error || "Erreur lors de l'enregistrement." })
+        toast.error(data.error || "Erreur lors de l'enregistrement.")
       }
     } catch (err) {
       console.error(err)
-      setStatusMessage({ type: "error", text: "Erreur de connexion" })
+      toast.error("Erreur de connexion")
     } finally {
       setSavingDiploma(false)
     }
   }
 
   const handleEditDiploma = (dip: Diploma) => {
-    setStatusMessage(null)
     setEditingDiplomaId(dip.id)
     setTitle(dip.title)
     setDegreeType(dip.degreeType || "CERTIFICAT")
@@ -308,10 +303,13 @@ export function DiplomasTab() {
       const res = await fetch(`/api/admin/diplomas?id=${id}`, { method: "DELETE" })
       if (res.ok) {
         setDiplomas((prev) => prev.filter((d) => d.id !== id))
-        setStatusMessage(null)
+        toast.success("Diplôme supprimé.")
+      } else {
+        toast.error("Erreur lors de la suppression du diplôme")
       }
     } catch (err) {
       console.error(err)
+      toast.error("Erreur réseau lors de la suppression")
     }
   }
 
@@ -680,18 +678,6 @@ export function DiplomasTab() {
               />
               <span className="text-foreground">Publier sur le site public</span>
             </label>
-
-            {statusMessage && (
-              <div
-                className={`rounded-lg p-2.5 text-xs ${
-                  statusMessage.type === "success"
-                    ? "bg-emerald-500/10 border border-emerald-500/30 text-emerald-400"
-                    : "bg-destructive/10 border border-destructive/30 text-destructive"
-                }`}
-              >
-                {statusMessage.text}
-              </div>
-            )}
 
             <button
               type="submit"

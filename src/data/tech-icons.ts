@@ -85,7 +85,6 @@ export const techCategories: TechCategory[] = [
   },
 ]
 
-/** Icônes pour la section Projets (mêmes URLs que la stack technique) */
 export const projectStackIcons = {
   Angular: "https://cdn.simpleicons.org/angular/DD0031",
   Laravel: "https://cdn.simpleicons.org/laravel/FF2D20",
@@ -99,4 +98,10 @@ export const projectStackIcons = {
   JavaScript: "https://cdn.simpleicons.org/javascript/F7DF1E",
   Python: "https://cdn.simpleicons.org/python/3776AB",
   Flask: "https://cdn.simpleicons.org/flask/000000",
+  "Next.js": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg",
+  "Nest.js": "https://cdn.simpleicons.org/nestjs/E0234E",
+  Django: "https://cdn.simpleicons.org/django/092E20",
+  Docker: "https://cdn.simpleicons.org/docker/2496ED",
+  Flutter: "https://cdn.simpleicons.org/flutter/02569B",
+  "CI/CD": "https://cdn.simpleicons.org/githubactions/2088FF",
 } as const

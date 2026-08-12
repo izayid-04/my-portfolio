@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { toast } from "sonner"
 import {
   FileText,
   Upload,
@@ -107,7 +108,6 @@ export function CvTab() {
   const [saving, setSaving] = React.useState(false)
   const [deleting, setDeleting] = React.useState(false)
   const [showDeleteModal, setShowDeleteModal] = React.useState(false)
-  const [statusMessage, setStatusMessage] = React.useState<{ type: "success" | "error"; text: string } | null>(null)
 
   // Charger le CV actuellement enregistré en BDD
   const fetchCv = React.useCallback(async () => {
@@ -142,13 +142,12 @@ export function CvTab() {
     if (!file) return
 
     if (file.type !== "application/pdf" && !file.name.endsWith(".pdf")) {
-      setStatusMessage({ type: "error", text: "Veuillez sélectionner un fichier au format PDF (.pdf)." })
+      toast.error("Veuillez sélectionner un fichier au format PDF (.pdf).")
       return
     }
 
     try {
       setUploading(true)
-      setStatusMessage(null)
 
       const formData = new FormData()
       formData.append("file", file)
@@ -163,13 +162,13 @@ export function CvTab() {
       if (res.ok && data.url) {
         setPdfUrl(data.url)
         setFileName(file.name)
-        setStatusMessage({ type: "success", text: "Fichier PDF chargé avec succès ! Cliquez sur 'Enregistrer & Publier'." })
+        toast.success("Fichier PDF chargé avec succès ! Cliquez sur 'Enregistrer & Publier'.")
       } else {
-        setStatusMessage({ type: "error", text: data.error || "Échec de l'upload du fichier PDF." })
+        toast.error(data.error || "Échec de l'upload du fichier PDF.")
       }
     } catch (err) {
       console.error(err)
-      setStatusMessage({ type: "error", text: "Erreur lors de l'envoi du fichier PDF." })
+      toast.error("Erreur lors de l'envoi du fichier PDF.")
     } finally {
       setUploading(false)
     }
@@ -179,13 +178,12 @@ export function CvTab() {
   const handleSave = async (e?: React.FormEvent) => {
     if (e) e.preventDefault()
     if (!pdfUrl.trim()) {
-      setStatusMessage({ type: "error", text: "Veuillez fournir l'URL du fichier PDF du CV." })
+      toast.error("Veuillez fournir l'URL du fichier PDF du CV.")
       return
     }
 
     try {
       setSaving(true)
-      setStatusMessage(null)
 
       const res = await fetch("/api/resume", {
         method: "POST",
@@ -198,15 +196,14 @@ export function CvTab() {
 
       const data = await res.json()
       if (res.ok && data.success) {
-        setStatusMessage({ type: "success", text: "Le CV PDF a été mis à jour et publié sur le site public ! 🎉" })
+        toast.success("Le CV PDF a été mis à jour et publié sur le site public ! 🎉")
         setUpdatedAt(data.resume.updatedAt)
-        setTimeout(() => setStatusMessage(null), 4000)
       } else {
-        setStatusMessage({ type: "error", text: data.error || "Erreur lors de la sauvegarde." })
+        toast.error(data.error || "Erreur lors de la sauvegarde.")
       }
     } catch (err) {
       console.error(err)
-      setStatusMessage({ type: "error", text: "Erreur de connexion serveur." })
+      toast.error("Erreur de connexion serveur.")
     } finally {
       setSaving(false)
     }
@@ -216,7 +213,6 @@ export function CvTab() {
   const handleDelete = async () => {
     try {
       setDeleting(true)
-      setStatusMessage(null)
 
       const res = await fetch("/api/resume", {
         method: "DELETE",
@@ -227,14 +223,13 @@ export function CvTab() {
         setPdfUrl("")
         setFileName("")
         setUpdatedAt(null)
-        setStatusMessage({ type: "success", text: "Le CV PDF a été supprimé avec succès ! 🗑️" })
-        setTimeout(() => setStatusMessage(null), 4000)
+        toast.success("Le CV PDF a été supprimé avec succès ! 🗑️")
       } else {
-        setStatusMessage({ type: "error", text: data.error || "Erreur lors de la suppression." })
+        toast.error(data.error || "Erreur lors de la suppression.")
       }
     } catch (err) {
       console.error(err)
-      setStatusMessage({ type: "error", text: "Erreur serveur lors de la suppression." })
+      toast.error("Erreur serveur lors de la suppression.")
     } finally {
       setDeleting(false)
       setShowDeleteModal(false)
@@ -358,19 +353,6 @@ export function CvTab() {
               </label>
             </div>
           </div>
-
-          {statusMessage && (
-            <div
-              className={`rounded-xl p-3 text-xs font-medium flex items-center gap-2 ${
-                statusMessage.type === "success"
-                  ? "bg-emerald-500/10 border border-emerald-500/30 text-emerald-400"
-                  : "bg-destructive/10 border border-destructive/30 text-destructive"
-              }`}
-            >
-              {statusMessage.type === "success" ? <CheckCircle2 className="size-4 shrink-0" /> : <AlertCircle className="size-4 shrink-0" />}
-              {statusMessage.text}
-            </div>
-          )}
 
           <div className="flex items-center justify-between pt-2">
             {/* BOUTON SUPPRIMER LE CV */}
