@@ -5,16 +5,22 @@ import { blogPosts } from "../src/data/blog"
 const prisma = new PrismaClient()
 
 async function main() {
-  const adminEmail = process.env.ADMIN_DEFAULT_EMAIL || "admin@portfolio.dev"
-  const adminPassword = process.env.ADMIN_DEFAULT_PASSWORD || "Admin_Portfolio_2026!SecureKey"
+  const adminEmail = process.env.ADMIN_DEFAULT_EMAIL
+  const adminPassword = process.env.ADMIN_DEFAULT_PASSWORD
+
+  if (!adminEmail || !adminPassword) {
+    throw new Error(
+      "ADMIN_DEFAULT_EMAIL et ADMIN_DEFAULT_PASSWORD doivent être définis dans l'environnement avant de lancer le seed."
+    )
+  }
 
   const hashedPassword = await bcrypt.hash(adminPassword, 10)
 
   const admin = await prisma.user.upsert({
     where: { email: adminEmail },
-    update: {
-      password: hashedPassword,
-    },
+    // Ne jamais écraser le mot de passe d'un compte existant lors d'un reseed
+    // (évite de réinitialiser silencieusement le mot de passe réel de l'admin)
+    update: {},
     create: {
       email: adminEmail,
       name: "Ali Izayid (Admin)",
