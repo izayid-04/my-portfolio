@@ -327,7 +327,7 @@ function BrowserPreview({ url, title }: { url: string; title: string }) {
               height={DESKTOP_VIEWPORT_HEIGHT}
               className="border-0"
               loading="lazy"
-              sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+              sandbox="allow-scripts allow-forms allow-popups"
               referrerPolicy="no-referrer"
             />
           </div>
