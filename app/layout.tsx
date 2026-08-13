@@ -19,11 +19,11 @@ export const metadata: Metadata = {
   description: "Portfolio personnel",
   icons: {
     icon: [
-      { url: "/logo.png", type: "image/png", sizes: "32x32" },
-      { url: "/logo.png", type: "image/png", sizes: "192x192" },
-      { url: "/logo.png", type: "image/png", sizes: "512x512" },
+      { url: "/favicon.png", type: "image/png", sizes: "32x32" },
+      { url: "/favicon.png", type: "image/png", sizes: "192x192" },
+      { url: "/favicon.png", type: "image/png", sizes: "512x512" },
     ],
-    apple: "/logo.png",
+    apple: "/favicon.png",
   },
 };
 
