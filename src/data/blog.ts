@@ -471,6 +471,146 @@ Une **plateforme claire et professionnelle** qui renforce l’image d’EASYTECS
     tags: ["État civil", "e-Gouvernance", "Sénégal"],
     image: "https://images.unsplash.com/photo-1581553672347-95d9444c0d2c?fm=jpg&q=80&w=800&auto=format&fit=crop",
   },
+  {
+    slug: "tmco",
+    title: "TMCO — Transport Mobilité Centre-Ouest",
+    excerpt:
+      "Plateforme officielle du réseau de transport public de la 3CO à Mayotte, avec un calcul d’itinéraire basé sur l’algorithme de Dijkstra.",
+    content: `
+## Contexte
+
+TMCO est la plateforme officielle du réseau de transport public de la Communauté de Communes du Centre-Ouest (3CO) à Mayotte — un territoire de 5 communes et plus de 50 000 habitants. Le projet a été réalisé pour l’agence UWEZO, avec un backend Django et un frontend Next.js.
+
+## Mon rôle
+
+J’étais principalement côté frontend, en charge de l’interface Next.js consultée par les usagers du réseau.
+
+## Le vrai défi : calculer les itinéraires
+
+La partie la plus difficile du projet n’avait rien à voir avec l’interface : c’est le calcul d’itinéraires sur la carte. J’ai implémenté l’algorithme de **Dijkstra** pour trouver le plus court chemin entre deux arrêts, en tenant compte du réseau réel de lignes et des correspondances entre les 5 communes. Une fois cette brique posée, le reste de l’intégration (recherche, affichage des horaires, responsive) s’est déroulé sans embûche particulière.
+
+## Stack technique
+
+- **Backend :** Django
+- **Frontend :** Next.js
+- **Zone couverte :** 5 communes, Mayotte
+
+## Résultat
+
+Une plateforme grand public qui permet à plus de 50 000 habitants de préparer leurs trajets en transport en commun, avec un calcul d’itinéraire fiable même sur un réseau à plusieurs correspondances.
+
+---
+
+[Visiter le site →](https://tmco.yt/)
+    `.trim(),
+    date: "2026-04-01",
+    readingTime: 2,
+    tags: ["Django", "Next.js", "Transport", "Mayotte"],
+    image: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=800&q=80",
+  },
+  {
+    slug: "yeeyo",
+    title: "YEE YÔ — SaaS de Gestion Commerciale",
+    excerpt:
+      "SaaS complet de gestion commerciale (ERP/CRM) développé à trois, feature par feature, avec CI/CD et Docker.",
+    content: `
+## Contexte
+
+YeeYo est une solution SaaS complète de gestion commerciale (ERP/CRM) : suivi des ventes, facturation, gestion des stocks et caisse enregistreuse. Développée chez BIACode, avec Next.js côté frontend et Nest.js côté backend.
+
+## Mon rôle
+
+On a avancé à trois, **feature par feature**, plutôt que par couche technique : sur chaque fonctionnalité, je touchais aussi bien le backend Nest.js que le frontend Next.js selon le besoin. J’ai aussi mis en place la partie **CI/CD** et la conteneurisation **Docker** du projet.
+
+## Stack technique
+
+- **Frontend :** Next.js
+- **Backend :** Nest.js
+- **Conteneurisation :** Docker
+- **CI/CD :** pipeline de déploiement automatisé
+
+## Résultat
+
+Une plateforme SaaS opérationnelle qui couvre tout le cycle commercial — vente, facturation, stock, caisse — avec un pipeline de déploiement automatisé qui a permis à l’équipe de livrer des itérations rapides tout au long du projet.
+
+---
+
+[Visiter le site →](https://www.yeeyo.org/)
+    `.trim(),
+    date: "2026-06-01",
+    readingTime: 2,
+    tags: ["Next.js", "Nest.js", "Docker", "CI/CD", "SaaS"],
+    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80",
+  },
+  {
+    slug: "bonjourcitoyen",
+    title: "BonjourCitoyen — Préparation à l’Examen Civique",
+    excerpt:
+      "Plateforme EdTech de préparation aux examens civiques en France, avec un moteur de quiz conçu de A à Z.",
+    content: `
+## Contexte
+
+BonjourCitoyen est une plateforme EdTech qui aide les usagers à se préparer aux examens civiques officiels en France : titre de séjour pluriannuel, carte de résident de 10 ans et naturalisation. Backend Django, frontend Next.js, réalisé pour l’agence UWEZO.
+
+## Mon rôle
+
+J’ai travaillé principalement côté frontend, avec la mise en place du **moteur de quiz** — la pièce centrale du produit — et de tout ce qui gravite autour : progression, correction, affichage des résultats.
+
+## Ce qui m’a posé le plus de problèmes
+
+J’ai rencontré pas mal d’erreurs pendant le développement du moteur de quiz, notamment sur la synchronisation entre les réponses de l’utilisateur et les retours de l’API. M’appuyer réellement sur les **codes de statut HTTP** plutôt que sur des réponses génériques m’a énormément aidé à fiabiliser le tout et à comprendre rapidement d’où venaient les problèmes.
+
+## Stack technique
+
+- **Backend :** Django
+- **Frontend :** Next.js
+
+## Résultat
+
+Une plateforme de préparation aux examens civiques avec un moteur de quiz fiable, utilisée par des usagers qui préparent des démarches administratives réelles — un contexte où la fiabilité compte particulièrement.
+
+---
+
+[Visiter le site →](https://bonjourcitoyen.fr/)
+    `.trim(),
+    date: "2026-07-01",
+    readingTime: 2,
+    tags: ["Django", "Next.js", "EdTech", "Examen Civique"],
+    image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&q=80",
+  },
+  {
+    slug: "photonum",
+    title: "PhotoNum — Photo d’Identité Numérique e-Photo (ANTS)",
+    excerpt:
+      "Service web et application mobile pour générer des photos d’identité conformes ANTS, avec une PWA packagée via Capacitor.",
+    content: `
+## Contexte
+
+PhotoNum (e-Photo) permet d’obtenir en quelques minutes des photos d’identité numériques avec signature électronique, conformes aux normes ANTS et Préfecture. Le projet combine un site vitrine WordPress, un serveur applicatif et une application mobile.
+
+## Mon rôle
+
+J’ai travaillé sur la partie applicative : un **serveur Node** et le **frontend web**, ainsi que l’**application mobile**, développée en PWA packagée directement avec **Capacitor**. Je n’ai pas touché au site vitrine WordPress, géré séparément.
+
+## Stack technique
+
+- **Backend :** Node.js
+- **Frontend web :** Next.js
+- **Mobile :** PWA packagée avec Capacitor
+
+## Résultat
+
+Une expérience complète, du site vitrine jusqu’à l’application mobile, qui permet aux usagers de générer une photo d’identité conforme aux exigences ANTS directement depuis leur téléphone.
+
+---
+
+[Visiter le site →](https://photonum.xyz/)
+    `.trim(),
+    date: "2026-08-01",
+    readingTime: 2,
+    tags: ["Next.js", "App Mobile", "e-Photo", "ANTS"],
+    image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80",
+  },
 ]
 
 export function getPostBySlug(slug: string): BlogPost | undefined {
