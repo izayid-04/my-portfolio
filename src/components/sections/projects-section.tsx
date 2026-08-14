@@ -15,6 +15,8 @@ import {
   X,
   RotateCcw,
   Filter,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { siteConfig } from "@/config/site"
@@ -485,6 +487,31 @@ export function ProjectsSection({
     setSearchQuery("")
   }
 
+  // Pagination : 3 lignes à la fois (9 cartes sur la grille 3 colonnes en desktop)
+  const PROJECTS_PER_PAGE = 9
+  const [currentPage, setCurrentPage] = useState(1)
+  const totalPages = Math.max(1, Math.ceil(filteredProjects.length / PROJECTS_PER_PAGE))
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [selectedCompany, selectedTag, searchQuery])
+
+  useEffect(() => {
+    if (currentPage > totalPages) setCurrentPage(totalPages)
+  }, [currentPage, totalPages])
+
+  const paginatedProjects = useMemo(() => {
+    const start = (currentPage - 1) * PROJECTS_PER_PAGE
+    return filteredProjects.slice(start, start + PROJECTS_PER_PAGE)
+  }, [filteredProjects, currentPage])
+
+  const goToPage = (page: number) => {
+    setCurrentPage(page)
+    if (typeof window !== "undefined") {
+      document.getElementById(siteConfig.sections.projects)?.scrollIntoView({ behavior: "smooth", block: "start" })
+    }
+  }
+
   const selectedSlug = selectedProject ? getProjectBlogSlug(selectedProject) : null
   const selectedPost = selectedSlug ? getPostBySlug(selectedSlug) : undefined
 
@@ -666,7 +693,13 @@ export function ProjectsSection({
       {/* Compteur de résultats */}
       <div className="flex items-center justify-between mb-4 px-1 text-xs text-muted-foreground">
         <span>
-          Affichage de <strong className="text-foreground font-semibold">{filteredProjects.length}</strong> projet(s) sur {items.length}
+          Affichage de{" "}
+          <strong className="text-foreground font-semibold">
+            {filteredProjects.length === 0 ? 0 : (currentPage - 1) * PROJECTS_PER_PAGE + 1}
+            {"–"}
+            {Math.min(currentPage * PROJECTS_PER_PAGE, filteredProjects.length)}
+          </strong>{" "}
+          sur {filteredProjects.length} projet(s) {activeFiltersCount > 0 ? "" : `(${items.length} au total)`}
         </span>
         {activeFiltersCount > 0 && (
           <button
@@ -701,7 +734,7 @@ export function ProjectsSection({
         </div>
       ) : (
         <ul className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {filteredProjects.map((project) => (
+          {paginatedProjects.map((project) => (
             <motion.li
               key={project.title}
               initial={{ opacity: 0, y: 20 }}
@@ -837,6 +870,48 @@ export function ProjectsSection({
             </motion.li>
           ))}
         </ul>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="mt-8 flex items-center justify-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => goToPage(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="cursor-pointer inline-flex size-8 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            aria-label="Page précédente"
+          >
+            <ChevronLeft className="size-4" />
+          </button>
+
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            <button
+              key={page}
+              type="button"
+              onClick={() => goToPage(page)}
+              className={cn(
+                "cursor-pointer inline-flex size-8 items-center justify-center rounded-lg text-xs font-semibold transition-colors border",
+                page === currentPage
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground"
+              )}
+              aria-current={page === currentPage ? "page" : undefined}
+            >
+              {page}
+            </button>
+          ))}
+
+          <button
+            type="button"
+            onClick={() => goToPage(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="cursor-pointer inline-flex size-8 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            aria-label="Page suivante"
+          >
+            <ChevronRight className="size-4" />
+          </button>
+        </div>
       )}
 
       {/* Modal Détail Projet */}

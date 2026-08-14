@@ -582,25 +582,24 @@ Une plateforme de préparation aux examens civiques avec un moteur de quiz fiabl
     slug: "photonum",
     title: "PhotoNum — Photo d’Identité Numérique e-Photo (ANTS)",
     excerpt:
-      "Service web et application mobile pour générer des photos d’identité conformes ANTS, avec une PWA packagée via Capacitor.",
+      "Service web pour générer des photos d’identité conformes ANTS, avec un serveur API et un frontend en Next.js.",
     content: `
 ## Contexte
 
-PhotoNum (e-Photo) permet d’obtenir en quelques minutes des photos d’identité numériques avec signature électronique, conformes aux normes ANTS et Préfecture. Le projet combine un site vitrine WordPress, un serveur applicatif et une application mobile.
+PhotoNum (e-Photo) permet d’obtenir en quelques minutes des photos d’identité numériques avec signature électronique, conformes aux normes ANTS et Préfecture. Le projet combine un site vitrine WordPress et une application web.
 
 ## Mon rôle
 
-J’ai travaillé sur la partie applicative : un **serveur Node** et le **frontend web**, ainsi que l’**application mobile**, développée en PWA packagée directement avec **Capacitor**. Je n’ai pas touché au site vitrine WordPress, géré séparément.
+J’ai travaillé sur la partie applicative : le **serveur API Next.js** et le **frontend web**. Je n’ai pas touché au site vitrine WordPress (géré séparément) ni à d’application mobile — le projet n’en comporte pas de mon côté.
 
 ## Stack technique
 
-- **Backend :** Node.js
+- **Backend/API :** Next.js (API routes)
 - **Frontend web :** Next.js
-- **Mobile :** PWA packagée avec Capacitor
 
 ## Résultat
 
-Une expérience complète, du site vitrine jusqu’à l’application mobile, qui permet aux usagers de générer une photo d’identité conforme aux exigences ANTS directement depuis leur téléphone.
+Un service web qui permet aux usagers de générer une photo d’identité conforme aux exigences ANTS directement depuis leur navigateur.
 
 ---
 
@@ -608,7 +607,7 @@ Une expérience complète, du site vitrine jusqu’à l’application mobile, qu
     `.trim(),
     date: "2026-08-01",
     readingTime: 2,
-    tags: ["Next.js", "App Mobile", "e-Photo", "ANTS"],
+    tags: ["Next.js", "e-Photo", "ANTS"],
     image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80",
   },
 ]
