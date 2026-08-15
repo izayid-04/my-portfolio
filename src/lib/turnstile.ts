@@ -1,11 +1,11 @@
 /**
- * Vérification Google reCAPTCHA v2 (checkbox) côté serveur.
- * @see https://developers.google.com/recaptcha/docs/verify
+ * Vérification Cloudflare Turnstile côté serveur.
+ * @see https://developers.cloudflare.com/turnstile/get-started/server-side-validation/
  */
-export async function verifyRecaptchaV2(token: string, remoteIp?: string): Promise<boolean> {
-  const secret = process.env.RECAPTCHA_SECRET_KEY
+export async function verifyTurnstile(token: string, remoteIp?: string): Promise<boolean> {
+  const secret = process.env.TURNSTILE_SECRET_KEY
   if (!secret?.trim()) {
-    console.warn("[recaptcha] RECAPTCHA_SECRET_KEY manquant — vérification ignorée")
+    console.warn("[turnstile] TURNSTILE_SECRET_KEY manquant — vérification ignorée")
     return false
   }
   if (!token?.trim()) return false
@@ -15,7 +15,7 @@ export async function verifyRecaptchaV2(token: string, remoteIp?: string): Promi
   params.set("response", token)
   if (remoteIp) params.set("remoteip", remoteIp)
 
-  const res = await fetch("https://www.google.com/recaptcha/api/siteverify", {
+  const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: params.toString(),
