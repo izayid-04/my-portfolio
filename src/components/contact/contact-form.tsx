@@ -5,10 +5,10 @@ import { motion } from "motion/react"
 import { Send, Search } from "lucide-react"
 import { countryPhoneOptions, getFlagEmoji, getPhonePlaceholder } from "@/data/countries"
 import {
-  RecaptchaV2,
-  isRecaptchaEnabled,
-  type RecaptchaV2Handle,
-} from "@/components/contact/recaptcha-v2"
+  TurnstileWidget,
+  isTurnstileEnabled,
+  type TurnstileWidgetHandle,
+} from "@/components/shared/turnstile-widget"
 import { ContactConfirmationModal } from "./contact-confirmation-modal"
 import type { ContactFormData } from "@/types"
 import { cn } from "@/lib/utils"
@@ -42,13 +42,13 @@ function filterCountries(query: string) {
 export function ContactForm() {
   const [form, setForm] = useState<ContactFormData>(initialForm)
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle")
-  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null)
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
   const [captchaHint, setCaptchaHint] = useState(false)
   const [countrySearch, setCountrySearch] = useState("")
   const [selectOpen, setSelectOpen] = useState(false)
   const searchInputRef = useRef<HTMLInputElement>(null)
-  const recaptchaRef = useRef<RecaptchaV2Handle>(null)
-  const captchaEnabled = isRecaptchaEnabled()
+  const turnstileRef = useRef<TurnstileWidgetHandle>(null)
+  const captchaEnabled = isTurnstileEnabled()
 
   const phonePlaceholder = getPhonePlaceholder(form.countryCode)
   const filteredCountries = useMemo(
@@ -76,7 +76,7 @@ export function ContactForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (captchaEnabled && !recaptchaToken) {
+    if (captchaEnabled && !turnstileToken) {
       setCaptchaHint(true)
       return
     }
@@ -92,22 +92,22 @@ export function ContactForm() {
           phone: form.phone || undefined,
           message: form.message || undefined,
           countryCode: form.countryCode || undefined,
-          recaptchaToken: recaptchaToken || undefined,
+          turnstileToken: turnstileToken || undefined,
         }),
       })
       await res.json().catch(() => ({}))
       if (!res.ok) {
         setStatus("error")
-        recaptchaRef.current?.reset()
+        turnstileRef.current?.reset()
         return
       }
       setStatus("success")
       setForm(initialForm)
-      recaptchaRef.current?.reset()
-      setRecaptchaToken(null)
+      turnstileRef.current?.reset()
+      setTurnstileToken(null)
     } catch {
       setStatus("error")
-      recaptchaRef.current?.reset()
+      turnstileRef.current?.reset()
     }
   }
 
@@ -300,16 +300,16 @@ export function ContactForm() {
 
       {captchaEnabled && (
         <div className="space-y-2">
-          <RecaptchaV2
-            ref={recaptchaRef}
+          <TurnstileWidget
+            ref={turnstileRef}
             onChange={(t) => {
-              setRecaptchaToken(t)
+              setTurnstileToken(t)
               if (t) setCaptchaHint(false)
             }}
           />
           {captchaHint && (
             <p className="text-sm text-destructive">
-              Cochez la case « Je ne suis pas un robot » avant d&apos;envoyer.
+              Validez le captcha avant d&apos;envoyer.
             </p>
           )}
         </div>
@@ -322,7 +322,7 @@ export function ContactForm() {
         </p>
         <motion.button
           type="submit"
-          disabled={status === "sending" || (captchaEnabled && !recaptchaToken)}
+          disabled={status === "sending" || (captchaEnabled && !turnstileToken)}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           className={cn(

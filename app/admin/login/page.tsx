@@ -1,9 +1,10 @@
 "use client"
 
-import { FormEvent, useEffect, useState } from "react"
+import { FormEvent, useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { LockKeyhole, ShieldCheck } from "lucide-react"
 import { ADMIN_KEYS } from "@/data/admin-demo"
+import { TurnstileWidget, type TurnstileWidgetHandle } from "@/components/shared/turnstile-widget"
 
 export default function AdminLoginPage() {
   const router = useRouter()
@@ -11,6 +12,8 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState<string>("")
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
+  const turnstileRef = useRef<TurnstileWidgetHandle>(null)
 
   useEffect(() => {
     // Check if session token is valid via API
@@ -38,7 +41,7 @@ export default function AdminLoginPage() {
       const res = await fetch("/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim(), password }),
+        body: JSON.stringify({ email: email.trim(), password, turnstileToken }),
       })
 
       const data = await res.json()
@@ -46,6 +49,7 @@ export default function AdminLoginPage() {
       if (!res.ok) {
         setError(data.error || "Identifiants invalides.")
         setIsLoading(false)
+        turnstileRef.current?.reset()
         return
       }
 
@@ -109,6 +113,8 @@ export default function AdminLoginPage() {
                 />
               </div>
             </label>
+
+            <TurnstileWidget ref={turnstileRef} onChange={setTurnstileToken} />
 
             {error && (
               <p className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">

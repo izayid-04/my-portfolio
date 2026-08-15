@@ -2,17 +2,39 @@ import { NextResponse } from "next/server"
 import bcrypt from "bcryptjs"
 import { prisma } from "@/lib/prisma"
 import { createToken, setAuthCookie } from "@/lib/auth"
+import { verifyTurnstile } from "@/lib/turnstile"
 
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { email, password } = body
+    const { email, password, turnstileToken } = body
 
     if (!email || !password) {
       return NextResponse.json(
         { error: "Veuillez fournir un e-mail et un mot de passe." },
         { status: 400 }
       )
+    }
+
+    const secretConfigured = Boolean(process.env.TURNSTILE_SECRET_KEY?.trim())
+    const siteKeyConfigured = Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim())
+
+    if (secretConfigured && siteKeyConfigured) {
+      if (!turnstileToken?.trim()) {
+        return NextResponse.json(
+          { error: "Veuillez valider le captcha." },
+          { status: 400 }
+        )
+      }
+      const forwarded = request.headers.get("x-forwarded-for")
+      const remoteIp = forwarded?.split(",")[0]?.trim()
+      const ok = await verifyTurnstile(turnstileToken.trim(), remoteIp)
+      if (!ok) {
+        return NextResponse.json(
+          { error: "Captcha invalide ou expiré. Réessayez." },
+          { status: 400 }
+        )
+      }
     }
 
     const cleanEmail = email.trim().toLowerCase()

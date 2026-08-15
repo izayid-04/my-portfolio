@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { sendEmail } from "@/lib/mail"
-import { verifyRecaptchaV2 } from "@/lib/recaptcha"
+import { verifyTurnstile } from "@/lib/turnstile"
 import { prisma } from "@/lib/prisma"
 
 /**
@@ -12,13 +12,13 @@ import { prisma } from "@/lib/prisma"
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { name, email, phone, message, countryCode, recaptchaToken } = body as {
+    const { name, email, phone, message, countryCode, turnstileToken } = body as {
       name?: string
       email?: string
       phone?: string
       message?: string
       countryCode?: string
-      recaptchaToken?: string
+      turnstileToken?: string
     }
 
     if (!name?.trim() || !email?.trim()) {
@@ -28,11 +28,11 @@ export async function POST(request: Request) {
       )
     }
 
-    const secretConfigured = Boolean(process.env.RECAPTCHA_SECRET_KEY?.trim())
-    const siteKeyConfigured = Boolean(process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY?.trim())
+    const secretConfigured = Boolean(process.env.TURNSTILE_SECRET_KEY?.trim())
+    const siteKeyConfigured = Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim())
 
     if (secretConfigured && siteKeyConfigured) {
-      if (!recaptchaToken?.trim()) {
+      if (!turnstileToken?.trim()) {
         return NextResponse.json(
           { error: "Veuillez valider le captcha." },
           { status: 400 }
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
       }
       const forwarded = request.headers.get("x-forwarded-for")
       const remoteIp = forwarded?.split(",")[0]?.trim()
-      const ok = await verifyRecaptchaV2(recaptchaToken.trim(), remoteIp)
+      const ok = await verifyTurnstile(turnstileToken.trim(), remoteIp)
       if (!ok) {
         return NextResponse.json(
           { error: "Captcha invalide ou expiré. Réessayez." },
