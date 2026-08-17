@@ -199,7 +199,7 @@ export function CertificationsSection({
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="mt-2 text-sm font-medium bg-gradient-to-r from-primary via-violet-500 to-cyan-500 bg-clip-text text-transparent sm:text-base"
+          className="mt-2 text-sm font-medium text-foreground sm:text-base"
         >
           {subtitle}
         </motion.p>
@@ -281,7 +281,7 @@ export function CertificationsSection({
             className="rounded-3xl border border-primary/30 bg-card p-5 sm:p-7 shadow-xl space-y-6 relative overflow-hidden"
           >
             {/* Ligne d'accent supérieure avec dégradé */}
-            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-violet-500 to-cyan-500" />
+            <div className="absolute inset-x-0 top-0 h-1 bg-foreground" />
 
             {/* BARRE DE NAVIGATION EN-TÊTE DU DIPLÔME SÉLECTIONNÉ */}
             <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border/60 pb-4">

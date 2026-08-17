@@ -22,7 +22,7 @@ export default function ContactPage() {
           <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-4xl md:text-5xl">
             Contact
           </h1>
-          <p className="mt-3 text-sm font-medium bg-gradient-to-r from-primary via-violet-500 to-cyan-500 bg-clip-text text-transparent sm:text-lg">
+          <p className="mt-3 text-sm font-medium text-foreground sm:text-lg">
             Un projet, une question ou une collaboration ? Envoyez-moi un message.
           </p>
         </header>

@@ -512,7 +512,7 @@ export function ProjectsSection({
         >
           {title}
         </h2>
-        <p className="mt-2 text-sm font-medium bg-gradient-to-r from-primary via-violet-500 to-cyan-500 bg-clip-text text-transparent sm:text-base">
+        <p className="mt-2 text-sm font-medium text-foreground sm:text-base">
           {subtitle}
         </p>
       </div>

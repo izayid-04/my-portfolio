@@ -57,7 +57,7 @@ export function AboutSection({
           >
             {title}
           </h2>
-          <p className="mt-2 text-sm font-semibold uppercase tracking-widest bg-gradient-to-r from-primary via-violet-500 to-cyan-500 bg-clip-text text-transparent">
+          <p className="mt-2 text-sm font-semibold uppercase tracking-widest text-foreground">
             Parcours & valeurs
           </p>
           <div className="mt-6 space-y-5">
