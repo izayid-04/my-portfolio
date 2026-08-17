@@ -284,6 +284,13 @@ function BrowserPreview({ url, title }: { url: string; title: string }) {
   const [scale, setScale] = useState(1)
   /** Évite les divergences SSR / premier rendu client (iframe + resize) */
   const [iframeReady, setIframeReady] = useState(false)
+  /** Ne monte le vrai <iframe> que lorsque la carte est déjà bien visible à l'écran :
+   *  certains sites externes chargés en direct ont un champ `autofocus`, ce qui pousse
+   *  le navigateur à recentrer la page sur l'iframe dès qu'elle charge. En la chargeant
+   *  seulement une fois déjà visible (plutôt que dès qu'elle approche de l'écran), ce
+   *  recentrage éventuel n'a plus rien à corriger — on évite le saut de scroll pendant
+   *  que l'utilisateur défile encore vers la carte. */
+  const [shouldLoadIframe, setShouldLoadIframe] = useState(false)
 
   useEffect(() => {
     setIframeReady(true)
@@ -303,6 +310,23 @@ function BrowserPreview({ url, title }: { url: string; title: string }) {
     return () => ro.disconnect()
   }, [iframeReady])
 
+  useEffect(() => {
+    if (!iframeReady) return
+    const el = wrapperRef.current
+    if (!el) return
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShouldLoadIframe(true)
+          io.disconnect()
+        }
+      },
+      { threshold: 0.3 }
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [iframeReady])
+
   return (
     <div className="flex flex-col overflow-hidden rounded-t-xl bg-card p-1.5 sm:p-2 border-b border-border">
       {/* Vue desktop : iframe 1280×960 → le site affiche sa version desktop, puis on scale pour remplir le cadre */}
@@ -311,7 +335,7 @@ function BrowserPreview({ url, title }: { url: string; title: string }) {
         className="relative w-full overflow-hidden rounded-lg border border-border/60 bg-muted"
         style={{ aspectRatio: "4/3" }}
       >
-        {!iframeReady ? (
+        {!iframeReady || !shouldLoadIframe ? (
           <div className="absolute inset-0 animate-pulse bg-muted" aria-hidden />
         ) : (
           <div
@@ -328,7 +352,6 @@ function BrowserPreview({ url, title }: { url: string; title: string }) {
               width={DESKTOP_VIEWPORT_WIDTH}
               height={DESKTOP_VIEWPORT_HEIGHT}
               className="border-0"
-              loading="lazy"
               sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
               referrerPolicy="no-referrer"
             />
@@ -352,7 +375,7 @@ export function ProjectsSection({
   subtitle = "Réalisations récentes et side projects",
   projects: initialProjects = defaultProjects,
 }: ProjectsSectionProps) {
-  const [items, setItems] = useState<Project[]>(initialProjects)
+  const items = initialProjects
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
 
   // Filtres State
@@ -366,47 +389,9 @@ export function ProjectsSection({
     setIsMounted(true)
   }, [])
 
-  useEffect(() => {
-    async function loadProjects() {
-      try {
-        const res = await fetch("/api/projects")
-        if (res.ok) {
-          const data = await res.json()
-          if (Array.isArray(data.projects) && data.projects.length > 0) {
-            const mapped: Project[] = data.projects.map((p: any) => {
-              const techIcons: ProjectTechIcon[] = (p.tags || [])
-                .map((tag: string) => {
-                  const matchedEntry = Object.entries(projectStackIcons).find(
-                    ([key]) => key.toLowerCase() === tag.toLowerCase()
-                  )
-                  return matchedEntry ? { name: tag, url: matchedEntry[1] } : null
-                })
-                .filter(Boolean) as ProjectTechIcon[]
-
-              return {
-                title: p.title,
-                description: p.description,
-                date: p.date || undefined,
-                slug: p.slug || undefined,
-                tags: p.tags || [],
-                image: p.image || undefined,
-                video: p.video || undefined,
-                href: p.href || undefined,
-                githubUrl: p.githubUrl || undefined,
-                embedSite: Boolean(p.embedSite),
-                techIcons: techIcons.length > 0 ? techIcons : undefined,
-                company: p.company || null,
-              }
-            })
-            setItems(mapped)
-          }
-        }
-      } catch (err) {
-        console.error("Erreur de chargement des projets:", err)
-      }
-    }
-    loadProjects()
-  }, [])
+  // Les projets sont fournis par le serveur (app/page.tsx) via la prop `projects`.
+  // Pas de re-fetch client ici : ça évite un redimensionnement de la section après
+  // le premier rendu (c'était la cause du saut de scroll au niveau de "À propos").
 
   // Calcul des options de filtres
   const companyOptions = useMemo(() => {
