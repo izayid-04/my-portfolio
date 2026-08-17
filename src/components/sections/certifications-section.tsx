@@ -148,35 +148,11 @@ export function CertificationsSection({
   subtitle = "Formations et diplômes",
   certifications: initialCertifications = defaultCertifications,
 }: CertificationsSectionProps) {
-  const [items, setItems] = useState<Certification[]>(initialCertifications)
+  // Les certifications sont fournies par le serveur (app/page.tsx) via la prop
+  // `certifications`. Pas de re-fetch client ici : ça évite un redimensionnement
+  // de la section après le premier rendu (cause du saut de scroll signalé).
+  const items = initialCertifications
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
-
-  // Chargement depuis la base de données
-  useEffect(() => {
-    async function loadDiplomas() {
-      try {
-        const res = await fetch("/api/diplomas")
-        if (res.ok) {
-          const data = await res.json()
-          if (Array.isArray(data.diplomas) && data.diplomas.length > 0) {
-            const mapped: Certification[] = data.diplomas.map((d: any) => ({
-              name: d.title,
-              issuer: d.institution?.name || "Formation / Indépendant",
-              date: d.date || undefined,
-              url: d.url || d.institution?.website || undefined,
-              logo: d.institution?.logo || undefined,
-              description: d.description || undefined,
-              image: d.image || undefined,
-            }))
-            setItems(mapped)
-          }
-        }
-      } catch (err) {
-        console.error("Erreur chargement diplômes:", err)
-      }
-    }
-    loadDiplomas()
-  }, [])
 
   const certs = items.length > 0 ? items : initialCertifications
 
