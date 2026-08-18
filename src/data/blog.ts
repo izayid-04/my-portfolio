@@ -479,11 +479,11 @@ Une **plateforme claire et professionnelle** qui renforce l’image d’EASYTECS
     content: `
 ## Contexte
 
-TMCO est la plateforme officielle du réseau de transport public de la Communauté de Communes du Centre-Ouest (3CO) à Mayotte — un territoire de 5 communes et plus de 50 000 habitants. Le projet a été réalisé pour l’agence UWEZO, avec un backend Django et un frontend Next.js.
+TMCO est la plateforme officielle du réseau de transport public de la Communauté de Communes du Centre-Ouest (3CO) à Mayotte — un territoire de 5 communes et plus de 50 000 habitants. Le projet a été réalisé pour l’agence UWEZO, avec un backend Laravel exposant des API et un frontend Next.js.
 
 ## Mon rôle
 
-J’étais principalement côté frontend, en charge de l’interface Next.js consultée par les usagers du réseau.
+J’étais principalement côté frontend, en charge de l’interface Next.js consultée par les usagers du réseau, consommant les API Laravel. Je me suis aussi occupé de la **conteneurisation Docker**, de la gestion des dépendances via **Composer**, et du **pipeline CI/CD**.
 
 ## Le vrai défi : calculer les itinéraires
 
@@ -491,8 +491,11 @@ La partie la plus difficile du projet n’avait rien à voir avec l’interface 
 
 ## Stack technique
 
-- **Backend :** Django
+- **Backend :** Laravel (API)
 - **Frontend :** Next.js
+- **Gestion des dépendances :** Composer
+- **Conteneurisation :** Docker
+- **CI/CD :** pipeline de déploiement jusqu’en production
 - **Zone couverte :** 5 communes, Mayotte
 
 ## Résultat
@@ -505,7 +508,7 @@ Une plateforme grand public qui permet à plus de 50 000 habitants de préparer 
     `.trim(),
     date: "2026-04-01",
     readingTime: 2,
-    tags: ["Django", "Next.js", "Transport", "Mayotte"],
+    tags: ["Laravel", "Next.js", "Docker", "CI/CD", "Transport", "Mayotte"],
     image: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=800&q=80",
   },
   {
@@ -554,7 +557,7 @@ BonjourCitoyen est une plateforme EdTech qui aide les usagers à se préparer au
 
 ## Mon rôle
 
-J’ai travaillé principalement côté frontend, avec la mise en place du **moteur de quiz** — la pièce centrale du produit — et de tout ce qui gravite autour : progression, correction, affichage des résultats.
+J’ai travaillé principalement côté frontend, avec la mise en place du **moteur de quiz** — la pièce centrale du produit — et de tout ce qui gravite autour : progression, correction, affichage des résultats. Je me suis aussi occupé de la **conteneurisation Docker** et du **pipeline CI/CD**, jusqu’à la mise en production.
 
 ## Ce qui m’a posé le plus de problèmes
 
@@ -564,6 +567,8 @@ J’ai rencontré pas mal d’erreurs pendant le développement du moteur de qui
 
 - **Backend :** Django
 - **Frontend :** Next.js
+- **Conteneurisation :** Docker
+- **CI/CD :** pipeline de déploiement jusqu’en production
 
 ## Résultat
 
@@ -575,7 +580,7 @@ Une plateforme de préparation aux examens civiques avec un moteur de quiz fiabl
     `.trim(),
     date: "2026-07-01",
     readingTime: 2,
-    tags: ["Django", "Next.js", "EdTech", "Examen Civique"],
+    tags: ["Django", "Next.js", "Docker", "CI/CD", "EdTech"],
     image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&q=80",
   },
   {
@@ -586,16 +591,19 @@ Une plateforme de préparation aux examens civiques avec un moteur de quiz fiabl
     content: `
 ## Contexte
 
-PhotoNum (e-Photo) permet d’obtenir en quelques minutes des photos d’identité numériques avec signature électronique, conformes aux normes ANTS et Préfecture. Le projet combine un site vitrine WordPress et une application web.
+PhotoNum (e-Photo) permet d’obtenir en quelques minutes des photos d’identité numériques avec signature électronique, conformes aux normes ANTS et Préfecture. Le projet combine un site vitrine WordPress, une application mobile Flutter et une application web.
 
 ## Mon rôle
 
-J’ai travaillé sur la partie applicative : le **serveur API Next.js** et le **frontend web**. Je n’ai pas touché au site vitrine WordPress (géré séparément) ni à d’application mobile — le projet n’en comporte pas de mon côté.
+J’ai travaillé sur la partie applicative : les **API routes Next.js** et le **frontend web**, avec **Firebase** comme base de données — la même que celle utilisée par l’application mobile, pour garder les données synchronisées entre les deux. Je me suis aussi occupé de la **conteneurisation Docker** et du **pipeline CI/CD** jusqu’en production. Je n’ai pas touché au site vitrine WordPress ni à l’application mobile Flutter, développés séparément par d’autres membres de l’équipe.
 
 ## Stack technique
 
 - **Backend/API :** Next.js (API routes)
 - **Frontend web :** Next.js
+- **Base de données :** Firebase
+- **Conteneurisation :** Docker
+- **CI/CD :** pipeline de déploiement jusqu’en production
 
 ## Résultat
 
@@ -607,7 +615,7 @@ Un service web qui permet aux usagers de générer une photo d’identité confo
     `.trim(),
     date: "2026-08-01",
     readingTime: 2,
-    tags: ["Next.js", "e-Photo", "ANTS"],
+    tags: ["Next.js", "Firebase", "Docker", "CI/CD", "e-Photo", "ANTS"],
     image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80",
   },
 ]

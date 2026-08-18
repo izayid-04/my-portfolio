@@ -1,9 +1,10 @@
 "use client"
 
+import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { motion } from "motion/react"
-import { ArrowRight, Clock } from "lucide-react"
+import { ArrowRight, Clock, ImageIcon } from "lucide-react"
 import type { BlogPostListItem } from "@/types"
 import { cn } from "@/lib/utils"
 
@@ -12,6 +13,9 @@ interface BlogTimelineContentProps {
 }
 
 export function BlogTimelineContent({ post }: BlogTimelineContentProps) {
+  const [imageFailed, setImageFailed] = useState(false)
+  const showImage = Boolean(post.image) && !imageFailed
+
   return (
     <motion.article
       initial={{ opacity: 0, y: 12 }}
@@ -28,15 +32,20 @@ export function BlogTimelineContent({ post }: BlogTimelineContentProps) {
         )}
       >
         <div className="flex flex-col gap-4 sm:flex-row sm:gap-6">
-          {post.image && (
+          {showImage ? (
             <div className="relative h-40 w-full shrink-0 overflow-hidden rounded-lg bg-muted sm:h-32 sm:w-48">
               <Image
-                src={post.image}
+                src={post.image!}
                 alt=""
                 fill
                 className="object-cover transition-transform duration-300 group-hover:scale-105"
                 sizes="(max-width: 640px) 100vw, 12rem"
+                onError={() => setImageFailed(true)}
               />
+            </div>
+          ) : (
+            <div className="flex h-40 w-full shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground sm:h-32 sm:w-48">
+              <ImageIcon className="size-6" />
             </div>
           )}
           <div className="min-w-0 flex-1">

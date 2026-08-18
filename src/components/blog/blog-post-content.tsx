@@ -1,7 +1,9 @@
 "use client"
 
+import { useState } from "react"
 import { motion } from "motion/react"
 import Image from "next/image"
+import { ImageIcon } from "lucide-react"
 
 interface BlogPostContentProps {
   content: string
@@ -9,22 +11,29 @@ interface BlogPostContentProps {
 }
 
 export function BlogPostContent({ content, coverImage }: BlogPostContentProps) {
+  const [imageFailed, setImageFailed] = useState(false)
   const sections = content.split(/(?=^## )/m).filter(Boolean)
+  const showImage = Boolean(coverImage) && !imageFailed
 
   return (
     <div className="space-y-10">
-      {coverImage && (
+      {showImage ? (
         <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-border bg-muted">
           <Image
-            src={coverImage}
+            src={coverImage!}
             alt=""
             fill
             className="object-cover"
             priority
             sizes="(max-width: 768px) 100vw, 672px"
+            onError={() => setImageFailed(true)}
           />
         </div>
-      )}
+      ) : coverImage ? (
+        <div className="flex aspect-video w-full items-center justify-center rounded-xl border border-border bg-muted text-muted-foreground">
+          <ImageIcon className="size-8" />
+        </div>
+      ) : null}
 
       <div className="prose prose-neutral dark:prose-invert max-w-none prose-headings:font-semibold prose-p:leading-relaxed prose-a:text-primary prose-pre:bg-muted prose-pre:border prose-pre:rounded-lg">
         {sections.map((section, i) => {
