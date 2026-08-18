@@ -4,7 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { motion } from "motion/react"
-import { ArrowRight, Clock, ImageIcon } from "lucide-react"
+import { ArrowRight, Clock, FileText } from "lucide-react"
 import type { BlogPostListItem } from "@/types"
 import { cn } from "@/lib/utils"
 
@@ -45,7 +45,7 @@ export function BlogTimelineContent({ post }: BlogTimelineContentProps) {
             </div>
           ) : (
             <div className="flex h-40 w-full shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground sm:h-32 sm:w-48">
-              <ImageIcon className="size-6" />
+              <FileText className="size-6" />
             </div>
           )}
           <div className="min-w-0 flex-1">

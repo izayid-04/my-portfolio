@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { motion } from "motion/react"
 import Image from "next/image"
-import { ImageIcon } from "lucide-react"
+import { FileText } from "lucide-react"
 
 interface BlogPostContentProps {
   content: string
@@ -31,7 +31,7 @@ export function BlogPostContent({ content, coverImage }: BlogPostContentProps) {
         </div>
       ) : coverImage ? (
         <div className="flex aspect-video w-full items-center justify-center rounded-xl border border-border bg-muted text-muted-foreground">
-          <ImageIcon className="size-8" />
+          <FileText className="size-8" />
         </div>
       ) : null}
 
