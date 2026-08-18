@@ -479,11 +479,11 @@ Une **plateforme claire et professionnelle** qui renforce l’image d’EASYTECS
     content: `
 ## Contexte
 
-TMCO est la plateforme officielle du réseau de transport public de la Communauté de Communes du Centre-Ouest (3CO) à Mayotte — un territoire de 5 communes et plus de 50 000 habitants. Le projet a été réalisé pour l’agence UWEZO, avec un backend Django et un frontend Next.js.
+TMCO est la plateforme officielle du réseau de transport public de la Communauté de Communes du Centre-Ouest (3CO) à Mayotte — un territoire de 5 communes et plus de 50 000 habitants. Le projet a été réalisé pour l’agence UWEZO, avec un backend Laravel exposant des API et un frontend Next.js.
 
 ## Mon rôle
 
-J’étais principalement côté frontend, en charge de l’interface Next.js consultée par les usagers du réseau.
+J’étais principalement côté frontend, en charge de l’interface Next.js consultée par les usagers du réseau, consommant les API Laravel. Je me suis aussi occupé de la **conteneurisation Docker**, de la gestion des dépendances via **Composer**, et du **pipeline CI/CD**.
 
 ## Le vrai défi : calculer les itinéraires
 
@@ -491,8 +491,11 @@ La partie la plus difficile du projet n’avait rien à voir avec l’interface 
 
 ## Stack technique
 
-- **Backend :** Django
+- **Backend :** Laravel (API)
 - **Frontend :** Next.js
+- **Gestion des dépendances :** Composer
+- **Conteneurisation :** Docker
+- **CI/CD :** pipeline de déploiement jusqu’en production
 - **Zone couverte :** 5 communes, Mayotte
 
 ## Résultat
@@ -505,7 +508,7 @@ Une plateforme grand public qui permet à plus de 50 000 habitants de préparer 
     `.trim(),
     date: "2026-04-01",
     readingTime: 2,
-    tags: ["Django", "Next.js", "Transport", "Mayotte"],
+    tags: ["Laravel", "Next.js", "Docker", "CI/CD", "Transport", "Mayotte"],
     image: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=800&q=80",
   },
   {
