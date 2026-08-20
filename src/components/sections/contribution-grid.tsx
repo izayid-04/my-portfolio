@@ -68,10 +68,10 @@ export function ContributionGrid({ calendar }: ContributionGridProps) {
   const monthLabels = getMonthLabels(calendar.weeks)
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-4 sm:p-5">
-      <div className="overflow-x-auto">
+    <div className="rounded-2xl border border-border bg-card p-5 sm:p-6">
+      <div className="overflow-x-auto overflow-y-visible py-1">
         <div className="flex gap-2 min-w-max">
-          <div className="flex shrink-0 flex-col gap-[3px] pt-[15px] text-[10px] text-muted-foreground">
+          <div className="flex shrink-0 flex-col gap-[3px] pt-[15px] text-[10px] leading-none text-muted-foreground">
             {DAY_LABELS.map((label, i) => (
               <div key={i} className="h-[11px] leading-[11px]">
                 {label}
@@ -80,7 +80,7 @@ export function ContributionGrid({ calendar }: ContributionGridProps) {
           </div>
 
           <div className="inline-flex flex-col gap-1">
-            <div className="flex gap-[3px] text-[10px] text-muted-foreground">
+            <div className="flex gap-[3px] text-[10px] leading-none text-muted-foreground">
               {calendar.weeks.map((_, i) => (
                 <div key={i} className="w-[11px] shrink-0 text-left">
                   {monthLabels[i] ?? ""}
