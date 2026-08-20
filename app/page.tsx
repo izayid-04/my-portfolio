@@ -5,6 +5,7 @@ import {
   CertificationsSection,
   ProjectsSection,
 } from "@/components/sections"
+import { GithubContributions } from "@/components/sections/github-contributions"
 import { projectStackIcons } from "@/data/tech-icons"
 
 export const metadata = {
@@ -87,7 +88,9 @@ export default async function HomePage() {
   return (
     <main className="min-h-screen pb-24">
       <HeroSection />
-      <AboutSection />
+      <AboutSection>
+        <GithubContributions username="izayid-04" />
+      </AboutSection>
       <CertificationsSection certifications={certifications} />
       <ProjectsSection projects={projects} />
     </main>

@@ -12,6 +12,7 @@ interface AboutSectionProps {
   className?: string
   title?: string
   paragraphs?: string[]
+  children?: React.ReactNode
 }
 
 const defaultParagraphs = [
@@ -23,6 +24,7 @@ export function AboutSection({
   className,
   title = "À propos",
   paragraphs = defaultParagraphs,
+  children,
 }: AboutSectionProps) {
   return (
     <SectionWrapper
@@ -116,6 +118,8 @@ export function AboutSection({
           ))}
         </div>
       </motion.div>
+
+      {children}
     </SectionWrapper>
   )
 }

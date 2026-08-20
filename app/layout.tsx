@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { GoogleAnalytics } from "@/components/analytics/google-analytics";
+import { PosthogProvider } from "@/components/analytics/posthog-provider";
 import { AppChrome } from "@/components/layout/app-chrome";
 
 const geistSans = Geist({
@@ -52,6 +53,7 @@ export default function RootLayout({
           }}
         />
         <GoogleAnalytics />
+        <PosthogProvider />
         <AppChrome>{children}</AppChrome>
       </body>
     </html>
