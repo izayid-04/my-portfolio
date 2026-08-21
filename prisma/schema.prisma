@@ -130,10 +130,12 @@ model Project {
 }
 
 model Resume {
-  id        String   @id @default("active")
-  pdfUrl    String   @map("pdf_url")
-  fileName  String?  @map("file_name")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id         String   @id @default("active")
+  pdfUrl     String   @map("pdf_url")
+  fileName   String?  @map("file_name")
+  pdfUrlEn   String?  @map("pdf_url_en")
+  fileNameEn String?  @map("file_name_en")
+  updatedAt  DateTime @updatedAt @map("updated_at")
 
   @@map("resumes")
 }

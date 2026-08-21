@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { Link } from "@/i18n/navigation"
 import {
   ArrowLeft,
@@ -17,6 +17,7 @@ import {
 
 export function CvView() {
   const t = useTranslations("cv")
+  const locale = useLocale()
   const [pdfUrl, setPdfUrl] = useState<string | null>(null)
   const [fileName, setFileName] = useState<string | null>(null)
   const [updatedAt, setUpdatedAt] = useState<string | null>(null)
@@ -46,7 +47,7 @@ export function CvView() {
     async function loadResume() {
       try {
         setLoading(true)
-        const res = await fetch("/api/resume")
+        const res = await fetch(`/api/resume?locale=${locale}`)
         if (res.ok) {
           const data = await res.json()
           if (data.pdfUrl) {
@@ -62,7 +63,7 @@ export function CvView() {
       }
     }
     loadResume()
-  }, [])
+  }, [locale])
 
   // 2. Chargement du document PDF via PDF.js
   useEffect(() => {
