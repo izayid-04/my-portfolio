@@ -1,13 +1,10 @@
 "use client"
 
-import { usePathname } from "next/navigation"
 import { Chatbot } from "@/components/chat/chatbot"
 import { Navbar } from "@/components/navbar"
 
+/** Habillage du site public (hors /admin, qui ne passe pas par ce composant). */
 export function AppChrome({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname()
-  const isAdminRoute = pathname.startsWith("/admin")
-
   return (
     <div className="relative min-h-screen">
       {/* Background ambient gradient glows matching Hero colors */}
@@ -18,8 +15,8 @@ export function AppChrome({ children }: { children: React.ReactNode }) {
       </div>
 
       <div className="relative z-10">{children}</div>
-      {!isAdminRoute && <Chatbot />}
-      {!isAdminRoute && <Navbar />}
+      <Chatbot />
+      <Navbar />
     </div>
   )
 }

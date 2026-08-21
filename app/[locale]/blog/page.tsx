@@ -1,27 +1,32 @@
+import { getTranslations, getLocale } from "next-intl/server"
 import { getAllPublishedPosts } from "@/lib/blog"
 import { Timeline } from "@/components/ui/timeline"
 import { BlogTimelineContent } from "@/components/blog/blog-timeline-content"
 
-export const metadata = {
-  title: "Blog | Mon portfolio",
-  description:
-    "Articles et réflexions sur le développement web, l'accessibilité et les bonnes pratiques.",
+export async function generateMetadata() {
+  const t = await getTranslations("blog")
+  return {
+    title: `${t("title")} | Mon portfolio`,
+    description: t("subtitle"),
+  }
 }
 
-function formatTimelineDate(dateStr: string): string {
+function formatTimelineDate(dateStr: string, locale: string): string {
   const d = new Date(dateStr)
-  return d.toLocaleDateString("fr-FR", {
+  return d.toLocaleDateString(locale === "fr" ? "fr-FR" : "en-US", {
     year: "numeric",
     month: "long",
   })
 }
 
 export default async function BlogPage() {
-  const posts = await getAllPublishedPosts()
+  const t = await getTranslations("blog")
+  const locale = await getLocale()
+  const posts = await getAllPublishedPosts(locale)
 
   const timelineData = posts.map((post) => ({
     id: post.slug,
-    title: formatTimelineDate(post.date),
+    title: formatTimelineDate(post.date, locale),
     content: <BlogTimelineContent key={post.slug} post={post} />,
   }))
 
@@ -30,8 +35,8 @@ export default async function BlogPage() {
       <div className="relative w-full overflow-hidden">
         <Timeline
           data={timelineData}
-          title="Blog"
-          subtitle="Réalisations et projets : assistant IA, sites et plateformes."
+          title={t("title")}
+          subtitle={t("subtitle")}
         />
       </div>
     </div>

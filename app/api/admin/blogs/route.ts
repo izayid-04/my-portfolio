@@ -24,8 +24,11 @@ export async function GET() {
         id: p.id,
         slug: p.slug,
         title: p.title,
+        titleEn: p.titleEn,
         excerpt: p.excerpt,
+        excerptEn: p.excerptEn,
         content: p.content,
+        contentEn: p.contentEn,
         date: p.date.toISOString(),
         readingTime: p.readingTime,
         tags: p.tags,
@@ -45,10 +48,13 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { title, excerpt, content, date, readingTime, tags, image, published } = body as {
+    const { title, titleEn, excerpt, excerptEn, content, contentEn, date, readingTime, tags, image, published } = body as {
       title?: string
+      titleEn?: string
       excerpt?: string
+      excerptEn?: string
       content?: string
+      contentEn?: string
       date?: string
       readingTime?: number
       tags?: string[]
@@ -75,8 +81,11 @@ export async function POST(request: Request) {
       data: {
         slug,
         title: title.trim(),
+        titleEn: titleEn?.trim() || null,
         excerpt: excerpt?.trim() ?? "",
+        excerptEn: excerptEn?.trim() || null,
         content: content.trim(),
+        contentEn: contentEn?.trim() || null,
         date: date ? new Date(date) : new Date(),
         readingTime: readingTime ?? 5,
         tags: tags ?? [],
@@ -91,8 +100,11 @@ export async function POST(request: Request) {
         id: post.id,
         slug: post.slug,
         title: post.title,
+        titleEn: post.titleEn,
         excerpt: post.excerpt,
+        excerptEn: post.excerptEn,
         content: post.content,
+        contentEn: post.contentEn,
         date: post.date.toISOString(),
         readingTime: post.readingTime,
         tags: post.tags,

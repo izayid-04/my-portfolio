@@ -19,7 +19,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { title, description, date, slug, tags, image, video, href, githubUrl, embedSite, published, order, companyId } = body
+    const { title, titleEn, description, descriptionEn, date, slug, tags, image, video, href, githubUrl, embedSite, published, order, companyId } = body
 
     if (!title || !description) {
       return NextResponse.json({ error: "Titre et description requis." }, { status: 400 })
@@ -28,7 +28,9 @@ export async function POST(request: Request) {
     const newProject = await prisma.project.create({
       data: {
         title,
+        titleEn: titleEn || null,
         description,
+        descriptionEn: descriptionEn || null,
         date: date || null,
         slug: slug || null,
         tags: Array.isArray(tags) ? tags : typeof tags === "string" ? tags.split(",").map((t: string) => t.trim()).filter(Boolean) : [],
@@ -55,7 +57,7 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   try {
     const body = await request.json()
-    const { id, title, description, date, slug, tags, image, video, href, githubUrl, embedSite, published, order, companyId } = body
+    const { id, title, titleEn, description, descriptionEn, date, slug, tags, image, video, href, githubUrl, embedSite, published, order, companyId } = body
 
     if (!id) {
       return NextResponse.json({ error: "ID du projet requis pour la modification." }, { status: 400 })
@@ -65,7 +67,9 @@ export async function PUT(request: Request) {
       where: { id },
       data: {
         title,
+        titleEn: titleEn || null,
         description,
+        descriptionEn: descriptionEn || null,
         date: date || null,
         slug: slug || null,
         tags: Array.isArray(tags) ? tags : typeof tags === "string" ? tags.split(",").map((t: string) => t.trim()).filter(Boolean) : [],

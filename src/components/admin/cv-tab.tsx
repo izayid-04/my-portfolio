@@ -102,9 +102,12 @@ function AdminCvPreview({ pdfUrl }: { pdfUrl: string }) {
 export function CvTab() {
   const [pdfUrl, setPdfUrl] = React.useState("")
   const [fileName, setFileName] = React.useState("")
+  const [pdfUrlEn, setPdfUrlEn] = React.useState("")
+  const [fileNameEn, setFileNameEn] = React.useState("")
   const [updatedAt, setUpdatedAt] = React.useState<string | null>(null)
   const [loading, setLoading] = React.useState(true)
   const [uploading, setUploading] = React.useState(false)
+  const [uploadingEn, setUploadingEn] = React.useState(false)
   const [saving, setSaving] = React.useState(false)
   const [deleting, setDeleting] = React.useState(false)
   const [showDeleteModal, setShowDeleteModal] = React.useState(false)
@@ -116,15 +119,17 @@ export function CvTab() {
       const res = await fetch("/api/resume")
       if (res.ok) {
         const data = await res.json()
-        if (data.pdfUrl) {
-          setPdfUrl(data.pdfUrl)
-          setFileName(data.fileName || "CV_Izayid_Ali.pdf")
+        if (data.pdfUrlFr) {
+          setPdfUrl(data.pdfUrlFr)
+          setFileName(data.fileNameFr || "CV_Izayid_Ali.pdf")
           setUpdatedAt(data.updatedAt)
         } else {
           setPdfUrl("")
           setFileName("")
           setUpdatedAt(null)
         }
+        setPdfUrlEn(data.pdfUrlEn || "")
+        setFileNameEn(data.fileNameEn || "")
       }
     } catch (err) {
       console.error("Erreur de chargement du CV:", err)
@@ -137,8 +142,8 @@ export function CvTab() {
     fetchCv()
   }, [fetchCv])
 
-  // Upload du fichier PDF vers Supabase Storage
-  const handleFileUpload = async (file: File) => {
+  // Upload du fichier PDF vers Supabase Storage (version FR ou EN)
+  const handleFileUpload = async (file: File, lang: "fr" | "en" = "fr") => {
     if (!file) return
 
     if (file.type !== "application/pdf" && !file.name.endsWith(".pdf")) {
@@ -147,7 +152,8 @@ export function CvTab() {
     }
 
     try {
-      setUploading(true)
+      if (lang === "en") setUploadingEn(true)
+      else setUploading(true)
 
       const formData = new FormData()
       formData.append("file", file)
@@ -160,8 +166,13 @@ export function CvTab() {
 
       const data = await res.json()
       if (res.ok && data.url) {
-        setPdfUrl(data.url)
-        setFileName(file.name)
+        if (lang === "en") {
+          setPdfUrlEn(data.url)
+          setFileNameEn(file.name)
+        } else {
+          setPdfUrl(data.url)
+          setFileName(file.name)
+        }
         toast.success("Fichier PDF chargé avec succès ! Cliquez sur 'Enregistrer & Publier'.")
       } else {
         toast.error(data.error || "Échec de l'upload du fichier PDF.")
@@ -170,7 +181,8 @@ export function CvTab() {
       console.error(err)
       toast.error("Erreur lors de l'envoi du fichier PDF.")
     } finally {
-      setUploading(false)
+      if (lang === "en") setUploadingEn(false)
+      else setUploading(false)
     }
   }
 
@@ -191,6 +203,8 @@ export function CvTab() {
         body: JSON.stringify({
           pdfUrl: pdfUrl.trim(),
           fileName: fileName || "CV_Izayid_Ali.pdf",
+          pdfUrlEn: pdfUrlEn.trim() || null,
+          fileNameEn: pdfUrlEn.trim() ? fileNameEn || "CV_Izayid_Ali_EN.pdf" : null,
         }),
       })
 
@@ -222,6 +236,8 @@ export function CvTab() {
       if (res.ok && data.success) {
         setPdfUrl("")
         setFileName("")
+        setPdfUrlEn("")
+        setFileNameEn("")
         setUpdatedAt(null)
         toast.success("Le CV PDF a été supprimé avec succès ! 🗑️")
       } else {
@@ -346,11 +362,72 @@ export function CvTab() {
                   className="hidden"
                   onChange={(e) => {
                     const file = e.target.files?.[0]
-                    if (file) handleFileUpload(file)
+                    if (file) handleFileUpload(file, "fr")
                   }}
                   disabled={uploading}
                 />
               </label>
+            </div>
+          </div>
+
+          {/* VERSION ANGLAISE DU CV (optionnelle) */}
+          <div className="rounded-xl border border-dashed border-border bg-muted/20 p-3 space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-medium text-muted-foreground">
+                CV en anglais (optionnel, affiché sur /en — retombe sur le CV français si non fourni)
+              </label>
+              {pdfUrlEn && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPdfUrlEn("")
+                    setFileNameEn("")
+                  }}
+                  className="cursor-pointer text-[11px] text-destructive hover:underline"
+                >
+                  Retirer la version anglaise
+                </button>
+              )}
+            </div>
+            <div className="grid gap-3 md:grid-cols-12 items-end">
+              <div className="md:col-span-8">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="url"
+                    placeholder="https://..."
+                    value={pdfUrlEn}
+                    onChange={(e) => setPdfUrlEn(e.target.value)}
+                    className="flex-1 rounded-xl border border-input bg-background px-3.5 py-2 text-xs text-foreground focus:border-primary focus:outline-none"
+                  />
+                  {pdfUrlEn && (
+                    <a
+                      href={pdfUrlEn}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 rounded-xl border border-border bg-muted px-3 py-2 text-xs font-semibold text-foreground hover:bg-accent transition-colors shrink-0"
+                      title="Télécharger / Ouvrir"
+                    >
+                      <Download className="size-3.5" /> Fichier
+                    </a>
+                  )}
+                </div>
+              </div>
+              <div className="md:col-span-4">
+                <label className="cursor-pointer w-full inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 text-xs font-semibold text-foreground hover:bg-accent transition-all shadow-xs">
+                  {uploadingEn ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />}
+                  {uploadingEn ? "Upload en cours..." : "Uploader le CV anglais"}
+                  <input
+                    type="file"
+                    accept="application/pdf,.pdf"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (file) handleFileUpload(file, "en")
+                    }}
+                    disabled={uploadingEn}
+                  />
+                </label>
+              </div>
             </div>
           </div>
 

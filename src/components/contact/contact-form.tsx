@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useRef, useEffect } from "react"
 import { motion } from "motion/react"
+import { useTranslations } from "next-intl"
 import { Send, Search } from "lucide-react"
 import { countryPhoneOptions, getFlagEmoji, getPhonePlaceholder } from "@/data/countries"
 import {
@@ -40,6 +41,7 @@ function filterCountries(query: string) {
 }
 
 export function ContactForm() {
+  const t = useTranslations("contact")
   const [form, setForm] = useState<ContactFormData>(initialForm)
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle")
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
@@ -117,6 +119,16 @@ export function ContactForm() {
 
   return (
     <>
+      <style jsx global>{`
+        .contact-country-select::-webkit-scrollbar {
+          display: none !important;
+          width: 0 !important;
+          height: 0 !important;
+        }
+        .contact-country-select {
+          scrollbar-width: none !important;
+        }
+      `}</style>
       <ContactConfirmationModal
         open={status === "success"}
         onClose={closeConfirmation}
@@ -134,7 +146,7 @@ export function ContactForm() {
             htmlFor="contact-name"
             className="text-sm font-medium text-foreground"
           >
-            Nom complet
+            {t("name")}
           </label>
           <input
             id="contact-name"
@@ -143,7 +155,7 @@ export function ContactForm() {
             required
             value={form.name}
             onChange={handleChange}
-            placeholder="Votre nom"
+            placeholder={t("namePlaceholder")}
             className={cn(
               "w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground",
               "placeholder:text-muted-foreground",
@@ -157,7 +169,7 @@ export function ContactForm() {
             htmlFor="contact-email"
             className="text-sm font-medium text-foreground"
           >
-            Email
+            {t("email")}
           </label>
           <input
             id="contact-email"
@@ -166,7 +178,7 @@ export function ContactForm() {
             required
             value={form.email}
             onChange={handleChange}
-            placeholder="Votre email"
+            placeholder={t("emailPlaceholder")}
             className={cn(
               "w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground",
               "placeholder:text-muted-foreground",
@@ -183,13 +195,19 @@ export function ContactForm() {
             htmlFor="contact-country"
             className="text-sm font-medium text-foreground"
           >
-            Pays
+            {t("country")}
           </label>
           <Select
             value={form.countryCode}
             onValueChange={handleCountryChange}
             open={selectOpen}
-            onOpenChange={setSelectOpen}
+            onOpenChange={(open) => {
+              // Radix ferme le select sur "resize"/"blur" de la fenêtre. Sur mobile,
+              // l'ouverture du clavier virtuel déclenche un resize : on ignore cette
+              // fermeture tant que le champ de recherche a encore le focus.
+              if (!open && document.activeElement === searchInputRef.current) return
+              setSelectOpen(open)
+            }}
           >
             <SelectTrigger
               id="contact-country"
@@ -205,10 +223,12 @@ export function ContactForm() {
                 )}
               </SelectValue>
             </SelectTrigger>
-            <SelectContent className="max-h-[min(320px,70vh)]" position="popper">
-              {/* Champ recherche masqué sur mobile : le focus ouvre le clavier et ferme le select */}
+            <SelectContent
+              className="max-h-[min(320px,70vh)] contact-country-select"
+              position="popper"
+            >
               <div
-                className="sticky top-0 z-10 hidden border-b border-border bg-popover p-2 sm:block"
+                className="sticky top-0 z-10 block border-b border-border bg-popover p-2"
                 onPointerDown={(e) => e.stopPropagation()}
               >
                 <div className="relative">
@@ -216,7 +236,7 @@ export function ContactForm() {
                   <input
                     ref={searchInputRef}
                     type="text"
-                    placeholder="Rechercher un pays..."
+                    placeholder={t("countrySearchPlaceholder")}
                     value={countrySearch}
                     onChange={(e) => setCountrySearch(e.target.value)}
                     onKeyDown={(e) => e.stopPropagation()}
@@ -228,10 +248,10 @@ export function ContactForm() {
                   />
                 </div>
               </div>
-              <div className="p-1 max-h-[260px] overflow-y-auto">
+              <div className="p-1">
                 {filteredCountries.length === 0 ? (
                   <div className="py-6 text-center text-sm text-muted-foreground">
-                    Aucun pays trouvé
+                    {t("noCountryFound")}
                   </div>
                 ) : (
                   filteredCountries.map((c) => (
@@ -255,7 +275,7 @@ export function ContactForm() {
             htmlFor="contact-phone"
             className="text-sm font-medium text-foreground"
           >
-            Téléphone
+            {t("phone")}
           </label>
           <input
             id="contact-phone"
@@ -279,7 +299,7 @@ export function ContactForm() {
           htmlFor="contact-message"
           className="text-sm font-medium text-foreground"
         >
-          Message
+          {t("message")}
         </label>
         <textarea
           id="contact-message"
@@ -288,7 +308,7 @@ export function ContactForm() {
           rows={5}
           value={form.message}
           onChange={handleChange}
-          placeholder="Votre message"
+          placeholder={t("messagePlaceholder")}
           className={cn(
             "w-full resize-y rounded-lg border border-input bg-background px-4 py-3 text-foreground",
             "placeholder:text-muted-foreground",
@@ -309,7 +329,7 @@ export function ContactForm() {
           />
           {captchaHint && (
             <p className="text-sm text-destructive">
-              Validez le captcha avant d&apos;envoyer.
+              {t("captchaHint")}
             </p>
           )}
         </div>
@@ -317,8 +337,7 @@ export function ContactForm() {
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-xs text-muted-foreground">
-          En envoyant ce formulaire, vous acceptez d&apos;être recontacté concernant
-          votre demande.
+          {t("disclaimer")}
         </p>
         <motion.button
           type="submit"
@@ -336,13 +355,13 @@ export function ContactForm() {
           {status === "sending" ? (
             <>
               <span className="size-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
-              Envoi...
+              {t("sending")}
             </>
           ) : status === "success" ? (
-            "Message envoyé"
+            t("sent")
           ) : (
             <>
-              Envoyer
+              {t("send")}
               <Send className="size-4" />
             </>
           )}
@@ -351,7 +370,7 @@ export function ContactForm() {
 
       {status === "error" && (
         <p className="text-sm text-destructive">
-          Une erreur est survenue. Réessayez ou contactez-moi par email.
+          {t("errorMessage")}
         </p>
       )}
     </motion.form>

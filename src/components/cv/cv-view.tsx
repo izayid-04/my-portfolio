@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import Link from "next/link"
+import { useLocale, useTranslations } from "next-intl"
+import { Link } from "@/i18n/navigation"
 import {
   ArrowLeft,
   Download,
@@ -15,6 +16,8 @@ import {
 } from "lucide-react"
 
 export function CvView() {
+  const t = useTranslations("cv")
+  const locale = useLocale()
   const [pdfUrl, setPdfUrl] = useState<string | null>(null)
   const [fileName, setFileName] = useState<string | null>(null)
   const [updatedAt, setUpdatedAt] = useState<string | null>(null)
@@ -44,7 +47,7 @@ export function CvView() {
     async function loadResume() {
       try {
         setLoading(true)
-        const res = await fetch("/api/resume")
+        const res = await fetch(`/api/resume?locale=${locale}`)
         if (res.ok) {
           const data = await res.json()
           if (data.pdfUrl) {
@@ -60,7 +63,7 @@ export function CvView() {
       }
     }
     loadResume()
-  }, [])
+  }, [locale])
 
   // 2. Chargement du document PDF via PDF.js
   useEffect(() => {
@@ -178,7 +181,7 @@ export function CvView() {
     return () => {
       viewport.removeEventListener("wheel", handleWheel)
     }
-  }, [])
+  }, [pdfUrl])
 
   // Garde zoomScaleRef synchronisé pour lecture dans les listeners tactiles natifs (évite les closures obsolètes)
   useEffect(() => {
@@ -252,7 +255,7 @@ export function CvView() {
       viewport.removeEventListener("touchend", handleTouchEndOrCancel)
       viewport.removeEventListener("touchcancel", handleTouchEndOrCancel)
     }
-  }, [])
+  }, [pdfUrl])
 
   // 5. Gestion du glisser / déplacer à la main (Drag to Pan avec curseur Grab / Grabbing)
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -284,7 +287,7 @@ export function CvView() {
   const handleResetZoom = () => setZoomScale(100)
 
   return (
-    <div className="h-screen w-full bg-background flex flex-col overflow-hidden p-2 sm:p-4 pb-20 sm:pb-24 relative select-none">
+    <div className="h-screen w-full bg-background flex flex-col overflow-hidden p-2 pt-6 sm:p-4 pb-20 sm:pb-24 relative select-none">
       {/* Masquage strict des barres de scroll tout en conservant le défilement fluide */}
       <style jsx global>{`
         .hide-scrollbar::-webkit-scrollbar {
@@ -348,7 +351,7 @@ export function CvView() {
               className="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground rounded-lg border border-border bg-background px-2.5 py-1 hover:bg-accent"
             >
               <ArrowLeft className="size-3.5" />
-              <span className="hidden sm:inline">Retour</span>
+              <span className="hidden sm:inline">{t("back")}</span>
             </Link>
 
             <div className="h-3.5 w-px bg-border hidden sm:block" />
@@ -358,7 +361,7 @@ export function CvView() {
                 <FileText className="size-3.5" />
               </span>
               <h1 className="text-xs font-bold text-foreground truncate max-w-[150px] sm:max-w-none">
-                CV Izayid Ali
+                {t("title")}
               </h1>
             </div>
           </div>
@@ -373,7 +376,7 @@ export function CvView() {
                   className="inline-flex items-center gap-1 rounded-lg border border-border bg-background px-2.5 py-1 text-xs font-semibold text-foreground hover:bg-accent transition-colors"
                 >
                   <ExternalLink className="size-3.5" />
-                  <span className="hidden sm:inline">PDF brut</span>
+                  <span className="hidden sm:inline">{t("rawPdf")}</span>
                 </a>
 
                 <a
@@ -382,7 +385,7 @@ export function CvView() {
                   className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground shadow-xs hover:bg-primary/90 transition-all cursor-pointer"
                 >
                   <Download className="size-3.5" />
-                  <span>Télécharger</span>
+                  <span>{t("download")}</span>
                 </a>
               </>
             )}
@@ -403,7 +406,7 @@ export function CvView() {
             </div>
 
             <span className="inline-flex items-center gap-1 text-[10px] text-emerald-500 font-semibold">
-              <CheckCircle2 className="size-3" /> CV Officiel
+              <CheckCircle2 className="size-3" /> {t("official")}
             </span>
           </div>
 
@@ -411,7 +414,7 @@ export function CvView() {
             <div className="flex-1 flex items-center justify-center p-6 bg-card">
               <div className="flex flex-col items-center gap-2 text-xs text-muted-foreground">
                 <Loader2 className="size-5 animate-spin text-primary" />
-                <span>Chargement HD du CV...</span>
+                <span>{t("loading")}</span>
               </div>
             </div>
           ) : pdfUrl ? (

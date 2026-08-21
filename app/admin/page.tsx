@@ -27,6 +27,7 @@ import { DiplomasTab } from "@/components/admin/diplomas-tab"
 import { ProjectsTab } from "@/components/admin/projects-tab"
 import { OverviewTab } from "@/components/admin/overview-tab"
 import { CvTab } from "@/components/admin/cv-tab"
+import { TranslateButton } from "@/components/admin/translate-button"
 import {
   ADMIN_KEYS,
   type AdminActivity,
@@ -63,8 +64,11 @@ interface DbBlogPost {
   id: string
   slug: string
   title: string
+  titleEn?: string | null
   excerpt: string
+  excerptEn?: string | null
   content: string
+  contentEn?: string | null
   date: string
   readingTime: number
   tags: string[]
@@ -213,8 +217,11 @@ export default function AdminDashboardPage() {
   const [projectRepoUrl, setProjectRepoUrl] = useState("")
 
   const [blogTitle, setBlogTitle] = useState("")
+  const [blogTitleEn, setBlogTitleEn] = useState("")
   const [blogExcerpt, setBlogExcerpt] = useState("")
+  const [blogExcerptEn, setBlogExcerptEn] = useState("")
   const [blogContent, setBlogContent] = useState("")
+  const [blogContentEn, setBlogContentEn] = useState("")
   const [blogImage, setBlogImage] = useState("")
   const [blogTags, setBlogTags] = useState("")
   const [blogReadingTime, setBlogReadingTime] = useState("5")
@@ -495,8 +502,11 @@ export default function AdminDashboardPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: blogTitle.trim(),
+          titleEn: blogTitleEn.trim() || null,
           excerpt: blogExcerpt.trim(),
+          excerptEn: blogExcerptEn.trim() || null,
           content: blogContent.trim(),
+          contentEn: blogContentEn.trim() || null,
           date: blogDate || new Date().toISOString().slice(0, 10),
           readingTime: Number.isFinite(readingTimeNumber) && readingTimeNumber > 0 ? readingTimeNumber : 5,
           tags: parseCsv(blogTags),
@@ -516,8 +526,11 @@ export default function AdminDashboardPage() {
         setBlogsReloadToken((p) => p + 1)
         if (!editingBlogId) {
           setBlogTitle("")
+          setBlogTitleEn("")
           setBlogExcerpt("")
+          setBlogExcerptEn("")
           setBlogContent("")
+          setBlogContentEn("")
           setBlogImage("")
           setBlogTags("")
           setBlogReadingTime("5")
@@ -550,8 +563,11 @@ export default function AdminDashboardPage() {
   const handleEditBlog = (blog: DbBlogPost) => {
     setEditingBlogId(blog.id)
     setBlogTitle(blog.title)
+    setBlogTitleEn(blog.titleEn ?? "")
     setBlogExcerpt(blog.excerpt)
+    setBlogExcerptEn(blog.excerptEn ?? "")
     setBlogContent(blog.content)
+    setBlogContentEn(blog.contentEn ?? "")
     setBlogImage(blog.image ?? "")
     setBlogTags(blog.tags.join(", "))
     setBlogReadingTime(String(blog.readingTime))
@@ -725,7 +741,7 @@ export default function AdminDashboardPage() {
                           type="button"
                           onClick={() => {
                             setEditingBlogId(null)
-                            setBlogTitle(""); setBlogExcerpt(""); setBlogContent("")
+                            setBlogTitle(""); setBlogTitleEn(""); setBlogExcerpt(""); setBlogExcerptEn(""); setBlogContent(""); setBlogContentEn("")
                             setBlogImage(""); setBlogTags(""); setBlogReadingTime("5")
                             setBlogDate(new Date().toISOString().slice(0, 10))
                             setBlogPublished(false); setBlogSaveStatus(null); setFormError("")
@@ -740,6 +756,32 @@ export default function AdminDashboardPage() {
                     <input value={blogTitle} onChange={(e) => setBlogTitle(e.target.value)} placeholder="Titre de l'article *" className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm" />
                     <textarea value={blogExcerpt} onChange={(e) => setBlogExcerpt(e.target.value)} placeholder="Extrait / résumé *" rows={2} className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm" />
                     <textarea value={blogContent} onChange={(e) => setBlogContent(e.target.value)} placeholder="Contenu en Markdown *" rows={6} className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm font-mono" />
+
+                    {/* TRADUCTION ANGLAISE (facultative) — pré-remplie par IA, à relire avant d'enregistrer */}
+                    <div className="space-y-2 rounded-xl border border-dashed border-border bg-muted/20 p-3">
+                      <p className="text-xs font-semibold text-muted-foreground">Version anglaise (optionnelle, affichée sur /en)</p>
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between gap-2">
+                          <label className="text-xs text-muted-foreground">Titre EN</label>
+                          <TranslateButton sourceText={blogTitle} kind="title" onTranslated={setBlogTitleEn} />
+                        </div>
+                        <input value={blogTitleEn} onChange={(e) => setBlogTitleEn(e.target.value)} placeholder="English title" className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between gap-2">
+                          <label className="text-xs text-muted-foreground">Extrait EN</label>
+                          <TranslateButton sourceText={blogExcerpt} kind="excerpt" onTranslated={setBlogExcerptEn} />
+                        </div>
+                        <textarea value={blogExcerptEn} onChange={(e) => setBlogExcerptEn(e.target.value)} placeholder="English excerpt" rows={2} className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between gap-2">
+                          <label className="text-xs text-muted-foreground">Contenu EN</label>
+                          <TranslateButton sourceText={blogContent} kind="content" onTranslated={setBlogContentEn} />
+                        </div>
+                        <textarea value={blogContentEn} onChange={(e) => setBlogContentEn(e.target.value)} placeholder="English content (Markdown)" rows={6} className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm font-mono" />
+                      </div>
+                    </div>
 
                     <div className="space-y-2 min-w-0">
                       <label className="text-xs font-medium text-muted-foreground">Image de couverture (upload)</label>

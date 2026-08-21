@@ -1,6 +1,7 @@
 "use client"
 
-import Link from "next/link"
+import { useTranslations } from "next-intl"
+import { Link } from "@/i18n/navigation"
 import Image from "next/image"
 import { motion } from "motion/react"
 import { BadgeCheck, FileText, Github, Linkedin, Mail } from "lucide-react"
@@ -38,15 +39,8 @@ const heroIconUrls = [
   githubHeroIcon,
 ].filter((value): value is string => Boolean(value))
 
-export function HeroSection({
-  className,
-  title = "Je conçois des produits web robustes, du prototype à la production.",
-  subtitle = "Architectures SaaS, plateformes EdTech, applications mobiles — des projets réels, utilisés chaque jour par des milliers d'utilisateurs.",
-}: {
-  className?: string
-  title?: string
-  subtitle?: string
-}) {
+export function HeroSection({ className }: { className?: string }) {
+  const t = useTranslations("hero")
   const github = socialLinks.find((item) => item.label === "GitHub")?.href ?? "https://github.com/izayid-04"
   const linkedin =
     socialLinks.find((item) => item.label === "LinkedIn")?.href ?? "https://www.linkedin.com/in/ali-izayid/"
@@ -63,12 +57,12 @@ export function HeroSection({
     >
       <style>{`
         @keyframes hero-spin-slow {
-          from { transform: translate(-50%, -50%) rotate(0deg); }
-          to { transform: translate(-50%, -50%) rotate(360deg); }
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
         }
         @keyframes hero-spin-reverse {
-          from { transform: translate(-50%, -50%) rotate(0deg); }
-          to { transform: translate(-50%, -50%) rotate(-360deg); }
+          from { transform: rotate(0deg); }
+          to { transform: rotate(-360deg); }
         }
         @keyframes hero-float {
           0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
@@ -85,50 +79,53 @@ export function HeroSection({
         {ringConfigs.map((ring, ringIndex) => (
           <div
             key={`ring-${ring.size}`}
-            className={cn("absolute left-1/2 top-1/2", ring.rotate)}
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 scale-[0.3] sm:scale-100"
             style={{ width: ring.size, height: ring.size }}
           >
-            {new Array(ring.iconCount).fill(0).map((_, iconIndex) => {
-              const icon =
-                ringIndex === 2 && iconIndex === 0
-                  ? githubHeroIcon
-                  : icons[(iconIndex + ringIndex * 3) % icons.length]
-              const angleOffset = (ringIndex * Math.PI) / (ring.iconCount * 2)
-              const angle = (iconIndex / ring.iconCount) * Math.PI * 2 + angleOffset
-              const radius = ring.size * ring.radiusRatio
-              const x = (Math.cos(angle) * radius).toFixed(2)
-              const y = (Math.sin(angle) * radius).toFixed(2)
-              const isGithubIcon = icon === githubHeroIcon
+            <div className={cn("absolute inset-0", ring.rotate)}>
+              {new Array(ring.iconCount).fill(0).map((_, iconIndex) => {
+                const icon =
+                  ringIndex === 2 && iconIndex === 0
+                    ? githubHeroIcon
+                    : icons[(iconIndex + ringIndex * 3) % icons.length]
+                const angleOffset = (ringIndex * Math.PI) / (ring.iconCount * 2)
+                const angle = (iconIndex / ring.iconCount) * Math.PI * 2 + angleOffset
+                const radius = ring.size * ring.radiusRatio
+                const x = (Math.cos(angle) * radius).toFixed(2)
+                const y = (Math.sin(angle) * radius).toFixed(2)
+                const isGithubIcon = icon === githubHeroIcon
 
-              return (
-                <div
-                  key={`icon-${ringIndex}-${iconIndex}`}
-                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-                  style={{ transform: `translate(${x}px, ${y}px)` }}
-                >
-                  {isGithubIcon ? (
-                    <Github
-                      style={{ width: ring.iconSize + 4, height: ring.iconSize + 4 }}
-                      className="text-foreground drop-shadow-[0_6px_14px_rgba(0,0,0,0.28)]"
-                      strokeWidth={2.25}
-                    />
-                  ) : (
-                    <Image
-                      src={icon}
-                      alt=""
-                      width={ring.iconSize}
-                      height={ring.iconSize}
-                      className="object-contain opacity-95 drop-shadow-[0_4px_10px_rgba(0,0,0,0.18)]"
-                      unoptimized
-                    />
-                  )}
-                </div>
-              )
-            })}
+                return (
+                  <div
+                    key={`icon-${ringIndex}-${iconIndex}`}
+                    className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+                    style={{ transform: `translate(${x}px, ${y}px)` }}
+                  >
+                    {isGithubIcon ? (
+                      <Github
+                        style={{ width: ring.iconSize + 4, height: ring.iconSize + 4 }}
+                        className="text-foreground drop-shadow-[0_6px_14px_rgba(0,0,0,0.28)]"
+                        strokeWidth={2.25}
+                      />
+                    ) : (
+                      <Image
+                        src={icon}
+                        alt=""
+                        width={ring.iconSize}
+                        height={ring.iconSize}
+                        className="object-contain opacity-95 drop-shadow-[0_4px_10px_rgba(0,0,0,0.18)]"
+                        unoptimized
+                      />
+                    )}
+                  </div>
+                )
+              })}
+            </div>
           </div>
         ))}
         <div className="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-primary/25 blur-3xl hero-float" />
         <div className="absolute -right-24 top-1/3 h-80 w-80 rounded-full bg-violet-500/20 blur-3xl hero-float" />
+        <div className="absolute -right-10 top-[52%] h-72 w-72 rounded-full bg-teal-400/15 blur-3xl hero-float" />
         <div className="absolute left-1/2 top-[62%] h-96 w-96 -translate-x-1/2 rounded-full bg-cyan-500/10 blur-3xl hero-float" />
       </div>
 
@@ -139,7 +136,7 @@ export function HeroSection({
         className="relative z-10 mb-6 inline-flex items-center gap-2 rounded-full border border-border/70 bg-card/70 px-4 py-2 text-xs font-medium text-muted-foreground backdrop-blur-md"
       >
         <BadgeCheck className="size-4 text-primary" />
-        Disponible pour missions et collaborations
+        {t("badge")}
       </motion.div>
 
       <motion.div
@@ -165,10 +162,10 @@ export function HeroSection({
         className="relative z-10 max-w-4xl"
       >
         <h1 className="text-balance text-3xl font-semibold leading-tight text-foreground sm:text-5xl md:text-6xl">
-          {title}
+          {t("title")}
         </h1>
         <p className="mx-auto mt-4 max-w-2xl text-pretty text-sm text-muted-foreground sm:text-base md:text-lg">
-          {subtitle}
+          {t("subtitle")}
         </p>
       </motion.div>
 
@@ -178,37 +175,37 @@ export function HeroSection({
         transition={{ duration: 0.45, delay: 0.24 }}
         className="relative z-10 mt-8 flex flex-wrap justify-center gap-3"
       >
-        <Link
+        <a
           href={github}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 rounded-full border border-border bg-card/80 px-5 py-2.5 text-sm font-medium text-foreground shadow-sm transition-all hover:scale-[1.03] hover:border-primary/60"
         >
           <Github className="size-4" />
-          GitHub
-        </Link>
-        <Link
+          {t("github")}
+        </a>
+        <a
           href={linkedin}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 rounded-full border border-border bg-card/80 px-5 py-2.5 text-sm font-medium text-foreground shadow-sm transition-all hover:scale-[1.03] hover:border-primary/60"
         >
           <Linkedin className="size-4" />
-          LinkedIn
-        </Link>
+          {t("linkedin")}
+        </a>
         <Link
           href="/contact"
           className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-5 py-2.5 text-sm font-medium text-primary shadow-sm transition-all hover:scale-[1.03] hover:bg-primary/15"
         >
           <Mail className="size-4" />
-          Me contacter
+          {t("contact")}
         </Link>
         <Link
           href="/cv"
           className="inline-flex items-center gap-2 rounded-full border border-border bg-card/80 px-5 py-2.5 text-sm font-medium text-foreground shadow-sm transition-all hover:scale-[1.03] hover:border-primary/60"
         >
           <FileText className="size-4" />
-          Voir mon CV
+          {t("cv")}
         </Link>
       </motion.div>
 

@@ -1,11 +1,12 @@
 import { blogPosts as staticBlogPosts } from "@/data/blog"
 import type { BlogPost } from "@/types/blog"
 import { prisma } from "@/lib/prisma"
+import { localize } from "@/lib/localize"
 
 /**
  * Récupère tous les articles publiés (DB + fallback statique)
  */
-export async function getAllPublishedPosts(): Promise<BlogPost[]> {
+export async function getAllPublishedPosts(locale: string = "fr"): Promise<BlogPost[]> {
   try {
     const dbPosts = await prisma.blogPost.findMany({
       where: { published: true },
@@ -14,9 +15,9 @@ export async function getAllPublishedPosts(): Promise<BlogPost[]> {
 
     const mapped: BlogPost[] = dbPosts.map((p) => ({
       slug: p.slug,
-      title: p.title,
-      excerpt: p.excerpt,
-      content: p.content,
+      title: localize(p.title, p.titleEn, locale),
+      excerpt: localize(p.excerpt, p.excerptEn, locale),
+      content: localize(p.content, p.contentEn, locale),
       date: p.date.toISOString(),
       readingTime: p.readingTime,
       tags: p.tags,
@@ -40,7 +41,7 @@ export async function getAllPublishedPosts(): Promise<BlogPost[]> {
 /**
  * Récupère un article par slug (DB + fallback statique)
  */
-export async function getPostBySlugFromDB(slug: string): Promise<BlogPost | null> {
+export async function getPostBySlugFromDB(slug: string, locale: string = "fr"): Promise<BlogPost | null> {
   try {
     const dbPost = await prisma.blogPost.findFirst({
       where: { slug, published: true },
@@ -49,9 +50,9 @@ export async function getPostBySlugFromDB(slug: string): Promise<BlogPost | null
     if (dbPost) {
       return {
         slug: dbPost.slug,
-        title: dbPost.title,
-        excerpt: dbPost.excerpt,
-        content: dbPost.content,
+        title: localize(dbPost.title, dbPost.titleEn, locale),
+        excerpt: localize(dbPost.excerpt, dbPost.excerptEn, locale),
+        content: localize(dbPost.content, dbPost.contentEn, locale),
         date: dbPost.date.toISOString(),
         readingTime: dbPost.readingTime,
         tags: dbPost.tags,

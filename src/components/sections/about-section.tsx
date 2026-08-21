@@ -2,6 +2,7 @@
 
 import Image from "next/image"
 import { motion } from "framer-motion"
+import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 import { siteConfig } from "@/config/site"
 import { SectionWrapper } from "@/components/layout"
@@ -10,22 +11,13 @@ import { InteractiveTerminal } from "@/components/ui/interactive-terminal"
 
 interface AboutSectionProps {
   className?: string
-  title?: string
-  paragraphs?: string[]
   children?: React.ReactNode
 }
 
-const defaultParagraphs = [
-  "Fort d'un an d'expérience au sein de l'entreprise UWEZO, j'y ai développé de solides compétences concrètes en conception d'applications web modernes. Cette expérience terrain m'a permis de perfectionner mon approche en combinant rigueur backend, interfaces réactives et sens du produit.",
-  "Je code principalement côté serveur avec Laravel, Spring Boot et Nest.js, et côté front avec Angular et Next.js. J'ai aussi une forte sensibilité DevOps : Linux au quotidien, Docker, intégration continue et déploiement sur le cloud.",
-]
+export function AboutSection({ className, children }: AboutSectionProps) {
+  const t = useTranslations("about")
+  const paragraphs = t.raw("paragraphs") as string[]
 
-export function AboutSection({
-  className,
-  title = "À propos",
-  paragraphs = defaultParagraphs,
-  children,
-}: AboutSectionProps) {
   return (
     <SectionWrapper
       id={siteConfig.sections.about}
@@ -57,10 +49,10 @@ export function AboutSection({
             id={`${siteConfig.sections.about}-heading`}
             className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl md:text-4xl"
           >
-            {title}
+            {t("title")}
           </h2>
           <p className="mt-2 text-sm font-semibold uppercase tracking-widest text-foreground">
-            Parcours & valeurs
+            {t("eyebrow")}
           </p>
           <div className="mt-6 space-y-5">
             {paragraphs.map((text, i) => (
@@ -88,13 +80,13 @@ export function AboutSection({
         transition={{ duration: 0.5 }}
       >
         <h3 className="mb-6 sm:mb-8 text-lg font-bold tracking-tight text-foreground sm:text-xl md:text-2xl">
-          Stack technique
+          {t("stackTitle")}
         </h3>
         <div className="grid gap-4 sm:gap-8 grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 min-w-0">
           {techCategories.map((cat) => (
-            <div key={cat.label} className="min-w-0">
+            <div key={cat.key} className="min-w-0">
               <p className="mb-2 sm:mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                {cat.label}
+                {t(`techCategories.${cat.key}`)}
               </p>
               <div className="flex flex-wrap gap-1.5 sm:gap-2">
                 {cat.items.map((tech) => (

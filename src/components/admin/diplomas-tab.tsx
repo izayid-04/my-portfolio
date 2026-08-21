@@ -25,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { TranslateButton } from "@/components/admin/translate-button"
 
 interface Institution {
   id: string
@@ -39,9 +40,11 @@ interface Institution {
 interface Diploma {
   id: string
   title: string
+  titleEn?: string | null
   degreeType: string
   fieldOfStudy?: string | null
   description?: string | null
+  descriptionEn?: string | null
   date?: string | null
   image?: string | null
   url?: string | null
@@ -82,9 +85,11 @@ export function DiplomasTab() {
   // Form state for Diploma (Create / Edit)
   const [editingDiplomaId, setEditingDiplomaId] = React.useState<string | null>(null)
   const [title, setTitle] = React.useState("")
+  const [titleEn, setTitleEn] = React.useState("")
   const [degreeType, setDegreeType] = React.useState("CERTIFICAT")
   const [fieldOfStudy, setFieldOfStudy] = React.useState("")
   const [description, setDescription] = React.useState("")
+  const [descriptionEn, setDescriptionEn] = React.useState("")
   const [date, setDate] = React.useState("")
   const [image, setImage] = React.useState("")
   const [url, setUrl] = React.useState("")
@@ -248,9 +253,11 @@ export function DiplomasTab() {
       const payload = {
         id: editingDiplomaId || undefined,
         title,
+        titleEn: titleEn || null,
         degreeType,
         fieldOfStudy: fieldOfStudy || null,
         description: description || null,
+        descriptionEn: descriptionEn || null,
         date: date || null,
         image: image || null,
         url: url || null,
@@ -286,9 +293,11 @@ export function DiplomasTab() {
   const handleEditDiploma = (dip: Diploma) => {
     setEditingDiplomaId(dip.id)
     setTitle(dip.title)
+    setTitleEn(dip.titleEn || "")
     setDegreeType(dip.degreeType || "CERTIFICAT")
     setFieldOfStudy(dip.fieldOfStudy || "")
     setDescription(dip.description || "")
+    setDescriptionEn(dip.descriptionEn || "")
     setDate(dip.date || "")
     setImage(dip.image || "")
     setUrl(dip.url || "")
@@ -316,9 +325,11 @@ export function DiplomasTab() {
   const resetForm = () => {
     setEditingDiplomaId(null)
     setTitle("")
+    setTitleEn("")
     setDegreeType("CERTIFICAT")
     setFieldOfStudy("")
     setDescription("")
+    setDescriptionEn("")
     setDate("")
     setImage("")
     setUrl("")
@@ -556,6 +567,21 @@ export function DiplomasTab() {
               />
             </div>
 
+            {/* TITRE EN */}
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-medium text-muted-foreground">Titre EN (optionnel, affiché sur /en)</label>
+                <TranslateButton sourceText={title} kind="title" onTranslated={setTitleEn} />
+              </div>
+              <input
+                type="text"
+                placeholder="English title"
+                value={titleEn}
+                onChange={(e) => setTitleEn(e.target.value)}
+                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
+              />
+            </div>
+
             {/* TYPE & ÉTABLISSEMENT */}
             <div className="grid grid-cols-2 gap-2">
               <div className="space-y-1">
@@ -625,6 +651,21 @@ export function DiplomasTab() {
                 placeholder="Précisez la formation, les compétences acquises ou les projets réalisés..."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
+                className="w-full rounded-lg border border-input bg-background p-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none"
+              />
+            </div>
+
+            {/* DESCRIPTION EN */}
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-medium text-muted-foreground">Description EN (optionnel)</label>
+                <TranslateButton sourceText={description} kind="description" onTranslated={setDescriptionEn} />
+              </div>
+              <textarea
+                rows={3}
+                placeholder="English description"
+                value={descriptionEn}
+                onChange={(e) => setDescriptionEn(e.target.value)}
                 className="w-full rounded-lg border border-input bg-background p-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none"
               />
             </div>

@@ -2,6 +2,7 @@
 
 import { useEffect } from "react"
 import { motion } from "motion/react"
+import { useTranslations } from "next-intl"
 import { CheckCircle2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -11,6 +12,7 @@ export interface ContactConfirmationModalProps {
 }
 
 export function ContactConfirmationModal({ open, onClose }: ContactConfirmationModalProps) {
+  const t = useTranslations("contact")
   useEffect(() => {
     if (!open) return
     const onKeyDown = (e: KeyboardEvent) => {
@@ -46,10 +48,10 @@ export function ContactConfirmationModal({ open, onClose }: ContactConfirmationM
           </div>
         </div>
         <h2 id="confirmation-title" className="text-lg font-semibold text-foreground mb-2">
-          Message envoyé
+          {t("sent")}
         </h2>
         <p className="text-sm text-muted-foreground mb-6">
-          Merci pour votre message. Je vous recontacterai dès que possible.
+          {t("confirmationBody")}
         </p>
         <button
           type="button"
@@ -59,7 +61,7 @@ export function ContactConfirmationModal({ open, onClose }: ContactConfirmationM
             "hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           )}
         >
-          Fermer
+          {t("close")}
         </button>
       </motion.div>
     </motion.div>

@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server"
 import { prisma } from "@/lib/prisma"
 import {
   HeroSection,
@@ -7,16 +8,24 @@ import {
 } from "@/components/sections"
 import { GithubContributions } from "@/components/sections/github-contributions"
 import { projectStackIcons } from "@/data/tech-icons"
+import { localize } from "@/lib/localize"
 
-export const metadata = {
-  title: "Accueil | Mon portfolio",
-  description:
-    "Portfolio professionnel — Développement web, React, Next.js et expériences utilisateur.",
+export async function generateMetadata() {
+  const t = await getTranslations("meta.home")
+  return {
+    title: t("title"),
+    description: t("description"),
+  }
 }
 
 export const revalidate = 60
 
-export default async function HomePage() {
+export default async function HomePage({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}) {
+  const { locale } = await params
   let certifications = undefined
   let projects = undefined
 
@@ -31,12 +40,12 @@ export default async function HomePage() {
 
       if (dbDiplomas && dbDiplomas.length > 0) {
         certifications = dbDiplomas.map((d: any) => ({
-          name: d.title,
+          name: localize(d.title, d.titleEn, locale),
           issuer: d.institution?.name || "Formation / Indépendant",
           date: d.date || undefined,
           url: d.url || d.institution?.website || undefined,
           logo: d.institution?.logo || undefined,
-          description: d.description || undefined,
+          description: d.description ? localize(d.description, d.descriptionEn, locale) : undefined,
           image: d.image || undefined,
         }))
       }
@@ -66,8 +75,8 @@ export default async function HomePage() {
           .filter((icon): icon is NonNullable<typeof icon> => icon !== null)
 
         return {
-          title: p.title,
-          description: p.description,
+          title: localize(p.title, p.titleEn, locale),
+          description: localize(p.description, p.descriptionEn, locale),
           date: p.date || undefined,
           slug: p.slug || undefined,
           tags: p.tags || [],

@@ -21,12 +21,15 @@ export interface TechItem {
 }
 
 export interface TechCategory {
+  /** Clé stable utilisée pour la traduction du label (voir messages/*.json → about.techCategories) */
+  key: string
   label: string
   items: TechItem[]
 }
 
 export const techCategories: TechCategory[] = [
   {
+    key: "languages",
     label: "Langages",
     items: [
       { name: "JavaScript", icon: "https://cdn.simpleicons.org/javascript/F7DF1E" },
@@ -40,6 +43,7 @@ export const techCategories: TechCategory[] = [
     ],
   },
   {
+    key: "frontend",
     label: "Frontend",
     items: [
       { name: "HTML", icon: "https://cdn.simpleicons.org/html5/E34F26" },
@@ -51,6 +55,7 @@ export const techCategories: TechCategory[] = [
     ],
   },
   {
+    key: "backend",
     label: "Backend",
     items: [
       { name: "Node.js", icon: "https://cdn.simpleicons.org/nodedotjs/339933" },
@@ -60,6 +65,7 @@ export const techCategories: TechCategory[] = [
     ],
   },
   {
+    key: "databases",
     label: "Bases de données",
     items: [
       { name: "PostgreSQL", icon: "https://cdn.simpleicons.org/postgresql/4169E1" },
@@ -70,6 +76,7 @@ export const techCategories: TechCategory[] = [
     ],
   },
   {
+    key: "devopsTools",
     label: "DevOps & outils",
     items: [
       { name: "Docker", icon: "https://cdn.simpleicons.org/docker/2496ED" },

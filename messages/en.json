@@ -1,0 +1,341 @@
+{
+  "nav": {
+    "home": "Home",
+    "blog": "Blog",
+    "cv": "Resume",
+    "contact": "Contact",
+    "theme": "Theme"
+  },
+  "hero": {
+    "badge": "Available for freelance work and collaborations",
+    "title": "I build robust web products, from prototype to production.",
+    "subtitle": "SaaS architectures, EdTech platforms, mobile apps — real projects, used every day by thousands of users.",
+    "github": "GitHub",
+    "linkedin": "LinkedIn",
+    "contact": "Contact me",
+    "cv": "View my resume"
+  },
+  "about": {
+    "title": "About",
+    "paragraphs": [
+      "With a year of experience at UWEZO, I've built solid, hands-on skills in designing modern web applications. That real-world experience sharpened my approach, combining backend rigor, responsive interfaces, and product sense.",
+      "I mainly code server-side with Laravel, Spring Boot, and Nest.js, and front-end with Angular and Next.js. I also have a strong DevOps mindset: Linux day-to-day, Docker, continuous integration, and cloud deployment."
+    ],
+    "eyebrow": "Background & values",
+    "stackTitle": "Tech stack",
+    "githubTitle": "GitHub activity",
+    "githubSubtitle": "contributions in the last 12 months",
+    "githubProfile": "View profile",
+    "githubClickHint": "Click a square to see the details",
+    "githubLess": "Less",
+    "githubMore": "More",
+    "months": [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec"
+    ],
+    "days": [
+      "",
+      "Mon",
+      "",
+      "Wed",
+      "",
+      "Fri",
+      ""
+    ],
+    "contributionsOn": "{count, plural, one {# contribution} other {# contributions}} on {date}",
+    "techCategories": {
+      "languages": "Languages",
+      "frontend": "Frontend",
+      "backend": "Backend",
+      "databases": "Databases",
+      "devopsTools": "DevOps & Tools"
+    }
+  },
+  "certifications": {
+    "title": "Certifications",
+    "subtitle": "Education and diplomas",
+    "loading": "Loading HD document...",
+    "previewUnavailable": "PDF preview unavailable",
+    "issuedBy": "Issued by",
+    "prevDiploma": "Previous diploma",
+    "nextDiploma": "Next diploma",
+    "officialDocument": "Official document & Certificate",
+    "visitSite": "Visit site",
+    "openRawPdf": "Open raw PDF file",
+    "noPdfAttached": "No PDF file attached for this certificate."
+  },
+  "projects": {
+    "title": "Projects",
+    "subtitle": "Recent work and side projects",
+    "searchPlaceholder": "Search by keyword, tech, or company...",
+    "moreFilters": "More filters",
+    "reset": "Reset",
+    "all": "All",
+    "personal": "Personal Projects",
+    "seeDetail": "View details",
+    "visitSite": "Visit site",
+    "noResults": "No project matches your filters",
+    "searchPlaceholderShort": "Search...",
+    "resetCount": "Reset ({count})",
+    "allCount": "All ({count})",
+    "personalCount": "Personal Projects ({count})",
+    "structure": "Company:",
+    "filtersButton": "Filters",
+    "resultsCount": "Showing <strong>{from}–{to}</strong> of {total, plural, one {# project} other {# projects}}",
+    "totalCount": "({count} total)",
+    "noResultsHint": "Try adjusting your search keyword or resetting the company filters.",
+    "resetAllFilters": "Reset all filters",
+    "personalBadge": "Personal",
+    "siteLink": "Site",
+    "viewSourceCode": "View source code on GitHub",
+    "prevPage": "Previous page",
+    "nextPage": "Next page",
+    "filtersModalTitle": "Project filters",
+    "filtersModalSubtitle": "Select the company or technology",
+    "search": "Search",
+    "searchPlaceholderModal": "Keyword, tech...",
+    "companyLabel": "Company",
+    "singleSelection": "Single selection",
+    "allProjects": "All projects",
+    "techTags": "Technologies & Tags",
+    "resetTag": "Reset tag",
+    "showResultsButton": "Show ({count})",
+    "preview": "Preview"
+  },
+  "contact": {
+    "title": "Contact",
+    "subtitle": "Let's talk about your project",
+    "name": "Full name",
+    "email": "Email",
+    "country": "Country",
+    "phone": "Phone",
+    "message": "Message",
+    "send": "Send",
+    "sending": "Sending...",
+    "sent": "Message sent",
+    "disclaimer": "By submitting this form, you agree to be contacted regarding your request.",
+    "backHome": "Back to home",
+    "intro": "A project, a question, or a collaboration? Send me a message.",
+    "cvTitle": "Resume",
+    "cvDescription": "View my resume and download it as a PDF directly from the page.",
+    "cvOpen": "Open",
+    "coordinates": "Contact details",
+    "whatsapp": "WhatsApp",
+    "formTitle": "Contact form",
+    "metaTitle": "Contact | My portfolio",
+    "metaDescription": "Get in touch for a project or a collaboration.",
+    "namePlaceholder": "Your name",
+    "emailPlaceholder": "Your email",
+    "messagePlaceholder": "Your message",
+    "countrySearchPlaceholder": "Search a country...",
+    "noCountryFound": "No country found",
+    "captchaHint": "Please validate the captcha before sending.",
+    "errorMessage": "Something went wrong. Please try again or contact me by email.",
+    "confirmationBody": "Thank you for your message. I'll get back to you as soon as possible.",
+    "close": "Close"
+  },
+  "cv": {
+    "title": "Izayid Ali — Resume",
+    "back": "Back",
+    "download": "Download",
+    "rawPdf": "Raw PDF",
+    "loading": "Loading resume in HD...",
+    "official": "Official resume"
+  },
+  "blog": {
+    "title": "Blog",
+    "subtitle": "Case studies and projects: AI assistant, websites and platforms.",
+    "back": "Back to blog",
+    "readMore": "Read more",
+    "minRead": "min",
+    "readingTime": "{count} min read"
+  },
+  "languageSwitcher": {
+    "label": "Language",
+    "french": "French",
+    "english": "English"
+  },
+  "terminal": {
+    "scenarios": [
+      {
+        "cmd": "pnpm run fetch-profile",
+        "outputs": [
+          {
+            "text": "⏳ Initializing developer profile..."
+          },
+          {
+            "text": "✔ Name: Izayid Ali",
+            "highlight": true
+          },
+          {
+            "text": "✔ Role: Full-Stack Developer (UWEZO)",
+            "accent": true
+          },
+          {
+            "text": "✔ Experience: 1 year at UWEZO · Web & DevOps projects"
+          },
+          {
+            "text": "✔ Location: France / Remote"
+          }
+        ]
+      },
+      {
+        "cmd": "cat bio.md",
+        "outputs": [
+          {
+            "text": "## Background & Experience at UWEZO",
+            "highlight": true
+          },
+          {
+            "text": "With a year of experience at UWEZO, I built solid, hands-on skills in web engineering."
+          },
+          {
+            "text": "My approach combines backend rigor, modern front-end frameworks, and a strong DevOps mindset."
+          }
+        ]
+      },
+      {
+        "cmd": "cat stack.config.ts",
+        "outputs": [
+          {
+            "text": "export const techStack = {"
+          },
+          {
+            "text": "  backend: [\"Laravel\", \"Spring Boot\", \"Nest.js\", \"Node.js / Express\"],",
+            "highlight": true
+          },
+          {
+            "text": "  frontend: [\"Next.js 15\", \"Angular\", \"React\", \"TailwindCSS\", \"Framer Motion\"],",
+            "accent": true
+          },
+          {
+            "text": "  databases: [\"PostgreSQL\", \"MySQL\", \"Prisma ORM\", \"Supabase\"],"
+          },
+          {
+            "text": "  devops: [\"Linux / Bash\", \"Docker & Compose\", \"CI/CD GitHub Actions\", \"VPS / Nginx\"]"
+          },
+          {
+            "text": "}"
+          }
+        ]
+      },
+      {
+        "cmd": "docker ps --format 'table {{.Names}}\\t{{.Status}}\\t{{.Ports}}'",
+        "outputs": [
+          {
+            "text": "NAMES                   STATUS                    PORTS",
+            "highlight": true
+          },
+          {
+            "text": "portfolio-nextjs-app   Up 14 hours (healthy)     0.0.0.0:3000->3000/tcp",
+            "accent": true
+          },
+          {
+            "text": "postgres-main-db        Up 14 hours (healthy)     0.0.0.0:5432->5432/tcp"
+          },
+          {
+            "text": "supabase-storage-api    Up 14 hours (healthy)     0.0.0.0:8000->8000/tcp"
+          }
+        ]
+      },
+      {
+        "cmd": "git log --oneline -n 4",
+        "outputs": [
+          {
+            "text": "a1f8c92 (head -> main) feat: HD PDF & Canvas CV viewer, no scrollbar",
+            "highlight": true
+          },
+          {
+            "text": "8b3e210 style: Design system standardization & dark/light mode support"
+          },
+          {
+            "text": "4d9a102 feat: Interactive redesign of the Terminal CLI component"
+          },
+          {
+            "text": "1c2f009 init: Initial portfolio v2.0 architecture",
+            "accent": true
+          }
+        ]
+      },
+      {
+        "cmd": "curl -s -X GET /api/certifications | jq '.'",
+        "outputs": [
+          {
+            "text": "["
+          },
+          {
+            "text": "  {",
+            "highlight": true
+          },
+          {
+            "text": "    \"degree\": \"Bachelor's in Software Engineering\",",
+            "accent": true
+          },
+          {
+            "text": "    \"school\": \"Université Dakar-Bourguiba\",",
+            "accent": true
+          },
+          {
+            "text": "    \"year\": \"2025\"",
+            "accent": true
+          },
+          {
+            "text": "  }"
+          },
+          {
+            "text": "]"
+          }
+        ]
+      },
+      {
+        "cmd": "status --availability",
+        "outputs": [
+          {
+            "text": "● Status: Open to projects, freelance work & job opportunities",
+            "highlight": true
+          },
+          {
+            "text": "● Mode: Freelance / Full-time / Permanent"
+          },
+          {
+            "text": "● Contact: via the /contact page or direct email"
+          }
+        ]
+      }
+    ]
+  },
+  "meta": {
+    "home": {
+      "title": "Home | My portfolio",
+      "description": "Professional portfolio — Web development, React, Next.js and user experience."
+    }
+  },
+  "chat": {
+    "online": "Online",
+    "closePanel": "Close chat",
+    "toggleOpen": "Chat with the AI assistant",
+    "toggleClose": "Close the AI assistant",
+    "greeting": "Hi! I'm {name}, Iza's assistant",
+    "greetingHint": "Ask me about his background, projects, or skills.",
+    "inputPlaceholder": "Type your message…",
+    "send": "Send",
+    "poweredBy": "Powered by AI",
+    "simulatedResponses": [
+      "Thanks for your question! Iza is a full-stack developer focused on backend & DevOps, passionate about Laravel, Spring Boot, Nest.js, Angular, and Next.js.",
+      "Iza mainly works with Laravel, Spring Boot, and Nest.js on the backend, and Angular/Next.js on the frontend. He's also skilled with Docker, Linux, and cloud deployment.",
+      "Feel free to check out the projects section of the portfolio for concrete examples of his work!",
+      "Good question! You can reach Iza directly through the Contact page on the site.",
+      "Iza is also comfortable with relational databases: PostgreSQL, MySQL, Oracle, SQL Server, and SQLite."
+    ]
+  }
+}

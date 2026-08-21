@@ -1,9 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import Link from "next/link"
 import Image from "next/image"
 import { motion } from "motion/react"
+import { useTranslations } from "next-intl"
+import { Link } from "@/i18n/navigation"
 import { ArrowRight, Clock, FileText } from "lucide-react"
 import type { BlogPostListItem } from "@/types"
 import { cn } from "@/lib/utils"
@@ -13,6 +14,7 @@ interface BlogTimelineContentProps {
 }
 
 export function BlogTimelineContent({ post }: BlogTimelineContentProps) {
+  const t = useTranslations("blog")
   const [imageFailed, setImageFailed] = useState(false)
   const showImage = Boolean(post.image) && !imageFailed
 
@@ -58,7 +60,7 @@ export function BlogTimelineContent({ post }: BlogTimelineContentProps) {
             <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
               <span className="flex items-center gap-1">
                 <Clock className="size-3.5" />
-                {post.readingTime} min
+                {post.readingTime} {t("minRead")}
               </span>
               {post.tags.map((tag) => (
                 <span
@@ -70,7 +72,7 @@ export function BlogTimelineContent({ post }: BlogTimelineContentProps) {
               ))}
             </div>
             <span className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary">
-              Lire la suite
+              {t("readMore")}
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
             </span>
           </div>

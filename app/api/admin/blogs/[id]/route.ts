@@ -16,8 +16,11 @@ export async function GET(
         id: post.id,
         slug: post.slug,
         title: post.title,
+        titleEn: post.titleEn,
         excerpt: post.excerpt,
+        excerptEn: post.excerptEn,
         content: post.content,
+        contentEn: post.contentEn,
         date: post.date.toISOString(),
         readingTime: post.readingTime,
         tags: post.tags,
@@ -41,10 +44,13 @@ export async function PATCH(
   try {
     const { id } = await params
     const body = await request.json()
-    const { title, excerpt, content, date, readingTime, tags, image, published } = body as {
+    const { title, titleEn, excerpt, excerptEn, content, contentEn, date, readingTime, tags, image, published } = body as {
       title?: string
+      titleEn?: string
       excerpt?: string
+      excerptEn?: string
       content?: string
+      contentEn?: string
       date?: string
       readingTime?: number
       tags?: string[]
@@ -54,8 +60,11 @@ export async function PATCH(
 
     const updateData: Record<string, unknown> = {}
     if (title !== undefined) updateData.title = title.trim()
+    if (titleEn !== undefined) updateData.titleEn = titleEn.trim() || null
     if (excerpt !== undefined) updateData.excerpt = excerpt.trim()
+    if (excerptEn !== undefined) updateData.excerptEn = excerptEn.trim() || null
     if (content !== undefined) updateData.content = content.trim()
+    if (contentEn !== undefined) updateData.contentEn = contentEn.trim() || null
     if (date !== undefined) updateData.date = new Date(date)
     if (readingTime !== undefined) updateData.readingTime = readingTime
     if (tags !== undefined) updateData.tags = tags
@@ -73,8 +82,11 @@ export async function PATCH(
         id: post.id,
         slug: post.slug,
         title: post.title,
+        titleEn: post.titleEn,
         excerpt: post.excerpt,
+        excerptEn: post.excerptEn,
         content: post.content,
+        contentEn: post.contentEn,
         date: post.date.toISOString(),
         readingTime: post.readingTime,
         tags: post.tags,
