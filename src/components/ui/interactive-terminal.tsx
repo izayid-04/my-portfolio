@@ -1,82 +1,13 @@
 "use client"
 
 import React, { useState, useEffect, useRef } from "react"
+import { useTranslations } from "next-intl"
 import { Terminal as TerminalIcon, Sparkles } from "lucide-react"
 
 interface ScenarioStep {
   cmd: string
   outputs: Array<{ text: string; highlight?: boolean; accent?: boolean }>
 }
-
-const SCENARIOS: ScenarioStep[] = [
-  {
-    cmd: "pnpm run fetch-profile",
-    outputs: [
-      { text: "⏳ Initialisation du profil développeur..." },
-      { text: "✔ Nom : Izayid Ali", highlight: true },
-      { text: "✔ Rôle : Développeur Full-Stack (UWEZO)", accent: true },
-      { text: "✔ Expérience : 1 an chez UWEZO · Projets Web & DevOps" },
-      { text: "✔ Localisation : France / Remote" },
-    ],
-  },
-  {
-    cmd: "cat bio.md",
-    outputs: [
-      { text: "## Parcours & Expérience chez UWEZO", highlight: true },
-      { text: "Fort d'un an d'expérience au sein de l'entreprise UWEZO, j'y ai développé de solides compétences concrètes en ingénierie web." },
-      { text: "Mon approche combine la rigueur backend, la modernité des frameworks front-end et une forte sensibilité DevOps." },
-    ],
-  },
-  {
-    cmd: "cat stack.config.ts",
-    outputs: [
-      { text: "export const techStack = {" },
-      { text: '  backend: ["Laravel", "Spring Boot", "Nest.js", "Node.js / Express"],', highlight: true },
-      { text: '  frontend: ["Next.js 15", "Angular", "React", "TailwindCSS", "Framer Motion"],', accent: true },
-      { text: '  databases: ["PostgreSQL", "MySQL", "Prisma ORM", "Supabase"],' },
-      { text: '  devops: ["Linux / Bash", "Docker & Compose", "CI/CD GitHub Actions", "VPS / Nginx"]' },
-      { text: "}" },
-    ],
-  },
-  {
-    cmd: "docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'",
-    outputs: [
-      { text: "NAMES                   STATUS                    PORTS", highlight: true },
-      { text: "portfolio-nextjs-app   Up 14 hours (healthy)     0.0.0.0:3000->3000/tcp", accent: true },
-      { text: "postgres-main-db        Up 14 hours (healthy)     0.0.0.0:5432->5432/tcp" },
-      { text: "supabase-storage-api    Up 14 hours (healthy)     0.0.0.0:8000->8000/tcp" },
-    ],
-  },
-  {
-    cmd: "git log --oneline -n 4",
-    outputs: [
-      { text: "a1f8c92 (head -> main) feat: Visualiseur CV PDF & Canvas HD sans barre de scroll", highlight: true },
-      { text: "8b3e210 style: Standardisation du design system & support mode sombre/clair" },
-      { text: "4d9a102 feat: Refonte interactive du composant Terminal CLI" },
-      { text: "1c2f009 init: Architecture initiale du portfolio v2.0", accent: true },
-    ],
-  },
-  {
-    cmd: "curl -s -X GET /api/certifications | jq '.'",
-    outputs: [
-      { text: "[" },
-      { text: "  {", highlight: true },
-      { text: '    "degree": "Licence 3 en Génie Logiciel",', accent: true },
-      { text: '    "school": "Université Dakar-Bourguiba",', accent: true },
-      { text: '    "year": "2025"', accent: true },
-      { text: "  }" },
-      { text: "]" },
-    ],
-  },
-  {
-    cmd: "status --availability",
-    outputs: [
-      { text: "● Statut : Ouvert aux projets, missions & opportunités de recrutement", highlight: true },
-      { text: "● Mode : Freelance / CDI / Temps plein" },
-      { text: "● Contact : via la page /contact ou par mail direct" },
-    ],
-  },
-]
 
 function PromptPrefix() {
   return (
@@ -92,6 +23,8 @@ function PromptPrefix() {
 }
 
 export function InteractiveTerminal() {
+  const t = useTranslations("terminal")
+  const scenarios = t.raw("scenarios") as ScenarioStep[]
   const [lines, setLines] = useState<Array<{ type: "cmd" | "out"; text: string; highlight?: boolean; accent?: boolean }>>([])
   const [currentCmd, setCurrentCmd] = useState("")
   const containerRef = useRef<HTMLDivElement>(null)
@@ -123,7 +56,7 @@ export function InteractiveTerminal() {
         setCurrentCmd("")
         await sleep(500)
 
-        for (const scenario of SCENARIOS) {
+        for (const scenario of scenarios) {
           if (!active) break
 
           // 1. Saisie caractère par caractère
@@ -161,7 +94,7 @@ export function InteractiveTerminal() {
     return () => {
       active = false
     }
-  }, [])
+  }, [scenarios])
 
   return (
     <div className="w-full h-[500px] sm:h-[540px] rounded-2xl border border-border bg-card text-card-foreground shadow-2xl overflow-hidden flex flex-col font-mono text-xs select-none">

@@ -1,7 +1,7 @@
 "use client"
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { useTranslations } from "next-intl"
+import { Link, usePathname } from "@/i18n/navigation"
 import { useEffect, useState } from "react"
 import {
   Github,
@@ -16,14 +16,18 @@ import {
 import { motion, AnimatePresence } from "motion/react"
 import { Dock, DockIcon } from "@/components/ui/dock"
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler"
+import { LanguageSwitcher } from "@/components/language-switcher"
 import { cn } from "@/lib/utils"
 
-const pageLinks = [
-  { href: "/", label: "Accueil", icon: Home },
-  { href: "/blog", label: "Blog", icon: FileText },
-  { href: "/cv", label: "CV", icon: IdCard },
-  { href: "/contact", label: "Contact", icon: Mail },
-]
+function usePageLinks() {
+  const t = useTranslations("nav")
+  return [
+    { href: "/", label: t("home"), icon: Home },
+    { href: "/blog", label: t("blog"), icon: FileText },
+    { href: "/cv", label: t("cv"), icon: IdCard },
+    { href: "/contact", label: t("contact"), icon: Mail },
+  ]
+}
 
 const socialLinks = [
   { href: "https://github.com/izayid-04", label: "GitHub", icon: Github },
@@ -119,6 +123,8 @@ export function Navbar() {
   const pathname = usePathname()
   const isMobile = useIsMobile()
   const [menuOpen, setMenuOpen] = useState(false)
+  const pageLinks = usePageLinks()
+  const tNav = useTranslations("nav")
 
   useEffect(() => {
     if (menuOpen) document.body.style.overflow = "hidden"
@@ -202,8 +208,9 @@ export function Navbar() {
                   </a>
                 ))}
                 <div className="my-2 h-px bg-border" />
+                <LanguageSwitcher variant="menu" />
                 <div className="flex items-center gap-3 rounded-xl px-4 py-3">
-                  <span className="text-sm font-medium text-foreground">Thème</span>
+                  <span className="text-sm font-medium text-foreground">{tNav("theme")}</span>
                   <AnimatedThemeToggler
                     aria-label="Mode clair / sombre"
                     className="ml-auto cursor-pointer [&_svg]:size-5"
@@ -257,12 +264,15 @@ export function Navbar() {
           ))}
           <div className="mx-1 w-px self-stretch bg-border shrink-0" aria-hidden />
           <DockIcon>
+            <LanguageSwitcher />
+          </DockIcon>
+          <DockIcon>
             <div className="group relative flex flex-col items-center size-full">
               <span
                 className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1 rounded-md bg-popover text-popover-foreground text-xs font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-200 border border-border shadow-sm"
                 aria-hidden
               >
-                Thème
+                {tNav("theme")}
               </span>
               <AnimatedThemeToggler
                 aria-label="Mode clair / sombre"

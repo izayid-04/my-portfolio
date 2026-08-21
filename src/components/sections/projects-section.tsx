@@ -4,6 +4,7 @@ import { useRef, useEffect, useState, useMemo } from "react"
 import { createPortal } from "react-dom"
 import Image from "next/image"
 import Link from "next/link"
+import { useTranslations } from "next-intl"
 import { motion, AnimatePresence } from "motion/react"
 import {
   ExternalLink,
@@ -280,6 +281,7 @@ const DESKTOP_VIEWPORT_HEIGHT = 960
 
 /** Cadre type navigateur avec iframe : site en direct en vue desktop (1280px) puis mis à l'échelle. */
 function BrowserPreview({ url, title }: { url: string; title: string }) {
+  const t = useTranslations("projects")
   const wrapperRef = useRef<HTMLDivElement>(null)
   const [scale, setScale] = useState(1)
   /** Évite les divergences SSR / premier rendu client (iframe + resize) */
@@ -348,7 +350,7 @@ function BrowserPreview({ url, title }: { url: string; title: string }) {
           >
             <iframe
               src={url}
-              title={`Aperçu : ${title}`}
+              title={`${t("preview")} : ${title}`}
               width={DESKTOP_VIEWPORT_WIDTH}
               height={DESKTOP_VIEWPORT_HEIGHT}
               className="border-0"
@@ -364,17 +366,14 @@ function BrowserPreview({ url, title }: { url: string; title: string }) {
 
 interface ProjectsSectionProps {
   className?: string
-  title?: string
-  subtitle?: string
   projects?: Project[]
 }
 
 export function ProjectsSection({
   className,
-  title = "Projets",
-  subtitle = "Réalisations récentes et side projects",
   projects: initialProjects = defaultProjects,
 }: ProjectsSectionProps) {
+  const t = useTranslations("projects")
   const items = initialProjects
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
 
@@ -510,10 +509,10 @@ export function ProjectsSection({
           id={`${siteConfig.sections.projects}-heading`}
           className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl md:text-4xl"
         >
-          {title}
+          {t("title")}
         </h2>
         <p className="mt-2 text-sm font-medium text-foreground sm:text-base">
-          {subtitle}
+          {t("subtitle")}
         </p>
       </div>
 
@@ -525,7 +524,7 @@ export function ProjectsSection({
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Rechercher par mot-clé, techno ou entreprise..."
+              placeholder={t("searchPlaceholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full rounded-xl border border-input bg-background/80 pl-9 pr-8 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none transition-all"
@@ -554,7 +553,7 @@ export function ProjectsSection({
               )}
             >
               <SlidersHorizontal className="size-3.5" />
-              Plus de filtres
+              {t("moreFilters")}
               {selectedTag !== "ALL" && (
                 <span className="flex size-4 items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold">
                   1
@@ -570,7 +569,7 @@ export function ProjectsSection({
                 className="cursor-pointer inline-flex items-center gap-1.5 rounded-xl border border-border bg-background px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
               >
                 <RotateCcw className="size-3.5 text-primary" />
-                Réinitialiser ({activeFiltersCount})
+                {t("resetCount", { count: activeFiltersCount })}
               </button>
             )}
           </div>
@@ -579,7 +578,7 @@ export function ProjectsSection({
         {/* Filtre Structure / Entreprise */}
         <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-border/40">
           <span className="text-[11px] font-semibold text-muted-foreground mr-1 flex items-center gap-1">
-            <Building2 className="size-3.5 text-primary" /> Structure :
+            <Building2 className="size-3.5 text-primary" /> {t("structure")}
           </span>
           <button
             type="button"
@@ -591,7 +590,7 @@ export function ProjectsSection({
                 : "border-border/60 bg-background/60 text-muted-foreground hover:bg-muted hover:text-foreground"
             )}
           >
-            Tous ({items.length})
+            {t("allCount", { count: items.length })}
           </button>
 
           {companyOptions.list.map((comp) => (
@@ -627,7 +626,7 @@ export function ProjectsSection({
               )}
             >
               <User className="size-3.5 text-muted-foreground" />
-              Projets Personnels ({companyOptions.personalCount})
+              {t("personalCount", { count: companyOptions.personalCount })}
             </button>
           )}
         </div>
@@ -639,7 +638,7 @@ export function ProjectsSection({
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Rechercher..."
+            placeholder={t("searchPlaceholderShort")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full rounded-xl border border-input bg-card pl-9 pr-7 py-2.5 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
@@ -666,7 +665,7 @@ export function ProjectsSection({
           )}
         >
           <SlidersHorizontal className="size-4" />
-          <span>Filtres</span>
+          <span>{t("filtersButton")}</span>
           {activeFiltersCount > 0 && (
             <span className="flex size-4 items-center justify-center rounded-full bg-background text-[10px] font-bold text-primary">
               {activeFiltersCount}
@@ -678,13 +677,13 @@ export function ProjectsSection({
       {/* Compteur de résultats */}
       <div className="flex items-center justify-between mb-4 px-1 text-xs text-muted-foreground">
         <span>
-          Affichage de{" "}
-          <strong className="text-foreground font-semibold">
-            {filteredProjects.length === 0 ? 0 : (currentPage - 1) * PROJECTS_PER_PAGE + 1}
-            {"–"}
-            {Math.min(currentPage * PROJECTS_PER_PAGE, filteredProjects.length)}
-          </strong>{" "}
-          sur {filteredProjects.length} projet(s) {activeFiltersCount > 0 ? "" : `(${items.length} au total)`}
+          {t.rich("resultsCount", {
+            from: filteredProjects.length === 0 ? 0 : (currentPage - 1) * PROJECTS_PER_PAGE + 1,
+            to: Math.min(currentPage * PROJECTS_PER_PAGE, filteredProjects.length),
+            total: filteredProjects.length,
+            strong: (chunks) => <strong className="text-foreground font-semibold">{chunks}</strong>,
+          })}{" "}
+          {activeFiltersCount === 0 && t("totalCount", { count: items.length })}
         </span>
         {activeFiltersCount > 0 && (
           <button
@@ -693,7 +692,7 @@ export function ProjectsSection({
             className="cursor-pointer text-primary hover:underline font-medium flex items-center gap-1"
           >
             <RotateCcw className="size-3" />
-            Réinitialiser
+            {t("reset")}
           </button>
         )}
       </div>
@@ -704,9 +703,9 @@ export function ProjectsSection({
           <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
             <Filter className="size-6" />
           </div>
-          <h3 className="text-sm font-semibold text-foreground">Aucun projet ne correspond à vos filtres</h3>
+          <h3 className="text-sm font-semibold text-foreground">{t("noResults")}</h3>
           <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-            Essayez de modifier votre mot-clé de recherche ou de réinitialiser les filtres par structure.
+            {t("noResultsHint")}
           </p>
           <button
             type="button"
@@ -714,7 +713,7 @@ export function ProjectsSection({
             className="cursor-pointer inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground shadow-sm hover:opacity-90 transition-opacity"
           >
             <RotateCcw className="size-3.5" />
-            Réinitialiser tous les filtres
+            {t("resetAllFilters")}
           </button>
         </div>
       ) : (
@@ -775,7 +774,7 @@ export function ProjectsSection({
                     ) : (
                       <span className="inline-flex items-center gap-1 rounded-full bg-muted border border-border px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground">
                         <User className="size-3" />
-                        Personnel
+                        {t("personalBadge")}
                       </span>
                     )}
                   </div>
@@ -816,10 +815,10 @@ export function ProjectsSection({
                           rel="noopener noreferrer"
                           onClick={(e) => e.stopPropagation()}
                           className="inline-flex items-center gap-1.5 h-8 rounded-lg border border-border bg-muted/50 px-3 text-xs font-semibold text-foreground transition-all hover:bg-muted hover:border-primary/40 hover:text-primary"
-                          title="Voir le site"
+                          title={t("visitSite")}
                         >
                           <ExternalLink className="size-3.5 shrink-0" aria-hidden />
-                          <span>Site</span>
+                          <span>{t("siteLink")}</span>
                         </Link>
                       )}
                       {project.githubUrl && (
@@ -829,7 +828,7 @@ export function ProjectsSection({
                           rel="noopener noreferrer"
                           onClick={(e) => e.stopPropagation()}
                           className="inline-flex items-center gap-1.5 h-8 rounded-lg border border-border bg-muted/50 px-3 text-xs font-semibold text-foreground transition-all hover:bg-muted hover:border-primary/40 hover:text-primary"
-                          title="Voir le code source sur GitHub"
+                          title={t("viewSourceCode")}
                         >
                           <Github className="size-3.5 shrink-0" aria-hidden />
                           <span>GitHub</span>
@@ -847,7 +846,7 @@ export function ProjectsSection({
                         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 shrink-0"
                       )}
                     >
-                      Voir le détail →
+                      {t("seeDetail")} →
                     </button>
                   </div>
                 </div>
@@ -865,7 +864,7 @@ export function ProjectsSection({
             onClick={() => goToPage(currentPage - 1)}
             disabled={currentPage === 1}
             className="cursor-pointer inline-flex size-8 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-            aria-label="Page précédente"
+            aria-label={t("prevPage")}
           >
             <ChevronLeft className="size-4" />
           </button>
@@ -892,7 +891,7 @@ export function ProjectsSection({
             onClick={() => goToPage(currentPage + 1)}
             disabled={currentPage === totalPages}
             className="cursor-pointer inline-flex size-8 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-            aria-label="Page suivante"
+            aria-label={t("nextPage")}
           >
             <ChevronRight className="size-4" />
           </button>
@@ -949,8 +948,8 @@ export function ProjectsSection({
                         <SlidersHorizontal className="size-4" />
                       </div>
                       <div>
-                        <h3 className="text-sm font-bold text-foreground">Filtres des projets</h3>
-                        <p className="text-[11px] text-muted-foreground">Sélectionnez la structure ou la technologie</p>
+                        <h3 className="text-sm font-bold text-foreground">{t("filtersModalTitle")}</h3>
+                        <p className="text-[11px] text-muted-foreground">{t("filtersModalSubtitle")}</p>
                       </div>
                     </div>
                     <button
@@ -964,12 +963,12 @@ export function ProjectsSection({
 
                   {/* Section Recherche */}
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-foreground block">Rechercher</label>
+                    <label className="text-xs font-semibold text-foreground block">{t("search")}</label>
                     <div className="relative">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
                       <input
                         type="text"
-                        placeholder="Mot-clé, techno..."
+                        placeholder={t("searchPlaceholderModal")}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="w-full rounded-xl border border-input bg-background pl-9 pr-8 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
@@ -989,8 +988,8 @@ export function ProjectsSection({
                   {/* Section Structure / Entreprise */}
                   <div className="space-y-2">
                     <label className="text-xs font-semibold text-foreground flex items-center justify-between">
-                      <span>Structure / Entreprise</span>
-                      <span className="text-[10px] text-muted-foreground italic">Sélection unique</span>
+                      <span>{t("companyLabel")}</span>
+                      <span className="text-[10px] text-muted-foreground italic">{t("singleSelection")}</span>
                     </label>
                     <div className="grid grid-cols-1 gap-1.5">
                       <button
@@ -1004,7 +1003,7 @@ export function ProjectsSection({
                         )}
                       >
                         <span className="flex items-center gap-2">
-                          <Building2 className="size-4 text-primary" /> Tous les projets
+                          <Building2 className="size-4 text-primary" /> {t("allProjects")}
                         </span>
                         <span className="rounded-full bg-background/80 px-2 py-0.5 text-[10px] font-semibold">
                           {items.length}
@@ -1049,7 +1048,7 @@ export function ProjectsSection({
                           )}
                         >
                           <span className="flex items-center gap-2">
-                            <User className="size-4 text-muted-foreground" /> Projets Personnels
+                            <User className="size-4 text-muted-foreground" /> {t("personal")}
                           </span>
                           <span className="rounded-full bg-background/80 px-2 py-0.5 text-[10px] font-semibold">
                             {companyOptions.personalCount}
@@ -1063,14 +1062,14 @@ export function ProjectsSection({
                   {tagOptions.length > 0 && (
                     <div className="space-y-2">
                       <label className="text-xs font-semibold text-foreground flex items-center justify-between">
-                        <span>Technologies & Tags</span>
+                        <span>{t("techTags")}</span>
                         {selectedTag !== "ALL" && (
                           <button
                             type="button"
                             onClick={() => setSelectedTag("ALL")}
                             className="text-[10px] text-primary hover:underline"
                           >
-                            Réinitialiser tag
+                            {t("resetTag")}
                           </button>
                         )}
                       </label>
@@ -1085,7 +1084,7 @@ export function ProjectsSection({
                               : "border-border/60 bg-muted/40 text-muted-foreground"
                           )}
                         >
-                          Tous
+                          {t("all")}
                         </button>
                         {tagOptions.map((t) => (
                           <button
@@ -1115,7 +1114,7 @@ export function ProjectsSection({
                         onClick={resetFilters}
                         className="cursor-pointer flex-1 rounded-xl border border-border bg-background py-2.5 text-xs font-semibold text-muted-foreground hover:bg-muted transition-colors text-center"
                       >
-                        Réinitialiser
+                        {t("reset")}
                       </button>
                     )}
                     <button
@@ -1123,7 +1122,7 @@ export function ProjectsSection({
                       onClick={() => setIsFiltersModalOpen(false)}
                       className="cursor-pointer flex-1 rounded-xl bg-primary py-2.5 text-xs font-semibold text-primary-foreground shadow-sm hover:opacity-90 transition-opacity text-center"
                     >
-                      Afficher ({filteredProjects.length})
+                      {t("showResultsButton", { count: filteredProjects.length })}
                     </button>
                   </div>
                 </motion.div>

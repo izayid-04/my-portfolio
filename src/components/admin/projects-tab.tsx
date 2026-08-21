@@ -26,6 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { TranslateButton } from "@/components/admin/translate-button"
 
 export interface CompanyData {
   id: string
@@ -37,7 +38,9 @@ export interface CompanyData {
 export interface ProjectData {
   id: string
   title: string
+  titleEn?: string | null
   description: string
+  descriptionEn?: string | null
   date?: string | null
   slug?: string | null
   tags: string[]
@@ -72,7 +75,9 @@ export function ProjectsTab() {
   // Form State (Projet)
   const [editingId, setEditingId] = React.useState<string | null>(null)
   const [title, setTitle] = React.useState("")
+  const [titleEn, setTitleEn] = React.useState("")
   const [description, setDescription] = React.useState("")
+  const [descriptionEn, setDescriptionEn] = React.useState("")
   const [date, setDate] = React.useState("")
   const [slug, setSlug] = React.useState("")
   const [tagsInput, setTagsInput] = React.useState("")
@@ -136,7 +141,9 @@ export function ProjectsTab() {
   const resetForm = () => {
     setEditingId(null)
     setTitle("")
+    setTitleEn("")
     setDescription("")
+    setDescriptionEn("")
     setDate("")
     setSlug("")
     setTagsInput("")
@@ -154,7 +161,9 @@ export function ProjectsTab() {
   const handleEdit = (project: ProjectData) => {
     setEditingId(project.id)
     setTitle(project.title)
+    setTitleEn(project.titleEn || "")
     setDescription(project.description)
+    setDescriptionEn(project.descriptionEn || "")
     setDate(project.date || "")
     setSlug(project.slug || "")
     setTagsInput(project.tags.join(", "))
@@ -285,7 +294,9 @@ export function ProjectsTab() {
       const payload = {
         id: editingId || undefined,
         title,
+        titleEn: titleEn || null,
         description,
+        descriptionEn: descriptionEn || null,
         date: date || null,
         slug: slug || null,
         tags: tagsArray,
@@ -434,6 +445,20 @@ export function ProjectsTab() {
                   placeholder="Ex: Université Dakar-Bourguiba (UDB)"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
+                  className="w-full rounded-xl border border-input bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-xs font-medium text-muted-foreground">Titre EN (optionnel, affiché sur /en)</label>
+                  <TranslateButton sourceText={title} kind="title" onTranslated={setTitleEn} />
+                </div>
+                <input
+                  type="text"
+                  placeholder="English title"
+                  value={titleEn}
+                  onChange={(e) => setTitleEn(e.target.value)}
                   className="w-full rounded-xl border border-input bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
                 />
               </div>
@@ -597,6 +622,20 @@ export function ProjectsTab() {
                 placeholder="Présentez les objectifs, l'équipe et les technologies utilisées..."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
+                className="w-full rounded-xl border border-input bg-background px-3 py-2 text-xs text-foreground focus:border-primary focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-xs font-medium text-muted-foreground">Description EN (optionnel)</label>
+                <TranslateButton sourceText={description} kind="description" onTranslated={setDescriptionEn} />
+              </div>
+              <textarea
+                rows={4}
+                placeholder="English description"
+                value={descriptionEn}
+                onChange={(e) => setDescriptionEn(e.target.value)}
                 className="w-full rounded-xl border border-input bg-background px-3 py-2 text-xs text-foreground focus:border-primary focus:outline-none"
               />
             </div>

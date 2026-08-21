@@ -2,6 +2,7 @@
 
 import { useRef, useEffect } from "react"
 import { motion } from "motion/react"
+import { useLocale, useTranslations } from "next-intl"
 import { Bot, Send, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { siteConfig } from "@/config/site"
@@ -17,8 +18,8 @@ interface ChatPanelProps {
   onClose: () => void
 }
 
-function formatTime(date: Date) {
-  return date.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })
+function formatTime(date: Date, locale: string) {
+  return date.toLocaleTimeString(locale === "fr" ? "fr-FR" : "en-US", { hour: "2-digit", minute: "2-digit" })
 }
 
 function TypingIndicator() {
@@ -49,6 +50,7 @@ function TypingIndicator() {
 }
 
 function MessageBubble({ message }: { message: ChatMessage }) {
+  const locale = useLocale()
   const isUser = message.role === "user"
 
   return (
@@ -83,7 +85,7 @@ function MessageBubble({ message }: { message: ChatMessage }) {
             isUser ? "text-right" : "text-left",
           )}
         >
-          {formatTime(message.timestamp)}
+          {formatTime(message.timestamp, locale)}
         </span>
       </div>
     </motion.div>
@@ -99,6 +101,7 @@ export function ChatPanel({
   onSend,
   onClose,
 }: ChatPanelProps) {
+  const t = useTranslations("chat")
   const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -126,8 +129,15 @@ export function ChatPanel({
         "max-sm:top-0 max-sm:translate-y-0 max-sm:left-0 max-sm:right-0 max-sm:bottom-0 max-sm:w-full max-sm:max-w-none max-sm:h-auto max-sm:rounded-none",
       )}
     >
+      {/* Ambient gradient glow, bottom-anchored */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-0 h-2/3" aria-hidden>
+        <div className="absolute inset-x-0 bottom-0 h-full bg-[radial-gradient(70%_80%_at_50%_100%,theme(colors.teal.600/35%),transparent_70%)] blur-2xl" />
+        <div className="absolute -bottom-10 left-1/4 h-56 w-56 -translate-x-1/2 rounded-full bg-emerald-500/25 blur-3xl" />
+        <div className="absolute -bottom-10 right-1/4 h-56 w-56 translate-x-1/2 rounded-full bg-sky-400/20 blur-3xl" />
+      </div>
+
       {/* Header */}
-      <div className="flex items-center gap-3 border-b border-border px-4 py-3">
+      <div className="relative z-10 flex items-center gap-3 border-b border-border px-4 py-3">
         <div className="flex size-9 items-center justify-center rounded-full bg-primary/10">
           <Bot className="size-4.5 text-primary" />
         </div>
@@ -138,30 +148,30 @@ export function ChatPanel({
               <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
             </span>
-            <span className="text-xs text-muted-foreground">En ligne</span>
+            <span className="text-xs text-muted-foreground">{t("online")}</span>
           </div>
         </div>
         <button
           onClick={onClose}
           className="flex size-8 items-center justify-center rounded-full hover:bg-muted transition-colors cursor-pointer"
-          aria-label="Fermer le chat"
+          aria-label={t("closePanel")}
         >
           <X className="size-4 text-muted-foreground" />
         </button>
       </div>
 
       {/* Messages */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+      <div ref={scrollRef} className="relative z-10 flex-1 overflow-y-auto px-4 py-4 space-y-4">
         {messages.length === 0 && !isTyping && (
           <div className="flex flex-col items-center justify-center h-full text-center px-6">
             <div className="flex size-14 items-center justify-center rounded-full bg-primary/10 mb-4">
               <Bot className="size-7 text-primary" />
             </div>
             <p className="text-sm font-medium text-foreground mb-1">
-              Salut ! Je suis {siteConfig.assistantName}, l&apos;assistant d&apos;Iza
+              {t("greeting", { name: siteConfig.assistantName })}
             </p>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Pose-moi une question sur son parcours, ses projets ou ses compétences.
+              {t("greetingHint")}
             </p>
           </div>
         )}
@@ -172,13 +182,13 @@ export function ChatPanel({
       </div>
 
       {/* Input */}
-      <div className="border-t border-border p-3 pb-3 sm:pb-3 max-sm:pb-4">
+      <div className="relative z-10 border-t border-border p-3 pb-3 sm:pb-3 max-sm:pb-4">
         <div className="flex items-end gap-2 rounded-xl bg-muted/50 border border-border px-3 py-2 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-1 focus-within:ring-offset-background transition-shadow">
           <textarea
             value={input}
             onChange={(e) => onInputChange(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Écris ton message…"
+            placeholder={t("inputPlaceholder")}
             rows={1}
             disabled={disabled}
             className="flex-1 resize-none bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none max-h-24 min-h-[1.5rem] disabled:opacity-60"
@@ -192,13 +202,13 @@ export function ChatPanel({
                 ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
                 : "bg-muted text-muted-foreground cursor-not-allowed",
             )}
-            aria-label="Envoyer"
+            aria-label={t("send")}
           >
             <Send className="size-3.5" />
           </button>
         </div>
         <p className="mt-1.5 text-center text-[10px] text-muted-foreground/50">
-          Propulsé par IA
+          {t("poweredBy")}
         </p>
       </div>
     </motion.div>

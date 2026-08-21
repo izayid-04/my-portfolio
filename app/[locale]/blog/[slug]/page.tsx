@@ -1,11 +1,12 @@
 import { notFound } from "next/navigation"
-import Link from "next/link"
 import { ArrowLeft, Clock, Calendar } from "lucide-react"
+import { getTranslations } from "next-intl/server"
+import { Link } from "@/i18n/navigation"
 import { getPostBySlugFromDB, getAllSlugsFromDB } from "@/lib/blog"
 import { BlogPostContent } from "@/components/blog/blog-post-content"
 
 interface PageProps {
-  params: Promise<{ slug: string }>
+  params: Promise<{ slug: string; locale: string }>
 }
 
 export async function generateStaticParams() {
@@ -14,8 +15,8 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: PageProps) {
-  const { slug } = await params
-  const post = await getPostBySlugFromDB(slug)
+  const { slug, locale } = await params
+  const post = await getPostBySlugFromDB(slug, locale)
   if (!post) return { title: "Article | Blog" }
   return {
     title: `${post.title} | Blog`,
@@ -24,11 +25,13 @@ export async function generateMetadata({ params }: PageProps) {
 }
 
 export default async function BlogPostPage({ params }: PageProps) {
-  const { slug } = await params
-  const post = await getPostBySlugFromDB(slug)
+  const { slug, locale } = await params
+  const post = await getPostBySlugFromDB(slug, locale)
   if (!post) notFound()
 
-  const dateFormatted = new Date(post.date).toLocaleDateString("fr-FR", {
+  const t = await getTranslations("blog")
+
+  const dateFormatted = new Date(post.date).toLocaleDateString(locale === "fr" ? "fr-FR" : "en-US", {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -42,7 +45,7 @@ export default async function BlogPostPage({ params }: PageProps) {
           className="mb-10 inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="size-4" />
-          Retour au blog
+          {t("back")}
         </Link>
         <header className="mb-10">
           <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl md:text-4xl lg:text-5xl">
@@ -55,7 +58,7 @@ export default async function BlogPostPage({ params }: PageProps) {
             </span>
             <span className="flex items-center gap-1.5">
               <Clock className="size-4" />
-              {post.readingTime} min de lecture
+              {t("readingTime", { count: post.readingTime })}
             </span>
           </div>
           <div className="mt-3 flex flex-wrap gap-2">

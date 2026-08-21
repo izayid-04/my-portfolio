@@ -1,0 +1,341 @@
+{
+  "nav": {
+    "home": "Accueil",
+    "blog": "Blog",
+    "cv": "CV",
+    "contact": "Contact",
+    "theme": "Thème"
+  },
+  "hero": {
+    "badge": "Disponible pour missions et collaborations",
+    "title": "Je conçois des produits web robustes, du prototype à la production.",
+    "subtitle": "Architectures SaaS, plateformes EdTech, applications mobiles — des projets réels, utilisés chaque jour par des milliers d'utilisateurs.",
+    "github": "GitHub",
+    "linkedin": "LinkedIn",
+    "contact": "Me contacter",
+    "cv": "Voir mon CV"
+  },
+  "about": {
+    "title": "À propos",
+    "paragraphs": [
+      "Fort d'un an d'expérience au sein de l'entreprise UWEZO, j'y ai développé de solides compétences concrètes en conception d'applications web modernes. Cette expérience terrain m'a permis de perfectionner mon approche en combinant rigueur backend, interfaces réactives et sens du produit.",
+      "Je code principalement côté serveur avec Laravel, Spring Boot et Nest.js, et côté front avec Angular et Next.js. J'ai aussi une forte sensibilité DevOps : Linux au quotidien, Docker, intégration continue et déploiement sur le cloud."
+    ],
+    "eyebrow": "Parcours & valeurs",
+    "stackTitle": "Stack technique",
+    "githubTitle": "Activité GitHub",
+    "githubSubtitle": "contributions sur les 12 derniers mois",
+    "githubProfile": "Voir le profil",
+    "githubClickHint": "Clique sur une case pour voir le détail",
+    "githubLess": "Moins",
+    "githubMore": "Plus",
+    "months": [
+      "Jan",
+      "Fév",
+      "Mar",
+      "Avr",
+      "Mai",
+      "Juin",
+      "Juil",
+      "Août",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Déc"
+    ],
+    "days": [
+      "",
+      "Lun",
+      "",
+      "Mer",
+      "",
+      "Ven",
+      ""
+    ],
+    "contributionsOn": "{count, plural, one {# contribution} other {# contributions}} le {date}",
+    "techCategories": {
+      "languages": "Langages",
+      "frontend": "Frontend",
+      "backend": "Backend",
+      "databases": "Bases de données",
+      "devopsTools": "DevOps & outils"
+    }
+  },
+  "certifications": {
+    "title": "Certifications",
+    "subtitle": "Formations et diplômes",
+    "loading": "Chargement HD du document PDF...",
+    "previewUnavailable": "Aperçu PDF indisponible",
+    "issuedBy": "Délivré par",
+    "prevDiploma": "Diplôme précédent",
+    "nextDiploma": "Diplôme suivant",
+    "officialDocument": "Document officiel & Attestation",
+    "visitSite": "Visiter le site",
+    "openRawPdf": "Ouvrir le fichier PDF brut",
+    "noPdfAttached": "Aucun fichier PDF joint pour cette attestation."
+  },
+  "projects": {
+    "title": "Projets",
+    "subtitle": "Réalisations récentes et side projects",
+    "searchPlaceholder": "Rechercher par mot-clé, techno ou entreprise...",
+    "moreFilters": "Plus de filtres",
+    "reset": "Réinitialiser",
+    "all": "Tous",
+    "personal": "Projets Personnels",
+    "seeDetail": "Voir le détail",
+    "visitSite": "Voir le site",
+    "noResults": "Aucun projet ne correspond à vos filtres",
+    "searchPlaceholderShort": "Rechercher...",
+    "resetCount": "Réinitialiser ({count})",
+    "allCount": "Tous ({count})",
+    "personalCount": "Projets Personnels ({count})",
+    "structure": "Structure :",
+    "filtersButton": "Filtres",
+    "resultsCount": "Affichage de <strong>{from}–{to}</strong> sur {total, plural, one {# projet} other {# projets}}",
+    "totalCount": "({count} au total)",
+    "noResultsHint": "Essayez de modifier votre mot-clé de recherche ou de réinitialiser les filtres par structure.",
+    "resetAllFilters": "Réinitialiser tous les filtres",
+    "personalBadge": "Personnel",
+    "siteLink": "Site",
+    "viewSourceCode": "Voir le code source sur GitHub",
+    "prevPage": "Page précédente",
+    "nextPage": "Page suivante",
+    "filtersModalTitle": "Filtres des projets",
+    "filtersModalSubtitle": "Sélectionnez la structure ou la technologie",
+    "search": "Rechercher",
+    "searchPlaceholderModal": "Mot-clé, techno...",
+    "companyLabel": "Structure / Entreprise",
+    "singleSelection": "Sélection unique",
+    "allProjects": "Tous les projets",
+    "techTags": "Technologies & Tags",
+    "resetTag": "Réinitialiser tag",
+    "showResultsButton": "Afficher ({count})",
+    "preview": "Aperçu"
+  },
+  "contact": {
+    "title": "Contact",
+    "subtitle": "Répondons ensemble à votre besoin",
+    "name": "Nom complet",
+    "email": "Email",
+    "country": "Pays",
+    "phone": "Téléphone",
+    "message": "Message",
+    "send": "Envoyer",
+    "sending": "Envoi...",
+    "sent": "Message envoyé",
+    "disclaimer": "En envoyant ce formulaire, vous acceptez d'être recontacté concernant votre demande.",
+    "backHome": "Retour à l'accueil",
+    "intro": "Un projet, une question ou une collaboration ? Envoyez-moi un message.",
+    "cvTitle": "Curriculum vitae",
+    "cvDescription": "Consultez mon CV et téléchargez-le en PDF directement depuis la page.",
+    "cvOpen": "Ouvrir",
+    "coordinates": "Coordonnées",
+    "whatsapp": "WhatsApp",
+    "formTitle": "Formulaire de contact",
+    "metaTitle": "Contact | Mon portfolio",
+    "metaDescription": "Me contacter pour un projet ou une collaboration.",
+    "namePlaceholder": "Votre nom",
+    "emailPlaceholder": "Votre email",
+    "messagePlaceholder": "Votre message",
+    "countrySearchPlaceholder": "Rechercher un pays...",
+    "noCountryFound": "Aucun pays trouvé",
+    "captchaHint": "Validez le captcha avant d'envoyer.",
+    "errorMessage": "Une erreur est survenue. Réessayez ou contactez-moi par email.",
+    "confirmationBody": "Merci pour votre message. Je vous recontacterai dès que possible.",
+    "close": "Fermer"
+  },
+  "cv": {
+    "title": "CV Izayid Ali",
+    "back": "Retour",
+    "download": "Télécharger",
+    "rawPdf": "PDF brut",
+    "loading": "Chargement HD du CV...",
+    "official": "CV Officiel"
+  },
+  "blog": {
+    "title": "Blog",
+    "subtitle": "Réalisations et projets : assistant IA, sites et plateformes.",
+    "back": "Retour au blog",
+    "readMore": "Lire la suite",
+    "minRead": "min",
+    "readingTime": "{count} min de lecture"
+  },
+  "languageSwitcher": {
+    "label": "Langue",
+    "french": "Français",
+    "english": "Anglais"
+  },
+  "terminal": {
+    "scenarios": [
+      {
+        "cmd": "pnpm run fetch-profile",
+        "outputs": [
+          {
+            "text": "⏳ Initialisation du profil développeur..."
+          },
+          {
+            "text": "✔ Nom : Izayid Ali",
+            "highlight": true
+          },
+          {
+            "text": "✔ Rôle : Développeur Full-Stack (UWEZO)",
+            "accent": true
+          },
+          {
+            "text": "✔ Expérience : 1 an chez UWEZO · Projets Web & DevOps"
+          },
+          {
+            "text": "✔ Localisation : France / Remote"
+          }
+        ]
+      },
+      {
+        "cmd": "cat bio.md",
+        "outputs": [
+          {
+            "text": "## Parcours & Expérience chez UWEZO",
+            "highlight": true
+          },
+          {
+            "text": "Fort d'un an d'expérience au sein de l'entreprise UWEZO, j'y ai développé de solides compétences concrètes en ingénierie web."
+          },
+          {
+            "text": "Mon approche combine la rigueur backend, la modernité des frameworks front-end et une forte sensibilité DevOps."
+          }
+        ]
+      },
+      {
+        "cmd": "cat stack.config.ts",
+        "outputs": [
+          {
+            "text": "export const techStack = {"
+          },
+          {
+            "text": "  backend: [\"Laravel\", \"Spring Boot\", \"Nest.js\", \"Node.js / Express\"],",
+            "highlight": true
+          },
+          {
+            "text": "  frontend: [\"Next.js 15\", \"Angular\", \"React\", \"TailwindCSS\", \"Framer Motion\"],",
+            "accent": true
+          },
+          {
+            "text": "  databases: [\"PostgreSQL\", \"MySQL\", \"Prisma ORM\", \"Supabase\"],"
+          },
+          {
+            "text": "  devops: [\"Linux / Bash\", \"Docker & Compose\", \"CI/CD GitHub Actions\", \"VPS / Nginx\"]"
+          },
+          {
+            "text": "}"
+          }
+        ]
+      },
+      {
+        "cmd": "docker ps --format 'table {{.Names}}\\t{{.Status}}\\t{{.Ports}}'",
+        "outputs": [
+          {
+            "text": "NAMES                   STATUS                    PORTS",
+            "highlight": true
+          },
+          {
+            "text": "portfolio-nextjs-app   Up 14 hours (healthy)     0.0.0.0:3000->3000/tcp",
+            "accent": true
+          },
+          {
+            "text": "postgres-main-db        Up 14 hours (healthy)     0.0.0.0:5432->5432/tcp"
+          },
+          {
+            "text": "supabase-storage-api    Up 14 hours (healthy)     0.0.0.0:8000->8000/tcp"
+          }
+        ]
+      },
+      {
+        "cmd": "git log --oneline -n 4",
+        "outputs": [
+          {
+            "text": "a1f8c92 (head -> main) feat: Visualiseur CV PDF & Canvas HD sans barre de scroll",
+            "highlight": true
+          },
+          {
+            "text": "8b3e210 style: Standardisation du design system & support mode sombre/clair"
+          },
+          {
+            "text": "4d9a102 feat: Refonte interactive du composant Terminal CLI"
+          },
+          {
+            "text": "1c2f009 init: Architecture initiale du portfolio v2.0",
+            "accent": true
+          }
+        ]
+      },
+      {
+        "cmd": "curl -s -X GET /api/certifications | jq '.'",
+        "outputs": [
+          {
+            "text": "["
+          },
+          {
+            "text": "  {",
+            "highlight": true
+          },
+          {
+            "text": "    \"degree\": \"Licence 3 en Génie Logiciel\",",
+            "accent": true
+          },
+          {
+            "text": "    \"school\": \"Université Dakar-Bourguiba\",",
+            "accent": true
+          },
+          {
+            "text": "    \"year\": \"2025\"",
+            "accent": true
+          },
+          {
+            "text": "  }"
+          },
+          {
+            "text": "]"
+          }
+        ]
+      },
+      {
+        "cmd": "status --availability",
+        "outputs": [
+          {
+            "text": "● Statut : Ouvert aux projets, missions & opportunités de recrutement",
+            "highlight": true
+          },
+          {
+            "text": "● Mode : Freelance / CDI / Temps plein"
+          },
+          {
+            "text": "● Contact : via la page /contact ou par mail direct"
+          }
+        ]
+      }
+    ]
+  },
+  "meta": {
+    "home": {
+      "title": "Accueil | Mon portfolio",
+      "description": "Portfolio professionnel — Développement web, React, Next.js et expériences utilisateur."
+    }
+  },
+  "chat": {
+    "online": "En ligne",
+    "closePanel": "Fermer le chat",
+    "toggleOpen": "Discuter avec l'assistant IA",
+    "toggleClose": "Fermer l'assistant IA",
+    "greeting": "Salut ! Je suis {name}, l'assistant d'Iza",
+    "greetingHint": "Pose-moi une question sur son parcours, ses projets ou ses compétences.",
+    "inputPlaceholder": "Écris ton message…",
+    "send": "Envoyer",
+    "poweredBy": "Propulsé par IA",
+    "simulatedResponses": [
+      "Merci pour ta question ! Iza est un développeur full-stack orienté backend & DevOps, passionné par Laravel, Spring Boot, Nest.js, Angular et Next.js.",
+      "Iza travaille principalement avec Laravel, Spring Boot et Nest.js côté backend, et Angular/Next.js côté frontend. Il maîtrise aussi Docker, Linux et le déploiement cloud.",
+      "N'hésite pas à consulter la section projets du portfolio pour voir des exemples concrets de réalisations !",
+      "Bonne question ! Tu peux contacter Iza directement via la page Contact du site.",
+      "Iza est aussi à l'aise avec les bases de données relationnelles : PostgreSQL, MySQL, Oracle, SQL Server et SQLite."
+    ]
+  }
+}

@@ -22,7 +22,7 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const body = await req.json()
-    const { title, degreeType, fieldOfStudy, description, date, image, url, published, institutionId } = body
+    const { title, titleEn, degreeType, fieldOfStudy, description, descriptionEn, date, image, url, published, institutionId } = body
 
     if (!title || typeof title !== "string" || !title.trim()) {
       return NextResponse.json({ error: "Le titre du diplôme est requis" }, { status: 400 })
@@ -31,9 +31,11 @@ export async function POST(req: Request) {
     const diploma = await prisma.diploma.create({
       data: {
         title: title.trim(),
+        titleEn: titleEn || null,
         degreeType: degreeType || "CERTIFICAT",
         fieldOfStudy: fieldOfStudy || null,
         description: description || null,
+        descriptionEn: descriptionEn || null,
         date: date || null,
         image: image || null,
         url: url || null,
@@ -56,7 +58,7 @@ export async function POST(req: Request) {
 export async function PUT(req: Request) {
   try {
     const body = await req.json()
-    const { id, title, degreeType, fieldOfStudy, description, date, image, url, published, institutionId } = body
+    const { id, title, titleEn, degreeType, fieldOfStudy, description, descriptionEn, date, image, url, published, institutionId } = body
 
     if (!id) {
       return NextResponse.json({ error: "ID manquant" }, { status: 400 })
@@ -66,9 +68,11 @@ export async function PUT(req: Request) {
       where: { id },
       data: {
         title: title?.trim(),
+        titleEn: titleEn || null,
         degreeType: degreeType || "CERTIFICAT",
         fieldOfStudy: fieldOfStudy ?? null,
         description: description ?? null,
+        descriptionEn: descriptionEn || null,
         date: date ?? null,
         image: image ?? null,
         url: url ?? null,

@@ -1,13 +1,19 @@
-import Link from "next/link"
 import { ArrowLeft, FileDown, Mail, MessageCircle } from "lucide-react"
+import { getTranslations } from "next-intl/server"
+import { Link } from "@/i18n/navigation"
 import { ContactForm } from "@/components/contact/contact-form"
 
-export const metadata = {
-  title: "Contact | Mon portfolio",
-  description: "Me contacter pour un projet ou une collaboration.",
+export async function generateMetadata() {
+  const t = await getTranslations("contact")
+  return {
+    title: t("metaTitle"),
+    description: t("metaDescription"),
+  }
 }
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const t = await getTranslations("contact")
+
   return (
     <div className="min-h-screen pb-24">
       <div className="mx-auto max-w-2xl px-4 sm:px-6 py-12 sm:py-16 md:py-24">
@@ -16,14 +22,14 @@ export default function ContactPage() {
           className="mb-10 inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="size-4" />
-          Retour à l'accueil
+          {t("backHome")}
         </Link>
         <header className="mb-12">
           <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-4xl md:text-5xl">
-            Contact
+            {t("title")}
           </h1>
           <p className="mt-3 text-sm font-medium text-foreground sm:text-lg">
-            Un projet, une question ou une collaboration ? Envoyez-moi un message.
+            {t("intro")}
           </p>
         </header>
         <div className="space-y-10">
@@ -32,18 +38,18 @@ export default function ContactPage() {
             className="flex items-center justify-between gap-4 rounded-xl border border-primary/25 bg-primary/5 p-4 shadow-sm transition-colors hover:bg-primary/10 sm:p-5"
           >
             <div>
-              <p className="text-sm font-semibold text-foreground">Curriculum vitae</p>
+              <p className="text-sm font-semibold text-foreground">{t("cvTitle")}</p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Consultez mon CV et téléchargez-le en PDF directement depuis la page.
+                {t("cvDescription")}
               </p>
             </div>
             <span className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">
               <FileDown className="size-4" aria-hidden />
-              Ouvrir
+              {t("cvOpen")}
             </span>
           </Link>
           <section className="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-6">
-            <h2 className="sr-only">Coordonnées</h2>
+            <h2 className="sr-only">{t("coordinates")}</h2>
             <ul className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:gap-6">
               <li className="flex items-center gap-3 text-muted-foreground">
                 <span
@@ -54,7 +60,7 @@ export default function ContactPage() {
                 </span>
                 <div>
                   <span className="block text-sm font-medium text-foreground">
-                    Email
+                    {t("email")}
                   </span>
                   <a
                     href="mailto:izayidali@biacode.tech"
@@ -73,7 +79,7 @@ export default function ContactPage() {
                 </span>
                 <div>
                   <span className="block text-sm font-medium text-foreground">
-                    WhatsApp
+                    {t("whatsapp")}
                   </span>
                   <a
                     href="https://wa.me/221783723507"
@@ -89,7 +95,7 @@ export default function ContactPage() {
           </section>
           <section className="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-6 md:p-8">
             <h2 className="text-lg font-semibold text-foreground mb-6">
-              Formulaire de contact
+              {t("formTitle")}
             </h2>
             <ContactForm />
           </section>
