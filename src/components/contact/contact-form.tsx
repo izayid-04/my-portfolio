@@ -201,13 +201,7 @@ export function ContactForm() {
             value={form.countryCode}
             onValueChange={handleCountryChange}
             open={selectOpen}
-            onOpenChange={(open) => {
-              // Radix ferme le select sur "resize"/"blur" de la fenêtre. Sur mobile,
-              // l'ouverture du clavier virtuel déclenche un resize : on ignore cette
-              // fermeture tant que le champ de recherche a encore le focus.
-              if (!open && document.activeElement === searchInputRef.current) return
-              setSelectOpen(open)
-            }}
+            onOpenChange={setSelectOpen}
           >
             <SelectTrigger
               id="contact-country"
@@ -227,8 +221,9 @@ export function ContactForm() {
               className="max-h-[min(320px,70vh)] contact-country-select"
               position="popper"
             >
+              {/* Champ recherche masqué sur mobile : le focus ouvre le clavier et ferme le select */}
               <div
-                className="sticky top-0 z-10 block border-b border-border bg-popover p-2"
+                className="sticky top-0 z-10 hidden border-b border-border bg-popover p-2 sm:block"
                 onPointerDown={(e) => e.stopPropagation()}
               >
                 <div className="relative">
