@@ -126,7 +126,7 @@ export function ChatPanel({
         "fixed z-50 flex flex-col overflow-hidden",
         "bg-background/95 backdrop-blur-xl border border-border shadow-2xl",
         "top-1/2 -translate-y-1/2 right-4 sm:right-6 w-[calc(100vw-2rem)] max-w-[460px] h-[min(82vh,700px)] rounded-2xl",
-        "max-sm:top-0 max-sm:translate-y-0 max-sm:left-0 max-sm:right-0 max-sm:bottom-0 max-sm:w-full max-sm:max-w-none max-sm:h-auto max-sm:rounded-none",
+        "max-sm:top-0 max-sm:translate-y-0 max-sm:left-0 max-sm:right-0 max-sm:w-full max-sm:max-w-none max-sm:h-[100dvh] max-sm:rounded-none",
       )}
     >
       {/* Ambient gradient glow, bottom-anchored */}
