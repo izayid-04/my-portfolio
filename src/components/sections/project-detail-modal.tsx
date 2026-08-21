@@ -105,7 +105,7 @@ export function ProjectDetailModal({
                 type="button"
                 onClick={onClose}
                 className={cn(
-                  "rounded-lg border border-border bg-background/60 p-2 text-muted-foreground",
+                  "max-sm:mt-8 rounded-lg border border-border bg-background/60 p-2 text-muted-foreground",
                   "hover:bg-background hover:text-foreground transition-colors cursor-pointer"
                 )}
                 aria-label="Fermer"
