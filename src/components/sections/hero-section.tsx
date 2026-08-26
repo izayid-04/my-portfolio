@@ -36,6 +36,7 @@ const heroIconUrls = [
   techByName.get("Linux"),
   techByName.get("AWS"),
   techByName.get("Git"),
+  techByName.get("GitLab"),
   githubHeroIcon,
 ].filter((value): value is string => Boolean(value))
 
@@ -212,7 +213,7 @@ export function HeroSection({ className }: { className?: string }) {
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_top,hsl(var(--background))_10%,transparent_38%,transparent_72%,hsl(var(--background))_100%)]" />
 
       <div className="relative z-10 mt-8 text-xs uppercase tracking-[0.18em] text-primary/80">
-        {siteConfig.name}
+        {t("portfolioLabel")}
       </div>
     </SectionWrapper>
   )

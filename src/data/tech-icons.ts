@@ -87,6 +87,7 @@ export const techCategories: TechCategory[] = [
       { name: "LWS", icon: "https://lws.info/wp-content/uploads/2025/01/cropped-LWS-fr.png" },
       { name: "Git", icon: "https://cdn.simpleicons.org/git/F05032" },
       { name: "GitHub", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" },
+      { name: "GitLab", icon: "https://cdn.simpleicons.org/gitlab/FC6D26" },
       { name: "Figma", icon: "https://cdn.simpleicons.org/figma/F24E1E" },
     ],
   },

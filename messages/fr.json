@@ -13,7 +13,8 @@
     "github": "GitHub",
     "linkedin": "LinkedIn",
     "contact": "Me contacter",
-    "cv": "Voir mon CV"
+    "cv": "Voir mon CV",
+    "portfolioLabel": "Mon Portfolio"
   },
   "about": {
     "title": "À propos",

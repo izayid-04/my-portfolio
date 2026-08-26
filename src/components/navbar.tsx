@@ -5,6 +5,7 @@ import { Link, usePathname } from "@/i18n/navigation"
 import { useEffect, useState } from "react"
 import {
   Github,
+  Gitlab,
   Linkedin,
   Home,
   FileText,
@@ -31,6 +32,7 @@ function usePageLinks() {
 
 const socialLinks = [
   { href: "https://github.com/izayid-04", label: "GitHub", icon: Github },
+  { href: "https://gitlab.com/izayidali440", label: "GitLab", icon: Gitlab },
   { href: "https://www.linkedin.com/in/ali-izayid/", label: "LinkedIn", icon: Linkedin },
   {
     href: "https://x.com/Izayid04",
