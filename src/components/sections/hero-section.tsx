@@ -23,6 +23,11 @@ const techByName = new Map(
   techCategories.flatMap((category) => category.items.map((item) => [item.name, item.icon] as const))
 )
 
+const ringIconOffsets = ringConfigs.reduce<number[]>((offsets, ring, index) => {
+  offsets.push(index === 0 ? 0 : offsets[index - 1] + ringConfigs[index - 1].iconCount)
+  return offsets
+}, [])
+
 const heroIconUrls = [
   techByName.get("Next.js"),
   techByName.get("Angular"),
@@ -88,7 +93,7 @@ export function HeroSection({ className }: { className?: string }) {
                 const icon =
                   ringIndex === 2 && iconIndex === 0
                     ? githubHeroIcon
-                    : icons[(iconIndex + ringIndex * 3) % icons.length]
+                    : icons[(ringIconOffsets[ringIndex] + iconIndex) % icons.length]
                 const angleOffset = (ringIndex * Math.PI) / (ring.iconCount * 2)
                 const angle = (iconIndex / ring.iconCount) * Math.PI * 2 + angleOffset
                 const radius = ring.size * ring.radiusRatio
