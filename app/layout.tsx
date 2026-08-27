@@ -15,9 +15,18 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const siteUrl = "https://izayid.dev"
+
 export const metadata: Metadata = {
-  title: "Mon portfolio Izayid Ali",
-  description: "Portfolio personnel",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "Izayid Ali — Développeur Full-Stack",
+    template: "%s",
+  },
+  description: "Portfolio d'Izayid Ali (Iza), développeur full-stack — Next.js, Angular, Spring Boot, NestJS, Laravel.",
+  keywords: ["Izayid Ali", "Izayid", "Iza", "développeur full-stack", "Next.js", "Angular", "Spring Boot"],
+  authors: [{ name: "Izayid Ali", url: siteUrl }],
+  creator: "Izayid Ali",
   icons: {
     icon: [
       { url: "/favicon.png", type: "image/png", sizes: "32x32" },
@@ -25,6 +34,19 @@ export const metadata: Metadata = {
       { url: "/favicon.png", type: "image/png", sizes: "512x512" },
     ],
     apple: "/favicon.png",
+  },
+  openGraph: {
+    type: "website",
+    siteName: "Izayid Ali — Portfolio",
+    images: [{ url: "/logo.png" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["/logo.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 

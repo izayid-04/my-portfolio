@@ -6,7 +6,7 @@ import { BlogTimelineContent } from "@/components/blog/blog-timeline-content"
 export async function generateMetadata() {
   const t = await getTranslations("blog")
   return {
-    title: `${t("title")} | Mon portfolio`,
+    title: `${t("title")} | Izayid Ali`,
     description: t("subtitle"),
   }
 }

@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: PageProps) {
   const post = await getPostBySlugFromDB(slug, locale)
   if (!post) return { title: "Article | Blog" }
   return {
-    title: `${post.title} | Blog`,
+    title: `${post.title} | Izayid Ali`,
     description: post.excerpt,
   }
 }

@@ -7,6 +7,7 @@
     "theme": "Thème"
   },
   "hero": {
+    "name": "Izayid Ali",
     "badge": "Disponible pour missions et collaborations",
     "title": "Je conçois des produits web robustes, du prototype à la production.",
     "subtitle": "Architectures SaaS, plateformes EdTech, applications mobiles — des projets réels, utilisés chaque jour par des milliers d'utilisateurs.",
@@ -133,7 +134,7 @@
     "coordinates": "Coordonnées",
     "whatsapp": "WhatsApp",
     "formTitle": "Formulaire de contact",
-    "metaTitle": "Contact | Mon portfolio",
+    "metaTitle": "Contact | Izayid Ali",
     "metaDescription": "Me contacter pour un projet ou une collaboration.",
     "namePlaceholder": "Votre nom",
     "emailPlaceholder": "Votre email",
@@ -317,8 +318,8 @@
   },
   "meta": {
     "home": {
-      "title": "Accueil | Mon portfolio",
-      "description": "Portfolio professionnel — Développement web, React, Next.js et expériences utilisateur."
+      "title": "Izayid Ali — Développeur Full-Stack | Portfolio",
+      "description": "Izayid Ali (Iza), développeur full-stack — Next.js, Angular, Spring Boot, NestJS, Laravel. Découvrez mes projets, mon CV et mes certifications."
     }
   },
   "chat": {

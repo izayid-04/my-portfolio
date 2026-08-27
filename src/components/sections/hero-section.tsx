@@ -23,6 +23,11 @@ const techByName = new Map(
   techCategories.flatMap((category) => category.items.map((item) => [item.name, item.icon] as const))
 )
 
+const ringIconOffsets = ringConfigs.reduce<number[]>((offsets, ring, index) => {
+  offsets.push(index === 0 ? 0 : offsets[index - 1] + ringConfigs[index - 1].iconCount)
+  return offsets
+}, [])
+
 const heroIconUrls = [
   techByName.get("Next.js"),
   techByName.get("Angular"),
@@ -88,7 +93,7 @@ export function HeroSection({ className }: { className?: string }) {
                 const icon =
                   ringIndex === 2 && iconIndex === 0
                     ? githubHeroIcon
-                    : icons[(iconIndex + ringIndex * 3) % icons.length]
+                    : icons[(ringIconOffsets[ringIndex] + iconIndex) % icons.length]
                 const angleOffset = (ringIndex * Math.PI) / (ring.iconCount * 2)
                 const angle = (iconIndex / ring.iconCount) * Math.PI * 2 + angleOffset
                 const radius = ring.size * ring.radiusRatio
@@ -148,7 +153,7 @@ export function HeroSection({ className }: { className?: string }) {
       >
         <Image
           src="/logo.png"
-          alt="Iza"
+          alt="Izayid Ali"
           width={128}
           height={128}
           className="size-24 rounded-full object-contain sm:size-28"
@@ -162,6 +167,9 @@ export function HeroSection({ className }: { className?: string }) {
         transition={{ duration: 0.5, delay: 0.16 }}
         className="relative z-10 max-w-4xl"
       >
+        <p className="mb-2 text-sm font-medium uppercase tracking-wide text-muted-foreground">
+          {t("name")}
+        </p>
         <h1 className="text-balance text-3xl font-semibold leading-tight text-foreground sm:text-5xl md:text-6xl">
           {t("title")}
         </h1>
