@@ -10,11 +10,37 @@ import { GithubContributions } from "@/components/sections/github-contributions"
 import { projectStackIcons } from "@/data/tech-icons"
 import { localize } from "@/lib/localize"
 
-export async function generateMetadata() {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}) {
+  const { locale } = await params
   const t = await getTranslations("meta.home")
+  const title = t("title")
+  const description = t("description")
+  const path = locale === "en" ? "/en" : "/"
+
   return {
-    title: t("title"),
-    description: t("description"),
+    title,
+    description,
+    alternates: {
+      canonical: path,
+      languages: {
+        fr: "/",
+        en: "/en",
+      },
+    },
+    openGraph: {
+      title,
+      description,
+      url: path,
+      type: "profile",
+    },
+    twitter: {
+      title,
+      description,
+    },
   }
 }
 
@@ -94,8 +120,28 @@ export default async function HomePage({
     console.error("Erreur de récupération des projets sur la page d'accueil:", error)
   }
 
+  const personJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: "Izayid Ali",
+    alternateName: "Iza",
+    url: "https://izayid.dev",
+    image: "https://izayid.dev/me.png",
+    jobTitle: "Développeur Full-Stack",
+    sameAs: [
+      "https://github.com/izayid-04",
+      "https://www.linkedin.com/in/ali-izayid/",
+      "https://x.com/Izayid04",
+      "https://gitlab.com/izayidali440",
+    ],
+  }
+
   return (
     <main className="min-h-screen pb-24">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
+      />
       <HeroSection />
       <AboutSection>
         <GithubContributions username="izayid-04" />
