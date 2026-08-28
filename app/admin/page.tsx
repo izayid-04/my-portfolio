@@ -2,6 +2,7 @@
 
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
+import { motion, AnimatePresence } from "motion/react"
 import {
   Activity,
   BookText,
@@ -10,12 +11,14 @@ import {
   Image as ImageIcon,
   Link as LinkIcon,
   LogOut,
+  Menu,
   MessageSquareText,
   PanelLeft,
   Rocket,
   User,
   GraduationCap,
   FileText,
+  X,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler"
@@ -96,6 +99,52 @@ const dashboardSections: Array<{ id: DashboardSection; label: string; icon: Luci
   { id: "cv", label: "Mon CV (PDF)", icon: FileText },
   { id: "profile", label: "Profil", icon: User },
 ]
+
+function SidebarNav({
+  activeSection,
+  onSelect,
+  email,
+}: {
+  activeSection: DashboardSection
+  onSelect: (id: DashboardSection) => void
+  email?: string | null
+}) {
+  return (
+    <>
+      <div className="mb-6 flex items-center gap-2">
+        <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
+          <PanelLeft className="size-4" />
+        </div>
+        <div>
+          <p className="text-xs uppercase tracking-wide text-muted-foreground">Admin</p>
+          <p className="text-sm font-semibold text-foreground">Portfolio Dashboard</p>
+        </div>
+      </div>
+
+      <nav className="space-y-1.5">
+        {dashboardSections.map(({ id, label, icon: Icon }) => (
+          <button
+            key={id}
+            type="button"
+            onClick={() => onSelect(id)}
+            className={`flex w-full cursor-pointer items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors ${
+              activeSection === id
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+            }`}
+          >
+            <Icon className="size-4" />
+            {label}
+          </button>
+        ))}
+      </nav>
+
+      <div className="mt-6 text-xs text-muted-foreground">
+        Connecte: <span className="font-medium text-foreground">{email}</span>
+      </div>
+    </>
+  )
+}
 
 function formatDate(value: string | null): string {
   if (!value) return "Jamais"
@@ -185,7 +234,15 @@ export default function AdminDashboardPage() {
   const [ready, setReady] = useState(false)
   const [session, setSession] = useState<AdminSession | null>(null)
   const [activeSection, setActiveSection] = useState<DashboardSection>("overview")
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const [formError, setFormError] = useState("")
+
+  useEffect(() => {
+    document.body.style.overflow = sidebarOpen ? "hidden" : ""
+    return () => {
+      document.body.style.overflow = ""
+    }
+  }, [sidebarOpen])
 
   const [projects, setProjects] = useState<AdminProject[]>([])
   const [activities, setActivities] = useState<AdminActivity[]>([])
@@ -657,42 +714,77 @@ export default function AdminDashboardPage() {
 
   return (
     <main className="min-h-screen bg-muted/30 px-4 py-6 sm:px-6">
-      <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[260px_1fr]">
-        <aside className="p-2 lg:p-1">
-          <div className="mb-6 flex items-center gap-2">
-            <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
-              <PanelLeft className="size-4" />
-            </div>
-            <div>
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">Admin</p>
-              <p className="text-sm font-semibold text-foreground">Portfolio Dashboard</p>
-            </div>
+      {/* Barre mobile : logo + bouton menu (sidebar cachee en dessous de lg) */}
+      <div className="mb-4 flex items-center justify-between lg:hidden">
+        <div className="flex items-center gap-2">
+          <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
+            <PanelLeft className="size-4" />
           </div>
+          <p className="text-sm font-semibold text-foreground">Portfolio Dashboard</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setSidebarOpen(true)}
+          className="inline-flex size-10 cursor-pointer items-center justify-center rounded-xl border border-border bg-background text-foreground hover:bg-muted"
+          aria-label="Ouvrir le menu"
+          aria-expanded={sidebarOpen}
+        >
+          <Menu className="size-5" />
+        </button>
+      </div>
 
-          <nav className="space-y-1.5">
-            {dashboardSections.map(({ id, label, icon: Icon }) => (
+      {/* Tiroir mobile : panneau lateral avec la meme navigation que la sidebar desktop */}
+      <AnimatePresence>
+        {sidebarOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm lg:hidden"
+              onClick={() => setSidebarOpen(false)}
+              aria-hidden
+            />
+            <motion.div
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", damping: 28, stiffness: 300 }}
+              className="fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] overflow-y-auto border-r border-border bg-card p-4 shadow-xl lg:hidden"
+            >
               <button
-                key={id}
                 type="button"
-                onClick={() => {
+                onClick={() => setSidebarOpen(false)}
+                className="mb-4 ml-auto flex size-9 cursor-pointer items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
+                aria-label="Fermer le menu"
+              >
+                <X className="size-4" />
+              </button>
+              <SidebarNav
+                activeSection={activeSection}
+                onSelect={(id) => {
                   setActiveSection(id)
                   setFormError("")
+                  setSidebarOpen(false)
                 }}
-                className={`flex w-full cursor-pointer items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors ${
-                  activeSection === id
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                }`}
-              >
-                <Icon className="size-4" />
-                {label}
-              </button>
-            ))}
-          </nav>
+                email={session?.email}
+              />
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
-          <div className="mt-6 text-xs text-muted-foreground">
-            Connecte: <span className="font-medium text-foreground">{session?.email}</span>
-          </div>
+      <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[260px_1fr]">
+        <aside className="hidden lg:block lg:p-1">
+          <SidebarNav
+            activeSection={activeSection}
+            onSelect={(id) => {
+              setActiveSection(id)
+              setFormError("")
+            }}
+            email={session?.email}
+          />
         </aside>
 
         <section className="min-h-[84vh]">
