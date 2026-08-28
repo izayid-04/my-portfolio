@@ -3,6 +3,7 @@
 import Image from "next/image"
 import { motion } from "framer-motion"
 import { useTranslations } from "next-intl"
+import { Github } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { siteConfig } from "@/config/site"
 import { SectionWrapper } from "@/components/layout"
@@ -94,14 +95,18 @@ export function AboutSection({ className, children }: AboutSectionProps) {
                     key={tech.name}
                     className="inline-flex items-center gap-1 sm:gap-1.5 rounded-lg border border-border bg-card px-2 sm:px-2.5 py-1 sm:py-1.5 text-[11px] sm:text-xs text-foreground shadow-sm shrink-0"
                   >
-                    <Image
-                      src={tech.icon}
-                      alt=""
-                      width={16}
-                      height={16}
-                      className="shrink-0"
-                      unoptimized
-                    />
+                    {tech.name === "GitHub" ? (
+                      <Github className="size-4 shrink-0 text-foreground" aria-hidden />
+                    ) : (
+                      <Image
+                        src={tech.icon}
+                        alt=""
+                        width={16}
+                        height={16}
+                        className="shrink-0"
+                        unoptimized
+                      />
+                    )}
                     {tech.name}
                   </span>
                 ))}
