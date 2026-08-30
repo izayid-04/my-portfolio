@@ -1,5 +1,6 @@
 "use client"
 
+import { BioBadge } from "@/components/bio-badge"
 import { Chatbot } from "@/components/chat/chatbot"
 import { Navbar } from "@/components/navbar"
 
@@ -17,6 +18,7 @@ export function AppChrome({ children }: { children: React.ReactNode }) {
       <div className="relative z-10">{children}</div>
       <Chatbot />
       <Navbar />
+      <BioBadge />
     </div>
   )
 }

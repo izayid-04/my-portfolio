@@ -338,5 +338,19 @@
       "Good question! You can reach Iza directly through the Contact page on the site.",
       "Iza is also comfortable with relational databases: PostgreSQL, MySQL, Oracle, SQL Server, and SQLite."
     ]
+  },
+  "bioBadge": {
+    "open": "Pull to reveal badge",
+    "close": "Put the badge away",
+    "name": "Izayid Ali",
+    "role": "Full-Stack Developer",
+    "nationalityLabel": "Nationality",
+    "nationalityValue": "🇰🇲 Comorian",
+    "locationLabel": "Based in",
+    "locationValue": "🇸🇳 Senegal",
+    "languagesLabel": "Languages",
+    "languagesValue": "French, English",
+    "availabilityLabel": "Availability",
+    "availabilityValue": "Open to opportunities"
   }
 }
