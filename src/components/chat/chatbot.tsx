@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from "react"
 import { AnimatePresence } from "motion/react"
-import { useLocale, useTranslations } from "next-intl"
+import { useLocale } from "next-intl"
 import { ChatToggleButton } from "./chat-toggle-button"
 import { ChatPanel } from "./chat-panel"
 import type { ChatMessage } from "@/types/chat"
@@ -16,8 +16,6 @@ function generateId() {
 
 export function Chatbot() {
   const locale = useLocale()
-  const t = useTranslations("chat")
-  const simulatedResponses = t.raw("simulatedResponses") as string[]
   const [isOpen, setIsOpen] = useState(false)
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState("")
@@ -74,6 +72,11 @@ export function Chatbot() {
     setIsTyping(true)
 
     let reply: string
+    const fallbackReply =
+      locale === "en"
+        ? "I can help with Iza's portfolio, skills, projects, and contact information."
+        : "Je peux t’aider sur le portfolio d’Iza, ses compétences, ses projets et son contact."
+
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
@@ -81,12 +84,14 @@ export function Chatbot() {
         body: JSON.stringify({ message: text, locale }),
       })
       const data = await res.json().catch(() => ({}))
+      const apiError = typeof data?.error === "string" ? data.error : null
+
       reply =
         res.ok && typeof data?.reply === "string"
           ? data.reply
-          : simulatedResponses[Math.floor(Math.random() * simulatedResponses.length)]
+          : apiError || fallbackReply
     } catch {
-      reply = simulatedResponses[0]
+      reply = fallbackReply
     }
 
     setIsTyping(false)
@@ -96,7 +101,7 @@ export function Chatbot() {
       { id: botId, role: "assistant", content: "", timestamp: new Date(), isStreaming: true },
     ])
     streamReply(botId, reply)
-  }, [input, isTyping, isStreaming, streamReply, locale, simulatedResponses])
+  }, [input, isTyping, isStreaming, streamReply, locale])
 
   return (
     <>

@@ -43,3 +43,6 @@ next-env.d.ts
 
 # cache pnpm (dossier local, ne pas versionner)
 .pnpm-store/
+
+
+/screens
