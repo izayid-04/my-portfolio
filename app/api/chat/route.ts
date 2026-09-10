@@ -80,12 +80,11 @@ export async function POST(request: Request) {
       )
     }
 
-    const apiKey = process.env.MISTRAL_API_KEY
-    const apiUrl =
-      process.env.MISTRAL_API_URL ?? "https://api.mistral.ai/v1/chat/completions"
-    const model = process.env.MISTRAL_MODEL ?? "mistral-small-latest"
+    // Essayer OpenRouter en priorité (Qwen), fallback sur Mistral
+    const openrouterKey = process.env.OPENROUTER_API_KEY
+    const mistralKey = process.env.MISTRAL_API_KEY
 
-    if (!apiKey) {
+    if (!openrouterKey && !mistralKey) {
       return NextResponse.json({
         reply: getPortfolioFallbackReply(message, locale),
       }, { status: 200 })
@@ -94,50 +93,98 @@ export async function POST(request: Request) {
     // Récupération dynamique du prompt avec tous les projets réels de la BDD
     const systemPrompt = await getDynamicChatbotSystemPrompt(locale)
 
-    const res = await fetch(apiUrl, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model,
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: message },
-        ],
-        max_tokens: 512,
-        temperature: 0.4,
-      }),
-    })
+    // Essayer OpenRouter d'abord
+    if (openrouterKey) {
+      const openrouterUrl = process.env.OPENROUTER_BASE_URL ?? "https://openrouter.ai/api/v1"
+      const res = await fetch(`${openrouterUrl}/chat/completions`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${openrouterKey}`,
+          "Content-Type": "application/json",
+          "HTTP-Referer": "http://localhost:3005",
+          "X-Title": "Portfolio Chat",
+        },
+        body: JSON.stringify({
+          model: "qwen/qwen-2.5-7b-instruct",
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: message },
+          ],
+          max_tokens: 512,
+          temperature: 0.3,
+        }),
+      })
 
-    if (!res.ok) {
-      const errText = await res.text()
-      console.error("[api/chat] Mistral error:", res.status, errText)
-      return NextResponse.json({
-        reply: getPortfolioFallbackReply(message, locale),
-      }, { status: 200 })
+      if (res.ok) {
+        const data = (await res.json()) as {
+          choices?: Array<{ message?: { content?: string } }>
+        }
+        const rawReply =
+          data?.choices?.[0]?.message?.content?.trim() ||
+          ERROR_MESSAGES[locale].noReply
+
+        const reply = rawReply
+          .replace(/\*\*/g, "")
+          .replace(/\*/g, "")
+          .trim()
+
+        return NextResponse.json({ reply })
+      } else {
+        const errText = await res.text()
+        console.error("[api/chat] OpenRouter error:", res.status, errText)
+      }
     }
 
-    const data = (await res.json()) as {
-      choices?: Array<{ message?: { content?: string } }>
+    // Fallback sur Mistral si OpenRouter échoue
+    if (mistralKey) {
+      const mistralUrl =
+        process.env.MISTRAL_API_URL ?? "https://api.mistral.ai/v1/chat/completions"
+      const res = await fetch(mistralUrl, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${mistralKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "mistral-small-latest",
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: message },
+          ],
+          max_tokens: 512,
+          temperature: 0.4,
+        }),
+      })
+
+      if (res.ok) {
+        const data = (await res.json()) as {
+          choices?: Array<{ message?: { content?: string } }>
+        }
+        const rawReply =
+          data?.choices?.[0]?.message?.content?.trim() ||
+          ERROR_MESSAGES[locale].noReply
+
+        const reply = rawReply
+          .replace(/\*\*/g, "")
+          .replace(/\*/g, "")
+          .trim()
+
+        return NextResponse.json({ reply })
+      } else {
+        const errText = await res.text()
+        console.error("[api/chat] Mistral error:", res.status, errText)
+      }
     }
-    const rawReply =
-      data?.choices?.[0]?.message?.content?.trim() ||
-      ERROR_MESSAGES[locale].noReply
 
-    // Nettoyage des astérisques Markdown pour un rendu propre sans ** ni *
-    const reply = rawReply
-      .replace(/\*\*/g, "")
-      .replace(/\*/g, "")
-      .trim()
-
-    return NextResponse.json({ reply })
+    // Si les deux APIs échouent, retourner un fallback statique
+    return NextResponse.json({
+      reply: getPortfolioFallbackReply(message, locale),
+    }, { status: 200 })
   } catch (e) {
     console.error("[api/chat]", e)
-    return NextResponse.json(
-      { error: ERROR_MESSAGES[locale].generic },
-      { status: 500 }
-    )
+    const locale = (await request.json().catch(() => ({}))).locale === "en" ? "en" : "fr"
+    return NextResponse.json({
+      reply: getPortfolioFallbackReply("", locale),
+    }, { status: 200 })
   }
 }
