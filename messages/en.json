@@ -20,7 +20,7 @@
   "about": {
     "title": "About",
     "paragraphs": [
-      "With a year of experience at UWEZO, I've built solid, hands-on skills in designing modern web applications. That real-world experience sharpened my approach, combining backend rigor, responsive interfaces, and product sense.",
+      "With a year of experience at the web agency UWEZO, I've built solid, hands-on skills in designing modern web applications. That real-world experience sharpened my approach, combining backend rigor, responsive interfaces, and product sense.",
       "I mainly code server-side with Laravel, Spring Boot, and Nest.js, and front-end with Angular and Next.js. I also have a strong DevOps mindset: Linux day-to-day, Docker, continuous integration, and cloud deployment."
     ],
     "eyebrow": "Background & values",
@@ -199,7 +199,7 @@
             "highlight": true
           },
           {
-            "text": "With a year of experience at UWEZO, I built solid, hands-on skills in web engineering."
+            "text": "With a year of experience at the web agency UWEZO, I built solid, hands-on skills in web engineering."
           },
           {
             "text": "My approach combines backend rigor, modern front-end frameworks, and a strong DevOps mindset."
