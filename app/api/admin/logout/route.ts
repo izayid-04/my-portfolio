@@ -3,5 +3,7 @@ import { clearAuthCookie } from "@/lib/auth"
 
 export async function POST() {
   await clearAuthCookie()
-  return NextResponse.json({ success: true })
+  const response = NextResponse.json({ success: true })
+  response.cookies.delete("admin_gate_unlocked")
+  return response
 }

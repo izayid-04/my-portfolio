@@ -25,6 +25,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Seuls les images et fichiers PDF sont acceptés." }, { status: 400 })
     }
 
+    // Limiter la taille max des uploads à 10 Mo
+    const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
+    if (file.size > MAX_FILE_SIZE) {
+      return NextResponse.json(
+        { error: "Le fichier dépasse la taille maximale autorisée (10 Mo)." },
+        { status: 400 }
+      )
+    }
+
     const folder = typeof folderRaw === "string" && folderRaw.trim() ? folderRaw.trim() : "general"
     const bucket = process.env.SUPABASE_STORAGE_BUCKET || "portfolio-assets"
 

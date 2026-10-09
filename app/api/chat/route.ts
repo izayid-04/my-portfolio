@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { getDynamicChatbotSystemPrompt } from "@/lib/chatbot-prompt"
+import { checkRateLimit } from "@/lib/rate-limit"
 
 const ERROR_MESSAGES = {
   fr: {
@@ -68,6 +69,22 @@ function getPortfolioFallbackReply(message: string, locale: "fr" | "en") {
 export async function POST(request: Request) {
   let locale: "fr" | "en" = "fr"
   try {
+    const forwarded = request.headers.get("x-forwarded-for")
+    const remoteIp = forwarded?.split(",")[0]?.trim() || "127.0.0.1"
+
+    // Rate limit: 20 requêtes par minute par IP
+    const rateLimit = checkRateLimit(`chat:${remoteIp}`, {
+      windowMs: 60 * 1000,
+      max: 20,
+    })
+
+    if (!rateLimit.success) {
+      return NextResponse.json(
+        { error: "Trop de requêtes au chat. Ralentissez un instant." },
+        { status: 429 }
+      )
+    }
+
     const body = await request.json()
     const message = (body?.message as string)?.trim()
     locale = body?.locale === "en" ? "en" : "fr"

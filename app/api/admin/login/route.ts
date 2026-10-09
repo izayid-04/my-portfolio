@@ -3,9 +3,29 @@ import bcrypt from "bcryptjs"
 import { prisma } from "@/lib/prisma"
 import { createToken, setAuthCookie } from "@/lib/auth"
 import { verifyTurnstile } from "@/lib/turnstile"
+import { checkRateLimit } from "@/lib/rate-limit"
 
 export async function POST(request: Request) {
   try {
+    const forwarded = request.headers.get("x-forwarded-for")
+    const remoteIp = forwarded?.split(",")[0]?.trim() || "127.0.0.1"
+
+    // Rate limit: 5 tentatives par fenêtre de 15 minutes par IP
+    const rateLimit = checkRateLimit(`login:${remoteIp}`, {
+      windowMs: 15 * 60 * 1000,
+      max: 5,
+    })
+
+    if (!rateLimit.success) {
+      const waitMinutes = Math.ceil((rateLimit.resetTime - Date.now()) / (60 * 1000))
+      return NextResponse.json(
+        {
+          error: `Trop de tentatives de connexion échouées. Réessayez dans ${waitMinutes} minute(s).`,
+        },
+        { status: 429 }
+      )
+    }
+
     const body = await request.json()
     const { email, password, turnstileToken } = body
 

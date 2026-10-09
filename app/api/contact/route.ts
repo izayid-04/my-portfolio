@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { sendEmail } from "@/lib/mail"
 import { verifyTurnstile } from "@/lib/turnstile"
 import { prisma } from "@/lib/prisma"
+import { checkRateLimit } from "@/lib/rate-limit"
 
 /**
  * POST /api/contact —
@@ -11,6 +12,22 @@ import { prisma } from "@/lib/prisma"
  */
 export async function POST(request: Request) {
   try {
+    const forwarded = request.headers.get("x-forwarded-for")
+    const remoteIp = forwarded?.split(",")[0]?.trim() || "127.0.0.1"
+
+    // Rate limit: 5 messages max toutes les 10 minutes par IP
+    const rateLimit = checkRateLimit(`contact:${remoteIp}`, {
+      windowMs: 10 * 60 * 1000,
+      max: 5,
+    })
+
+    if (!rateLimit.success) {
+      return NextResponse.json(
+        { error: "Trop de messages envoyés récemment. Merci de patienter quelques minutes." },
+        { status: 429 }
+      )
+    }
+
     const body = await request.json()
     const { name, email, phone, message, countryCode, turnstileToken } = body as {
       name?: string
