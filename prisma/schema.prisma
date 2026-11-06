@@ -120,6 +120,7 @@ model Project {
   published     Boolean  @default(true)
   order         Int      @default(0)
 
+  projectType   String   @default("WEB") @map("project_type") // "WEB", "BACKEND", "DEVOPS"
   companyId String?  @map("company_id")
   company   Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
 

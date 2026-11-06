@@ -111,6 +111,7 @@ export default async function HomePage({
           href: p.href || undefined,
           githubUrl: p.githubUrl || undefined,
           embedSite: Boolean(p.embedSite),
+          projectType: p.projectType || undefined,
           techIcons: techIcons.length > 0 ? techIcons : undefined,
           company: p.company || null,
         }

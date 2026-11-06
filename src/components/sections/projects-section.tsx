@@ -18,6 +18,9 @@ import {
   Filter,
   ChevronLeft,
   ChevronRight,
+  Terminal,
+  Server,
+  Cpu,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { siteConfig } from "@/config/site"
@@ -57,6 +60,8 @@ export interface Project {
   githubUrl?: string
   /** Afficher le site en direct dans un cadre (iframe) sur mobile et desktop */
   embedSite?: boolean
+  /** Catégorie du projet : WEB (par défaut), BACKEND ou DEVOPS */
+  projectType?: "WEB" | "BACKEND" | "DEVOPS" | string
   /** Entreprise / Structure reliée */
   company?: ProjectCompany | null
 }
@@ -378,6 +383,7 @@ export function ProjectsSection({
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
 
   // Filtres State
+  const [selectedCategory, setSelectedCategory] = useState<string>("ALL")
   const [selectedCompany, setSelectedCompany] = useState<string>("ALL")
   const [selectedTag, setSelectedTag] = useState<string>("ALL")
   const [searchQuery, setSearchQuery] = useState<string>("")
@@ -387,6 +393,20 @@ export function ProjectsSection({
   useEffect(() => {
     setIsMounted(true)
   }, [])
+
+  // Calcul du nombre de projets par catégorie
+  const categoryCounts = useMemo(() => {
+    let web = 0
+    let backend = 0
+    let devops = 0
+    items.forEach((p) => {
+      const type = p.projectType || "WEB"
+      if (type === "BACKEND") backend++
+      else if (type === "DEVOPS") devops++
+      else web++
+    })
+    return { all: items.length, web, backend, devops }
+  }, [items])
 
   // Les projets sont fournis par le serveur (app/page.tsx) via la prop `projects`.
   // Pas de re-fetch client ici : ça évite un redimensionnement de la section après
@@ -433,6 +453,12 @@ export function ProjectsSection({
 
   const filteredProjects = useMemo(() => {
     return items.filter((p) => {
+      // Filtre Catégorie (WEB / BACKEND / DEVOPS)
+      if (selectedCategory !== "ALL") {
+        const pType = p.projectType || "WEB"
+        if (pType !== selectedCategory) return false
+      }
+
       if (selectedCompany !== "ALL") {
         if (selectedCompany === "PERSONAL") {
           if (p.company) return false
@@ -458,14 +484,16 @@ export function ProjectsSection({
 
       return true
     })
-  }, [items, selectedCompany, selectedTag, searchQuery])
+  }, [items, selectedCategory, selectedCompany, selectedTag, searchQuery])
 
   const activeFiltersCount =
+    (selectedCategory !== "ALL" ? 1 : 0) +
     (selectedCompany !== "ALL" ? 1 : 0) +
     (selectedTag !== "ALL" ? 1 : 0) +
     (searchQuery.trim() ? 1 : 0)
 
   const resetFilters = () => {
+    setSelectedCategory("ALL")
     setSelectedCompany("ALL")
     setSelectedTag("ALL")
     setSearchQuery("")
@@ -573,6 +601,61 @@ export function ProjectsSection({
               </button>
             )}
           </div>
+        </div>
+
+        {/* Filtre Catégorie Principale (Web / Backend / DevOps) */}
+        <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-border/40">
+          <span className="text-[11px] font-semibold text-muted-foreground mr-1 flex items-center gap-1">
+            <SlidersHorizontal className="size-3.5 text-primary" /> {t("categoryLabel")}
+          </span>
+          <button
+            type="button"
+            onClick={() => setSelectedCategory("ALL")}
+            className={cn(
+              "cursor-pointer rounded-lg px-2.5 py-1 text-xs font-medium transition-all flex items-center gap-1.5 border",
+              selectedCategory === "ALL"
+                ? "border-primary/40 bg-primary/10 text-primary font-semibold shadow-xs"
+                : "border-border/60 bg-background/60 text-muted-foreground hover:bg-muted hover:text-foreground"
+            )}
+          >
+            {t("allCount", { count: categoryCounts.all })}
+          </button>
+          <button
+            type="button"
+            onClick={() => setSelectedCategory("WEB")}
+            className={cn(
+              "cursor-pointer rounded-lg px-2.5 py-1 text-xs font-medium transition-all flex items-center gap-1.5 border",
+              selectedCategory === "WEB"
+                ? "border-primary/40 bg-primary/10 text-primary font-semibold shadow-xs"
+                : "border-border/60 bg-background/60 text-muted-foreground hover:bg-muted hover:text-foreground"
+            )}
+          >
+            {t("filterWeb")} ({categoryCounts.web})
+          </button>
+          <button
+            type="button"
+            onClick={() => setSelectedCategory("BACKEND")}
+            className={cn(
+              "cursor-pointer rounded-lg px-2.5 py-1 text-xs font-medium transition-all flex items-center gap-1.5 border",
+              selectedCategory === "BACKEND"
+                ? "border-primary/40 bg-primary/10 text-primary font-semibold shadow-xs"
+                : "border-border/60 bg-background/60 text-muted-foreground hover:bg-muted hover:text-foreground"
+            )}
+          >
+            {t("filterBackend")} ({categoryCounts.backend})
+          </button>
+          <button
+            type="button"
+            onClick={() => setSelectedCategory("DEVOPS")}
+            className={cn(
+              "cursor-pointer rounded-lg px-2.5 py-1 text-xs font-medium transition-all flex items-center gap-1.5 border",
+              selectedCategory === "DEVOPS"
+                ? "border-primary/40 bg-primary/10 text-primary font-semibold shadow-xs"
+                : "border-border/60 bg-background/60 text-muted-foreground hover:bg-muted hover:text-foreground"
+            )}
+          >
+            {t("filterDevops")} ({categoryCounts.devops})
+          </button>
         </div>
 
         {/* Filtre Structure / Entreprise */}
@@ -727,7 +810,7 @@ export function ProjectsSection({
               transition={{ duration: 0.4 }}
             >
               <div className="group flex h-full flex-col rounded-xl border border-border bg-card overflow-hidden text-card-foreground shadow-sm transition-all hover:border-primary/30 hover:shadow-md">
-                {(project.video || (project.embedSite && project.href) || project.image) && (
+                {(project.video || (project.embedSite && project.href) || project.image || project.projectType === "BACKEND" || project.projectType === "DEVOPS") && (
                   <div className="-mx-4 -mt-4 sm:-mx-6 sm:-mt-6 mb-4 overflow-hidden rounded-t-xl">
                     {project.video ? (
                       <div className="relative aspect-video overflow-hidden bg-muted">
@@ -753,6 +836,58 @@ export function ProjectsSection({
                           className="object-cover transition-transform duration-300 group-hover:scale-105"
                           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         />
+                      </div>
+                    ) : project.projectType === "BACKEND" ? (
+                      /* Carte visuelle dynamique spécial Backend & API (sans interface) */
+                      <div className="relative aspect-video overflow-hidden bg-gradient-to-br from-zinc-900 via-zinc-950 to-purple-950/40 p-4 font-mono flex flex-col justify-between border-b border-border/60">
+                        <div className="flex items-center justify-between border-b border-zinc-800/80 pb-2">
+                          <div className="flex items-center gap-1.5">
+                            <span className="size-2.5 rounded-full bg-red-500/80" />
+                            <span className="size-2.5 rounded-full bg-yellow-500/80" />
+                            <span className="size-2.5 rounded-full bg-emerald-500/80" />
+                          </div>
+                          <span className="text-[10px] text-zinc-400 flex items-center gap-1">
+                            <Server className="size-3 text-purple-400" /> REST / gRPC API
+                          </span>
+                        </div>
+                        <div className="my-auto space-y-1.5 text-xs text-zinc-300">
+                          <p className="text-emerald-400 flex items-center gap-1">
+                            <span className="text-zinc-500 font-bold">➜</span> GET /api/v1/status HTTP/1.1
+                          </p>
+                          <p className="text-[11px] text-zinc-400">
+                            200 OK · Architecture Microservices & DB
+                          </p>
+                        </div>
+                        <div className="flex items-center justify-between text-[10px] text-zinc-500 pt-1">
+                          <span>Payload JSON</span>
+                          <span className="text-purple-400 font-semibold">Ready</span>
+                        </div>
+                      </div>
+                    ) : project.projectType === "DEVOPS" ? (
+                      /* Carte visuelle dynamique spécial DevOps & Infra (sans interface) */
+                      <div className="relative aspect-video overflow-hidden bg-gradient-to-br from-zinc-900 via-zinc-950 to-blue-950/40 p-4 font-mono flex flex-col justify-between border-b border-border/60">
+                        <div className="flex items-center justify-between border-b border-zinc-800/80 pb-2">
+                          <div className="flex items-center gap-1.5">
+                            <span className="size-2.5 rounded-full bg-red-500/80" />
+                            <span className="size-2.5 rounded-full bg-yellow-500/80" />
+                            <span className="size-2.5 rounded-full bg-emerald-500/80" />
+                          </div>
+                          <span className="text-[10px] text-zinc-400 flex items-center gap-1">
+                            <Cpu className="size-3 text-blue-400" /> CI/CD & Infra Pipeline
+                          </span>
+                        </div>
+                        <div className="my-auto space-y-1.5 text-xs text-zinc-300">
+                          <p className="text-blue-400 flex items-center gap-1">
+                            <span className="text-zinc-500 font-bold">$</span> docker compose up --build -d
+                          </p>
+                          <p className="text-[11px] text-emerald-400 flex items-center gap-1">
+                            ✔ Pipeline passing · Kubernetes / Linux Cloud
+                          </p>
+                        </div>
+                        <div className="flex items-center justify-between text-[10px] text-zinc-500 pt-1">
+                          <span>Cluster Status</span>
+                          <span className="text-emerald-400 font-semibold">Running</span>
+                        </div>
                       </div>
                     ) : null}
                   </div>
@@ -815,10 +950,10 @@ export function ProjectsSection({
                           rel="noopener noreferrer"
                           onClick={(e) => e.stopPropagation()}
                           className="inline-flex items-center gap-1.5 h-8 rounded-lg border border-border bg-muted/50 px-3 text-xs font-semibold text-foreground transition-all hover:bg-muted hover:border-primary/40 hover:text-primary"
-                          title={t("visitSite")}
+                          title={project.projectType === "BACKEND" ? t("docsLink") : t("visitSite")}
                         >
                           <ExternalLink className="size-3.5 shrink-0" aria-hidden />
-                          <span>{t("siteLink")}</span>
+                          <span>{project.projectType === "BACKEND" ? t("docsLink") : t("siteLink")}</span>
                         </Link>
                       )}
                       {project.githubUrl && (
@@ -982,6 +1117,68 @@ export function ProjectsSection({
                           <X className="size-3.5" />
                         </button>
                       )}
+                    </div>
+                  </div>
+
+                  {/* Section Catégorie (Nature du projet) */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-foreground flex items-center justify-between">
+                      <span>{t("categoryLabel")}</span>
+                      <span className="text-[10px] text-muted-foreground italic">{t("singleSelection")}</span>
+                    </label>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedCategory("ALL")}
+                        className={cn(
+                          "cursor-pointer rounded-xl p-2.5 text-xs text-left font-medium transition-all flex items-center justify-between border",
+                          selectedCategory === "ALL"
+                            ? "border-primary bg-primary/10 text-primary font-bold"
+                            : "border-border/60 bg-muted/30 text-foreground hover:bg-muted"
+                        )}
+                      >
+                        <span>{t("allProjects")}</span>
+                        <span className="rounded-full bg-background/80 px-2 py-0.5 text-[10px] font-semibold">{categoryCounts.all}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedCategory("WEB")}
+                        className={cn(
+                          "cursor-pointer rounded-xl p-2.5 text-xs text-left font-medium transition-all flex items-center justify-between border",
+                          selectedCategory === "WEB"
+                            ? "border-primary bg-primary/10 text-primary font-bold"
+                            : "border-border/60 bg-muted/30 text-foreground hover:bg-muted"
+                        )}
+                      >
+                        <span>{t("filterWeb")}</span>
+                        <span className="rounded-full bg-background/80 px-2 py-0.5 text-[10px] font-semibold">{categoryCounts.web}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedCategory("BACKEND")}
+                        className={cn(
+                          "cursor-pointer rounded-xl p-2.5 text-xs text-left font-medium transition-all flex items-center justify-between border",
+                          selectedCategory === "BACKEND"
+                            ? "border-primary bg-primary/10 text-primary font-bold"
+                            : "border-border/60 bg-muted/30 text-foreground hover:bg-muted"
+                        )}
+                      >
+                        <span>{t("filterBackend")}</span>
+                        <span className="rounded-full bg-background/80 px-2 py-0.5 text-[10px] font-semibold">{categoryCounts.backend}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedCategory("DEVOPS")}
+                        className={cn(
+                          "cursor-pointer rounded-xl p-2.5 text-xs text-left font-medium transition-all flex items-center justify-between border",
+                          selectedCategory === "DEVOPS"
+                            ? "border-primary bg-primary/10 text-primary font-bold"
+                            : "border-border/60 bg-muted/30 text-foreground hover:bg-muted"
+                        )}
+                      >
+                        <span>{t("filterDevops")}</span>
+                        <span className="rounded-full bg-background/80 px-2 py-0.5 text-[10px] font-semibold">{categoryCounts.devops}</span>
+                      </button>
                     </div>
                   </div>
 

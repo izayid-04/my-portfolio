@@ -19,11 +19,13 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { title, titleEn, description, descriptionEn, date, slug, tags, image, video, href, githubUrl, embedSite, published, order, companyId } = body
+    const { title, titleEn, description, descriptionEn, date, slug, tags, image, video, href, githubUrl, embedSite, published, order, companyId, projectType } = body
 
     if (!title || !description) {
       return NextResponse.json({ error: "Titre et description requis." }, { status: 400 })
     }
+
+    const validProjectType = projectType === "BACKEND" || projectType === "DEVOPS" ? projectType : "WEB"
 
     const newProject = await prisma.project.create({
       data: {
@@ -38,7 +40,8 @@ export async function POST(request: Request) {
         video: video || null,
         href: href || null,
         githubUrl: githubUrl || null,
-        embedSite: typeof embedSite === "boolean" ? embedSite : true,
+        embedSite: validProjectType !== "WEB" ? false : typeof embedSite === "boolean" ? embedSite : true,
+        projectType: validProjectType,
         published: typeof published === "boolean" ? published : true,
         order: typeof order === "number" ? order : 0,
         companyId: companyId || null,
@@ -57,11 +60,13 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   try {
     const body = await request.json()
-    const { id, title, titleEn, description, descriptionEn, date, slug, tags, image, video, href, githubUrl, embedSite, published, order, companyId } = body
+    const { id, title, titleEn, description, descriptionEn, date, slug, tags, image, video, href, githubUrl, embedSite, published, order, companyId, projectType } = body
 
     if (!id) {
       return NextResponse.json({ error: "ID du projet requis pour la modification." }, { status: 400 })
     }
+
+    const validProjectType = projectType === "BACKEND" || projectType === "DEVOPS" ? projectType : "WEB"
 
     const updatedProject = await prisma.project.update({
       where: { id },
@@ -77,7 +82,8 @@ export async function PUT(request: Request) {
         video: video || null,
         href: href || null,
         githubUrl: githubUrl || null,
-        embedSite: typeof embedSite === "boolean" ? embedSite : true,
+        embedSite: validProjectType !== "WEB" ? false : typeof embedSite === "boolean" ? embedSite : true,
+        projectType: validProjectType,
         published: typeof published === "boolean" ? published : true,
         order: typeof order === "number" ? order : 0,
         companyId: companyId || null,

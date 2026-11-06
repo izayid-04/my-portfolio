@@ -27,6 +27,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { TranslateButton } from "@/components/admin/translate-button"
+import { cn } from "@/lib/utils"
 
 export interface CompanyData {
   id: string
@@ -49,6 +50,7 @@ export interface ProjectData {
   href?: string | null
   githubUrl?: string | null
   embedSite: boolean
+  projectType?: "WEB" | "BACKEND" | "DEVOPS" | string
   published: boolean
   order: number
   companyId?: string | null
@@ -87,6 +89,7 @@ export function ProjectsTab() {
   const [hasPublicRepo, setHasPublicRepo] = React.useState(false)
   const [githubUrl, setGithubUrl] = React.useState("")
   const [companyId, setCompanyId] = React.useState("")
+  const [projectType, setProjectType] = React.useState<"WEB" | "BACKEND" | "DEVOPS">("WEB")
   const [embedSite, setEmbedSite] = React.useState(true)
   const [published, setPublished] = React.useState(true)
   const [order, setOrder] = React.useState("0")
@@ -153,6 +156,7 @@ export function ProjectsTab() {
     setHasPublicRepo(false)
     setGithubUrl("")
     setCompanyId("")
+    setProjectType("WEB")
     setEmbedSite(true)
     setPublished(true)
     setOrder("0")
@@ -174,6 +178,8 @@ export function ProjectsTab() {
     setHasPublicRepo(hasGithub)
     setGithubUrl(project.githubUrl || "")
     setCompanyId(project.companyId || "")
+    const currentType = (project.projectType === "BACKEND" || project.projectType === "DEVOPS") ? project.projectType : "WEB"
+    setProjectType(currentType)
     setEmbedSite(project.embedSite)
     setPublished(project.published)
     setOrder(String(project.order || 0))
@@ -305,7 +311,8 @@ export function ProjectsTab() {
         href: href || null,
         githubUrl: hasPublicRepo && githubUrl.trim() ? githubUrl.trim() : null,
         companyId: companyId || null,
-        embedSite,
+        projectType,
+        embedSite: projectType === "WEB" ? embedSite : false,
         published,
         order: parseInt(order) || 0,
       }
@@ -435,14 +442,68 @@ export function ProjectsTab() {
               )}
             </div>
 
-            {/* TITRE & DATE */}
+            {/* TYPE DE PROJET & TITRE */}
             <div className="space-y-3">
+              {/* SÉLECTEUR DE CATÉGORIE / TYPE */}
+              <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 space-y-2">
+                <label className="text-xs font-semibold text-foreground flex items-center justify-between">
+                  <span>Type / Nature du projet *</span>
+                  <span className="text-[11px] font-normal text-muted-foreground">
+                    {projectType === "WEB" ? "Application Web avec UI" : projectType === "BACKEND" ? "API, Service, Sans Interface" : "Infra, CI/CD, Docker, Cloud"}
+                  </span>
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setProjectType("WEB")}
+                    className={cn(
+                      "cursor-pointer rounded-lg px-2.5 py-2 text-xs font-medium text-center transition-all border",
+                      projectType === "WEB"
+                        ? "border-primary bg-primary text-primary-foreground font-semibold shadow-xs"
+                        : "border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"
+                    )}
+                  >
+                    🌐 Web & App
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setProjectType("BACKEND")
+                      setEmbedSite(false)
+                    }}
+                    className={cn(
+                      "cursor-pointer rounded-lg px-2.5 py-2 text-xs font-medium text-center transition-all border",
+                      projectType === "BACKEND"
+                        ? "border-primary bg-primary text-primary-foreground font-semibold shadow-xs"
+                        : "border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"
+                    )}
+                  >
+                    ⚡ Backend & API
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setProjectType("DEVOPS")
+                      setEmbedSite(false)
+                    }}
+                    className={cn(
+                      "cursor-pointer rounded-lg px-2.5 py-2 text-xs font-medium text-center transition-all border",
+                      projectType === "DEVOPS"
+                        ? "border-primary bg-primary text-primary-foreground font-semibold shadow-xs"
+                        : "border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"
+                    )}
+                  >
+                    🛠️ DevOps & Infra
+                  </button>
+                </div>
+              </div>
+
               <div>
                 <label className="text-xs font-medium text-muted-foreground block mb-1">Titre du projet *</label>
                 <input
                   type="text"
                   required
-                  placeholder="Ex: Université Dakar-Bourguiba (UDB)"
+                  placeholder={projectType === "BACKEND" ? "Ex: Auth & Billing Microservice API" : projectType === "DEVOPS" ? "Ex: Pipeline CI/CD GitOps & Kubernetes" : "Ex: Université Dakar-Bourguiba (UDB)"}
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   className="w-full rounded-xl border border-input bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
@@ -555,10 +616,16 @@ export function ProjectsTab() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground block mb-1">URL Démo / Site public</label>
+                  <label className="text-xs font-medium text-muted-foreground block mb-1">
+                    {projectType === "BACKEND"
+                      ? "URL Documentation API (Swagger / Postman / Démo)"
+                      : projectType === "DEVOPS"
+                      ? "URL Documentation / Dashboard / Repo"
+                      : "URL Démo / Site public"}
+                  </label>
                   <input
                     type="url"
-                    placeholder="https://..."
+                    placeholder={projectType === "BACKEND" ? "https://api.monsite.dev/docs" : "https://..."}
                     value={href}
                     onChange={(e) => setHref(e.target.value)}
                     className="w-full rounded-xl border border-input bg-background px-3 py-2 text-xs text-foreground focus:border-primary focus:outline-none"
@@ -645,7 +712,7 @@ export function ProjectsTab() {
               <label className="text-xs font-medium text-muted-foreground block mb-1">Technologies / Tags (séparés par des virgules)</label>
               <input
                 type="text"
-                placeholder="Ex: Laravel, Angular, MySQL, OVH"
+                placeholder={projectType === "DEVOPS" ? "Ex: Docker, Kubernetes, GitHub Actions, Linux, Cloud" : projectType === "BACKEND" ? "Ex: Nest.js, PostgreSQL, Redis, Swagger, JWT" : "Ex: Laravel, Angular, MySQL, OVH"}
                 value={tagsInput}
                 onChange={(e) => setTagsInput(e.target.value)}
                 className="w-full rounded-xl border border-input bg-background px-3 py-2 text-xs text-foreground focus:border-primary focus:outline-none"
@@ -654,7 +721,9 @@ export function ProjectsTab() {
 
             {/* IMAGE DE COUVERTURE */}
             <div className="space-y-1">
-              <label className="text-xs font-medium text-muted-foreground block mb-1">Image de couverture (Supabase Storage)</label>
+              <label className="text-xs font-medium text-muted-foreground block mb-1">
+                Image de couverture {projectType !== "WEB" ? "(Optionnelle - Terminal/Architecture généré si vide)" : "(Supabase Storage)"}
+              </label>
               <div className="flex items-center gap-2">
                 <input
                   type="url"
@@ -686,15 +755,17 @@ export function ProjectsTab() {
 
             {/* OPTIONS (Checkboxes) */}
             <div className="space-y-2 pt-2 border-t border-border">
-              <label className="flex items-center gap-2 text-xs font-medium text-foreground cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={embedSite}
-                  onChange={(e) => setEmbedSite(e.target.checked)}
-                  className="size-4 rounded border-input accent-primary"
-                />
-                Afficher le site en aperçu direct (iframe)
-              </label>
+              {projectType === "WEB" && (
+                <label className="flex items-center gap-2 text-xs font-medium text-foreground cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={embedSite}
+                    onChange={(e) => setEmbedSite(e.target.checked)}
+                    className="size-4 rounded border-input accent-primary"
+                  />
+                  Afficher le site en aperçu direct (iframe)
+                </label>
+              )}
 
               <label className="flex items-center gap-2 text-xs font-medium text-foreground cursor-pointer">
                 <input
@@ -770,6 +841,17 @@ export function ProjectsTab() {
                         <div className="min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
                             <h4 className="font-semibold text-sm text-foreground truncate">{proj.title}</h4>
+                            <span
+                              className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                                proj.projectType === "BACKEND"
+                                  ? "bg-purple-500/10 text-purple-400 border border-purple-500/20"
+                                  : proj.projectType === "DEVOPS"
+                                  ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                                  : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                              }`}
+                            >
+                              {proj.projectType === "BACKEND" ? "⚡ Backend/API" : proj.projectType === "DEVOPS" ? "🛠️ DevOps" : "🌐 Web"}
+                            </span>
                             <span
                               className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
                                 proj.published
